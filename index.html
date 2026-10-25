@@ -3,306 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sweet Melon Gaming | 游戏基地</title>
+    <!-- 已经改为你的专属名字 -->
+    <title>zyh's 游戏基地</title>
     <style>
-        /* 基础设置 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --primary: #00f3ff; /* 赛博蓝 */
+            --danger: #ff003c; /* 危险红 */
+            --bg-dark: #050505;
+            --card-bg: rgba(20, 20, 25, 0.8);
+            --text-main: #ffffff;
+            --text-muted: #888899;
         }
 
-        body {
-            background-color: #0f172a; /* 深邃的夜空蓝 */
-            color: #e2e8f0;
-            line-height: 1.6;
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
+        body { background-color: var(--bg-dark); color: var(--text-main); overflow-x: hidden; }
+
+        /* 背景光效 */
+        .bg-glow {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            background: radial-gradient(circle at 50% 10%, rgba(0, 243, 255, 0.1), transparent 30%);
         }
 
-        /* 顶部导航栏 */
+        /* 顶部导航 */
         header {
-            background-color: rgba(15, 23, 42, 0.9);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid #1e293b;
-            backdrop-filter: blur(10px);
+            padding: 20px 50px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .logo { font-size: 1.5rem; font-weight: 900; letter-spacing: 2px; color: #fff; text-shadow: 0 0 10px var(--primary); }
+        .logo span { color: var(--primary); }
+
+        /* 游戏区域 */
+        .game-section { display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-header h1 { font-size: 2.5rem; margin-bottom: 10px; text-transform: uppercase; color: var(--primary); text-shadow: 0 0 10px rgba(0, 243, 255, 0.4); }
+        .game-header p { color: var(--text-muted); }
+
+        /* Canvas 画布 */
+        #gameCanvas {
+            background: #000;
+            border: 2px solid #1a1a1a;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.1);
+            cursor: none; /* 隐藏鼠标，用飞船代替 */
         }
 
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #38bdf8; /* 亮蓝色 */
-            letter-spacing: 2px;
-        }
-
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 30px;
-        }
-
-        nav a {
-            color: #94a3b8;
-            text-decoration: none;
-            transition: color 0.3s;
-            font-weight: 500;
-        }
-
-        nav a:hover {
-            color: #38bdf8;
-        }
-
-        /* 顶部主视觉区 */
-        .hero {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
-            padding: 20px;
-        }
-
-        .hero h1 {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            background: linear-gradient(to right, #38bdf8, #818cf8, #c084fc);
-            -webkit-background-clip: text;
-            color: transparent;
-            animation: glow 3s infinite alternate;
-        }
-
-        @keyframes glow {
-            0% { text-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
-            100% { text-shadow: 0 0 20px rgba(56, 189, 248, 0.8), 0 0 30px rgba(129, 140, 248, 0.6); }
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            color: #94a3b8;
-            max-width: 600px;
-            margin-bottom: 30px;
-        }
-
-        .btn {
-            padding: 12px 30px;
-            background: linear-gradient(to right, #38bdf8, #818cf8);
-            border: none;
-            border-radius: 25px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
-        }
-
-        /* 游戏展示区 */
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 50px;
-            color: #f8fafc;
-        }
-
-        .games-section {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 100px 20px;
-        }
-
-        .game-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
+        /* 真实游戏库展示 */
+        .library { max-width: 1200px; margin: 60px auto; padding: 0 20px; }
+        .library-title { font-size: 2rem; margin-bottom: 30px; border-left: 5px solid var(--danger); padding-left: 15px; }
+        .game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        
         .game-card {
-            background-color: #1e293b;
-            border-radius: 15px;
-            padding: 30px;
-            transition: transform 0.3s, box-shadow 0.3s;
-            border: 1px solid #334155;
-            position: relative;
-            overflow: hidden;
+            background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px;
+            padding: 25px; transition: 0.3s; position: relative; overflow: hidden;
         }
+        .game-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 20px rgba(0,243,255,0.1); }
+        .game-card h3 { font-size: 1.4rem; margin-bottom: 10px; color: #fff; }
+        .game-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
+        .tag { display: inline-block; padding: 4px 10px; background: rgba(0,243,255,0.1); color: var(--primary); border-radius: 4px; font-size: 0.8rem; margin-bottom: 15px; border: 1px solid rgba(0,243,255,0.3); }
 
-        .game-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            border-color: #38bdf8;
-        }
+        footer { text-align: center; padding: 40px; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); }
 
-        .game-tag {
-            background-color: #38bdf8;
-            color: #0f172a;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            display: inline-block;
-            margin-bottom: 15px;
-        }
-
-        .game-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #e2e8f0;
-        }
-
-        .game-card p {
-            color: #94a3b8;
-            font-size: 0.95rem;
-        }
-
-        /* 新闻时间轴 */
-        .news-section {
-            background-color: #0b1120;
-            padding: 100px 20px;
-        }
-
-        .timeline {
-            max-width: 800px;
-            margin: 0 auto;
-            position: relative;
-            border-left: 2px solid #334155;
-            padding-left: 30px;
-        }
-
-        .news-item {
-            margin-bottom: 40px;
-            position: relative;
-        }
-
-        .news-item::before {
-            content: '';
-            position: absolute;
-            left: -37px;
-            top: 5px;
-            width: 12px;
-            height: 12px;
-            background-color: #38bdf8;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #38bdf8;
-        }
-
-        .news-date {
-            color: #38bdf8;
-            font-size: 0.9rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .news-item h4 {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-        }
-
-        /* 页脚 */
-        footer {
-            text-align: center;
-            padding: 40px 20px;
-            background-color: #0f172a;
-            border-top: 1px solid #1e293b;
-            color: #94a3b8;
-        }
-
-        footer a {
-            color: #38bdf8;
-            text-decoration: none;
+        /* 手机适配 */
+        @media (max-width: 768px) {
+            header { padding: 20px; }
+            #gameCanvas { width: 100%; height: auto; }
+            .game-header h1 { font-size: 1.8rem; }
         }
     </style>
 </head>
 <body>
+    <div class="bg-glow"></div>
 
-    <!-- 导航栏 -->
     <header>
-        <nav>
-            <div class="logo">SWEET MELON</div>
-            <ul>
-                <li><a href="#home">首页</a></li>
-                <li><a href="#games">热门推荐</a></li>
-                <li><a href="#news">游戏资讯</a></li>
-            </ul>
-        </nav>
+        <div class="logo">zyh's 游戏基地<span>.GAMING</span></div>
     </header>
 
-    <!-- 顶部欢迎区 -->
-    <section class="hero" id="home">
-        <h1>探索虚拟世界</h1>
-        <p>欢迎来到我的个人游戏空间。这里有最硬核的评测、最新鲜的资讯，以及那些让人彻夜难眠的第九艺术。</p>
-        <a href="#games" class="btn">开始探索</a>
+    <!-- 核心游戏区 -->
+    <section class="game-section">
+        <div class="game-header">
+            <!-- 游戏名字我也帮你改得更酷了一点 -->
+            <h1>ZYH 星际防卫战</h1>
+            <p>移动鼠标控制战机，躲避红色陨石。看看你能拿多少分！</p>
+        </div>
+        <!-- 游戏画布 -->
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
     </section>
 
-    <!-- 游戏展示区 -->
-    <section class="games-section" id="games">
-        <h2 class="section-title">我的年度推荐</h2>
+    <!-- 游戏库展示 -->
+    <section class="library">
+        <h2 class="library-title">次世代 3A 巨作推荐</h2>
         <div class="game-grid">
-            <!-- 游戏卡片 1 -->
             <div class="game-card">
-                <span class="game-tag">动作 RPG</span>
-                <h3>《赛博朋克 2077》</h3>
-                <p>夜之城的传奇还在继续。沉浸式的开放世界，极具深度的剧情，以及经过不断打磨后如今堪称完美的游戏体验。</p>
+                <span class="tag">开放世界</span>
+                <h3>赛博朋克 2077</h3>
+                <p>夜之城，充满欲望与罪恶的未来都市。沉浸式剧情与绝佳的光追画面，让你体验真实的未来生存法则。</p>
             </div>
-            <!-- 游戏卡片 2 -->
             <div class="game-card">
-                <span class="game-tag">独立神作</span>
-                <h3>《哈迪斯 Hades》</h3>
-                <p>爽快至极的 Roguelike 动作游戏。每一次死亡都是新的开始，精美的美术风格和极其上头的战斗节奏让人欲罢不能。</p>
+                <span class="tag">魂系动作</span>
+                <h3>艾尔登法环</h3>
+                <p>宫崎英高的巅峰之作。在广袤的交界地探索未知，受苦与成就并存，这是属于褪色者的史诗。</p>
             </div>
-            <!-- 游戏卡片 3 -->
             <div class="game-card">
-                <span class="game-tag">开放世界</span>
-                <h3>《艾尔登法环》</h3>
-                <p>宫崎英高的巅峰之作。交界地广袤无垠，充满了危险与奇迹。受苦与成就感并存，这是属于褪色者的史诗。</p>
+                <span class="tag">国产之光</span>
+                <h3>黑神话：悟空</h3>
+                <p>基于虚幻 5 打造的东方神话世界。完美还原的西游史诗，每一场Boss战都让人热血沸腾。</p>
             </div>
         </div>
     </section>
 
-    <!-- 新闻区 -->
-    <section class="news-section" id="news">
-        <h2 class="section-title">最新游戏情报</h2>
-        <div class="timeline">
-            <div class="news-item">
-                <div class="news-date">2024年5月20日</div>
-                <h4>《黑神话：悟空》最终预告片发布</h4>
-                <p>距离发售仅剩三个月，全新的实机演示展示了令人惊叹的Boss战和画面表现，国产3A正在创造历史。</p>
-            </div>
-            <div class="news-item">
-                <div class="news-date">2024年5月15日</div>
-                <h4>任天堂 Switch 2 传闻再起</h4>
-                <p>据业内人士爆料，新一代主机将于明年第一季度发布，并向下兼容现有游戏阵容，玩家社区反响热烈。</p>
-            </div>
-            <div class="news-item">
-                <div class="news-date">2024年5月10日</div>
-                <h4>Steam 夏季促销即将开启</h4>
-                <p>准备好你的钱包！数千款游戏将迎来史低折扣，包括多款年度大作和好评如潮的独立游戏。</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- 页脚 -->
     <footer>
-        <p>© 2024 Sweet Watermelons. 用 <a href="https://pages.github.com/" target="_blank">GitHub Pages</a> 强力驱动。</p>
-        <p>热爱游戏，热爱生活。</p>
+        <p>© 2024 zyh's 游戏基地 | 由 GitHub Pages 强力驱动</p>
     </footer>
 
+    <!-- 游戏逻辑代码 -->
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 游戏变量
+        let score = 0;
+        let gameOver = false;
+        let frameCount = 0;
+
+        // 玩家飞船
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height - 50,
+            radius: 15,
+            speed: 5
+        };
+
+        // 陨石数组
+        let asteroids = [];
+
+        // 鼠标控制
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            player.x = (e.clientX - rect.left) * scaleX;
+            player.y = (e.clientY - rect.top) * scaleY;
+        });
+
+        // 点击重启
+        canvas.addEventListener('click', () => {
+            if (gameOver) {
+                score = 0;
+                asteroids = [];
+                gameOver = false;
+                frameCount = 0;
+                requestAnimationFrame(update);
+            }
+        });
+
+        // 生成陨石
+        function spawnAsteroid() {
+            asteroids.push({
+                x: Math.random() * canvas.width,
+                y: -30,
+                radius: Math.random() * 15 + 10,
+                speed: Math.random() * 3 + 2
+            });
+        }
+
+        // 绘制飞船
+        function drawPlayer() {
+            ctx.beginPath();
+            // 飞船形状（三角形）
+            ctx.moveTo(player.x, player.y - player.radius);
+            ctx.lineTo(player.x - player.radius, player.y + player.radius);
+            ctx.lineTo(player.x + player.radius, player.y + player.radius);
+            ctx.closePath();
+            
+            // 霓虹发光效果
+            ctx.fillStyle = '#00f3ff';
+            ctx.shadowColor = '#00f3ff';
+            ctx.shadowBlur = 15;
+            ctx.fill();
+            ctx.shadowBlur = 0; // 重置阴影
+        }
+
+        // 绘制陨石
+        function drawAsteroids() {
+            asteroids.forEach((ast) => {
+                ctx.beginPath();
+                ctx.arc(ast.x, ast.y, ast.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#ff003c';
+                ctx.shadowColor = '#ff003c';
+                ctx.shadowBlur = 15;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+        }
+
+        // 碰撞检测
+        function checkCollision() {
+            for (let i = 0; i < asteroids.length; i++) {
+                const dx = player.x - asteroids[i].x;
+                const dy = player.y - asteroids[i].y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < player.radius + asteroids[i].radius) {
+                    gameOver = true;
+                }
+            }
+        }
+
+        // 绘制分数和结束画面
+        function drawUI() {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '20px Arial';
+            ctx.fillText('得分: ' + score, 20, 30);
+
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#ff003c';
+                ctx.font = 'bold 40px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('战机已坠毁', canvas.width/2, canvas.height/2 - 20);
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '20px Arial';
+                ctx.fillText('点击屏幕重新开始', canvas.width/2, canvas.height/2 + 30);
+                ctx.textAlign = 'start';
+            }
+        }
+
+        // 游戏主循环
+        function update() {
+            if (gameOver) {
+                drawUI();
+                return;
+            }
+
+            // 清屏并绘制星空背景
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 控制陨石生成速度
+            frameCount++;
+            if (frameCount % 30 === 0) {
+                spawnAsteroid();
+                score += 10;
+            }
+
+            // 更新陨石位置
+            for (let i = asteroids.length - 1; i >= 0; i--) {
+                asteroids[i].y += asteroids[i].speed;
+                // 移出屏幕则删除
+                if (asteroids[i].y > canvas.height + 30) {
+                    asteroids.splice(i, 1);
+                }
+            }
+
+            // 渲染
+            drawPlayer();
+            drawAsteroids();
+            checkCollision();
+            drawUI();
+
+            requestAnimationFrame(update);
+        }
+
+        // 启动游戏
+        requestAnimationFrame(update);
+    </script>
 </body>
 </html>
