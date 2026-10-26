@@ -205,18 +205,16 @@
     .widget { grid-column: span 1 !important; }
   }
 
-  /* ======= 天气面板专属修复 (彻底解决上下不匹配) ======= */
+  /* ======= 天气面板 ======= */
   .weather-expanded { display: flex; flex-direction: column; gap: 24px; }
   .we-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
   .we-main { display: flex; align-items: center; gap: 20px; }
   
-  /* 大图标容器 */
   .we-main .emoji { 
     width: 80px; height: 80px;
     display: flex; align-items: center; justify-content: center;
     font-size: 72px; line-height: 1;
   }
-  /* 大温度 */
   .we-main .temp { 
     font-size: 56px; font-weight: 900; line-height: 0.9; letter-spacing: -2px;
   }
@@ -351,7 +349,6 @@
 <body>
 <div class="app">
 
-  <!-- 顶部 -->
   <div class="topbar">
     <div class="hello-block">
       <h1 id="greeting">你好<span>。</span></h1>
@@ -382,7 +379,6 @@
     </div>
   </div>
 
-  <!-- 搜索 -->
   <div class="search-wrap">
     <div class="search-box">
       <span class="icon">🔍</span>
@@ -392,10 +388,8 @@
     <div class="suggestions" id="suggestions"></div>
   </div>
 
-  <!-- 可拖拽网格 -->
   <div class="grid-container" id="draggableGrid">
     
-    <!-- 天气卡 (12列) -->
     <div class="widget col-12" draggable="false" data-id="weather">
       <div class="widget-header">
         <div class="widget-title"><span class="dot"></span> 天气详情</div>
@@ -412,27 +406,21 @@
           <div style="text-align: right; font-size: 20px; font-weight: 800;" id="wCityName">北京</div>
         </div>
         
-        <!-- 详细指标 (6项) -->
+        <!-- 详细指标 (现在包含体感温度) -->
         <div class="we-details">
           <div class="we-item"><div class="label">风向</div><div class="val" id="wWindDir">--</div></div>
           <div class="we-item"><div class="label">风力</div><div class="val" id="wWindScale">--级</div></div>
           <div class="we-item"><div class="label">湿度</div><div class="val" id="wHumidity">--%</div></div>
           <div class="we-item"><div class="label">气压</div><div class="val" id="wPressure">--hPa</div></div>
-          <div class="we-item"><div class="label">紫外线</div><div class="val" id="wUv">--</div></div>
+          <div class="we-item"><div class="label">体感温度</div><div class="val" id="wFeelsLike">--°</div></div>
           <div class="we-item"><div class="label">能见度</div><div class="val" id="wVis">--km</div></div>
         </div>
 
-        <!-- 24小时预报 (横向滑动) -->
-        <div class="hourly-container" id="hourlyList">
-          <!-- JS 动态填充 -->
-        </div>
-
-        <!-- 3天预报 -->
+        <div class="hourly-container" id="hourlyList"></div>
         <div class="we-forecast" id="forecastList"></div>
       </div>
     </div>
 
-    <!-- 计时器 (4列) -->
     <div class="widget col-4" draggable="false" data-id="timer">
       <div class="widget-header">
         <div class="widget-title"><span class="dot"></span> 焦点计时</div>
@@ -453,7 +441,6 @@
       </div>
     </div>
 
-    <!-- 待办 (8列) -->
     <div class="widget col-8" draggable="false" data-id="todo">
       <div class="widget-header">
         <div class="widget-title"><span class="dot"></span> 待办事项</div>
@@ -466,7 +453,6 @@
       <div class="todo-list" id="todoList"></div>
     </div>
 
-    <!-- 快捷访问 (6列) -->
     <div class="widget col-6" draggable="false" data-id="shortcuts">
       <div class="widget-header">
         <div class="widget-title"><span class="dot"></span> 快捷访问</div>
@@ -475,7 +461,6 @@
       <div class="shortcuts-grid" id="shortcutsGrid"></div>
     </div>
 
-    <!-- 格言 (6列) -->
     <div class="widget col-6" draggable="false" data-id="quote">
       <div class="widget-header">
         <div class="widget-title"><span class="dot"></span> 每日格言</div>
@@ -511,10 +496,8 @@
 (function(){
   'use strict';
 
-  // ================= 🔧 配置区 =================
   const QWEATHER_KEY = '2c55c096e05040a3909355dd97aef46a'; 
   const API_HOST = 'm233jru63j.re.qweatherapi.com'; 
-  // ==============================================
 
   const $ = s => document.querySelector(s);
   const $$ = s => document.querySelectorAll(s);
@@ -614,14 +597,15 @@
         $('#wTempMini').textContent = now.temp + '°';
         $('#wPlaceMini').textContent = currentCity.name;
 
+        // 2. 指标数据（新增体感温度）
         $('#wWindDir').textContent = now.windDir;
         $('#wWindScale').textContent = now.windScale + '级';
         $('#wHumidity').textContent = now.humidity + '%';
         $('#wPressure').textContent = now.pressure + 'hPa';
+        $('#wFeelsLike').textContent = now.feelsLike + '°'; 
         $('#wVis').textContent = now.vis + 'km';
-        $('#wUv').textContent = now.uvIndex !== undefined ? now.uvIndex : '--'; 
 
-        // 2. 渲染 24 小时预报（严格显示具体时间，高亮当前整点）
+        // 3. 渲染 24 小时预报
         if (hourlyData.code === '200' && hourlyData.hourly) {
           const hList = $('#hourlyList');
           hList.innerHTML = '';
@@ -636,7 +620,6 @@
             const div = document.createElement('div');
             div.className = 'hourly-item';
             
-            // 如果这正好是当前的整点，给时间加个蓝色高亮
             const isCurrentHour = (hHour === currentHour);
             const timeStyle = isCurrentHour ? 'style="color: var(--accent); font-weight: 800;"' : '';
             
@@ -649,7 +632,7 @@
           });
         }
 
-        // 3. 渲染3天预报
+        // 4. 渲染3天预报
         if (dailyData.code === '200' && dailyData.daily) {
           const dList = $('#forecastList');
           dList.innerHTML = '';
