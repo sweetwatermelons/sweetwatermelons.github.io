@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>新标签页</title>
+<title>新标签页 · 终极版</title>
 <style>
   :root {
     --bg: #f5f7fb;
@@ -60,7 +60,7 @@
 
   .app { width:100%; max-width:1120px; display:flex; flex-direction:column; gap:28px; position: relative; }
 
-  /* 顶部 */
+  /* ======= 顶部 ======= */
   .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
   .hello-block h1 { font-size:26px; font-weight:700; letter-spacing:-0.02em; line-height:1.25; }
   .hello-block h1 span { color:var(--accent); }
@@ -174,7 +174,6 @@
     transition: box-shadow 0.2s, border-color 0.2s;
     overflow: hidden;
   }
-  /* 拖拽抓手 */
   .widget-header {
     display: flex;
     align-items: center;
@@ -206,36 +205,52 @@
     .widget { grid-column: span 1 !important; }
   }
 
-  /* --- 天气模块 --- */
-  .weather-expanded { display: flex; flex-direction: column; gap: 20px; }
-  .we-top { display: flex; justify-content: space-between; align-items: flex-start; }
-  .we-main { display: flex; align-items: center; gap: 16px; }
-  .we-main .emoji { font-size: 56px; line-height: 1; }
-  .we-main .temp { font-size: 42px; font-weight: 700; line-height: 1; }
-  .we-main .desc { font-size: 15px; font-weight: 500; color: var(--text-soft); margin-top: 4px;}
+  /* ======= 天气面板专属修复 (彻底解决上下不匹配) ======= */
+  .weather-expanded { display: flex; flex-direction: column; gap: 24px; }
+  .we-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+  .we-main { display: flex; align-items: center; gap: 20px; }
+  
+  /* 大图标容器 */
+  .we-main .emoji { 
+    width: 80px; height: 80px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 72px; line-height: 1;
+  }
+  /* 大温度 */
+  .we-main .temp { 
+    font-size: 56px; font-weight: 900; line-height: 0.9; letter-spacing: -2px;
+  }
+  .we-main .desc { 
+    font-size: 16px; font-weight: 500; color: var(--text-soft); margin-top: 6px;
+  }
   
   .we-details {
     display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
-    background: var(--input-bg); padding: 14px; border-radius: 16px;
+    background: var(--input-bg); padding: 16px; border-radius: 16px;
   }
-  .we-item { text-align: center; font-size: 13px; }
-  .we-item .label { color: var(--text-mute); margin-bottom: 4px; font-size: 11px;}
-  .we-item .val { font-weight: 600; color: var(--text); }
+  .we-item { text-align: center; font-size: 13px; display: flex; flex-direction: column; gap: 6px;}
+  .we-item .label { color: var(--text-mute); font-size: 12px; font-weight: 500;}
+  .we-item .val { font-weight: 700; color: var(--text); font-size: 15px;}
 
-  /* 逐小时预报横向滚动 */
+  /* 24小时预报横向滑动 */
   .hourly-container {
-    display: flex; overflow-x: auto; gap: 6px; padding-bottom: 10px;
+    display: flex; overflow-x: auto; gap: 20px; padding-bottom: 10px;
     scrollbar-width: thin; padding-top: 10px; border-bottom: 1px solid var(--divider);
+    align-items: flex-start;
   }
-  .hourly-container::-webkit-scrollbar { height: 6px; }
-  .hourly-container::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 6px; }
+  .hourly-container::-webkit-scrollbar { height: 4px; }
+  .hourly-container::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
   .hourly-item {
-    min-width: 60px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+    min-width: 48px; display: flex; flex-direction: column; align-items: center; gap: 10px;
     background: transparent;
   }
-  .hourly-item .h-time { font-size: 13px; color: var(--text-soft); font-weight: 500;}
-  .hourly-item .h-icon { font-size: 22px; line-height: 1; margin: 4px 0;}
-  .hourly-item .h-temp { font-size: 15px; font-weight: 600; }
+  .hourly-item .h-time { font-size: 13px; color: var(--text-soft); font-weight: 600; height: 18px; display: flex; align-items: center;}
+  .hourly-item .h-icon { 
+    width: 36px; height: 36px; 
+    display: flex; align-items: center; justify-content: center; 
+    font-size: 32px; line-height: 1; margin: 2px 0;
+  }
+  .hourly-item .h-temp { font-size: 17px; font-weight: 800; height: 20px; display: flex; align-items: center;}
 
   /* 3天预报 */
   .we-forecast { display: flex; gap: 8px; margin-top: 4px;}
@@ -247,9 +262,9 @@
   .forecast-day:last-child { border-right: none; }
   .forecast-day .day-name { font-size: 12px; color: var(--text-soft); font-weight: 600;}
   .forecast-day .f-emoji { font-size: 20px; margin: 2px 0; }
-  .forecast-day .f-temp { font-size: 12.5px; font-weight: 600;}
+  .forecast-day .f-temp { font-size: 13px; font-weight: 600;}
   .forecast-day .f-temp span { font-weight: 400; color: var(--text-mute); margin-left:4px;}
-  
+
   /* --- 快捷访问 --- */
   .shortcuts-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(80px, 1fr)); gap:12px; }
   .sc {
@@ -388,13 +403,13 @@
       <div class="weather-expanded">
         <div class="we-top">
           <div class="we-main">
-            <div class="emoji" id="wEmojiLarge">⛅</div>
+            <div class="emoji" id="wEmojiLarge">☀️</div>
             <div>
               <div class="temp" id="wTempLarge">--°</div>
               <div class="desc" id="wDescLarge">获取中...</div>
             </div>
           </div>
-          <div style="text-align: right; font-size: 15px; font-weight: 700;" id="wCityName">北京</div>
+          <div style="text-align: right; font-size: 20px; font-weight: 800;" id="wCityName">北京</div>
         </div>
         
         <!-- 详细指标 (6项) -->
@@ -536,28 +551,22 @@
     const weekdays = ['周日','周一','周二','周三','周四','周五','周六'];
     $('#date').textContent = `${now.getMonth()+1}月${now.getDate()}日 ${weekdays[now.getDay()]}`;
 
-    // 每次刷新都重新计算
     const h = now.getHours();
     let greet = '你好';
     if (h < 5) greet = '夜深了';
     else if (h < 9) greet = '早上好';
     else if (h < 12) greet = '上午好';
-    else if (h === 12) greet = '中午好';  // 只有 12:00 - 12:59 算中午
-    else if (h < 18) greet = '下午好';    // 13:00 - 17:59 算下午
+    else if (h === 12) greet = '中午好';  
+    else if (h < 18) greet = '下午好';    
     else if (h < 23) greet = '晚上好';
     else greet = '夜深了';
     
     $('#greeting').innerHTML = `${greet}<span>。</span>`;
   }
   updateClock();
-  // 定时器：每20秒检查一次（防止页面挂后台太久导致时间错乱）
   setInterval(updateClock, 1000 * 20);
-  
-  // 监听页面切回（比如从其他网页切回来立刻校准）
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      updateClock();
-    }
+    if (document.visibilityState === 'visible') updateClock();
   });
 
   // ================= 和风天气 =================
@@ -593,16 +602,17 @@
 
       if (nowData.code === '200') {
         const now = nowData.now;
-        const emoji = iconToEmoji(now.icon);
+        const nowEmoji = iconToEmoji(now.icon);
         
-        $('#wEmojiMini').textContent = emoji;
-        $('#wTempMini').textContent = now.temp + '°';
-        $('#wPlaceMini').textContent = currentCity.name;
-
-        $('#wEmojiLarge').textContent = emoji;
+        // 1. 顶部实时天气
         $('#wTempLarge').textContent = now.temp + '°';
+        $('#wEmojiLarge').textContent = nowEmoji;
         $('#wDescLarge').textContent = now.text;
         $('#wCityName').textContent = currentCity.name;
+
+        $('#wEmojiMini').textContent = nowEmoji;
+        $('#wTempMini').textContent = now.temp + '°';
+        $('#wPlaceMini').textContent = currentCity.name;
 
         $('#wWindDir').textContent = now.windDir;
         $('#wWindScale').textContent = now.windScale + '级';
@@ -611,16 +621,27 @@
         $('#wVis').textContent = now.vis + 'km';
         $('#wUv').textContent = now.uvIndex !== undefined ? now.uvIndex : '--'; 
 
+        // 2. 渲染 24 小时预报（严格显示具体时间，高亮当前整点）
         if (hourlyData.code === '200' && hourlyData.hourly) {
           const hList = $('#hourlyList');
           hList.innerHTML = '';
-          hourlyData.hourly.slice(0, 24).forEach((h, index) => {
-            const timeStr = index === 0 ? '现在' : h.fxTime.split('T')[1].substring(0,5);
+          
+          const currentHour = new Date().getHours();
+
+          hourlyData.hourly.forEach((h) => {
+            const timeStr = h.fxTime.split('T')[1].substring(0, 5);
+            const hHour = parseInt(timeStr.split(':')[0]);
             const hEmoji = iconToEmoji(h.icon);
+            
             const div = document.createElement('div');
             div.className = 'hourly-item';
+            
+            // 如果这正好是当前的整点，给时间加个蓝色高亮
+            const isCurrentHour = (hHour === currentHour);
+            const timeStyle = isCurrentHour ? 'style="color: var(--accent); font-weight: 800;"' : '';
+            
             div.innerHTML = `
-              <div class="h-time">${timeStr}</div>
+              <div class="h-time" ${timeStyle}>${timeStr}</div>
               <div class="h-icon">${hEmoji}</div>
               <div class="h-temp">${h.temp}°</div>
             `;
@@ -628,6 +649,7 @@
           });
         }
 
+        // 3. 渲染3天预报
         if (dailyData.code === '200' && dailyData.daily) {
           const dList = $('#forecastList');
           dList.innerHTML = '';
