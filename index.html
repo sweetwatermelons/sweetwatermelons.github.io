@@ -1,275 +1,980 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 已经改为你的专属名字 -->
-    <title>zyh's 游戏基地</title>
-    <style>
-        :root {
-            --primary: #00f3ff; /* 赛博蓝 */
-            --danger: #ff003c; /* 危险红 */
-            --bg-dark: #050505;
-            --card-bg: rgba(20, 20, 25, 0.8);
-            --text-main: #ffffff;
-            --text-muted: #888899;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新标签页 · 终极版</title>
+<style>
+  :root {
+    --bg: #f5f7fb;
+    --bg-grad: radial-gradient(1200px 600px at 10% -10%, #e0ecff 0%, transparent 60%),
+               radial-gradient(900px 500px at 110% 10%, #ffe9f3 0%, transparent 55%),
+               #f5f7fb;
+    --card: rgba(255,255,255,0.72);
+    --card-border: rgba(255,255,255,0.9);
+    --text: #1a2233;
+    --text-soft: #5b6b85;
+    --text-mute: #8b99b0;
+    --accent: #4f7cff;
+    --accent-soft: rgba(79,124,255,0.12);
+    --shadow: 0 20px 40px -20px rgba(40,70,140,0.25), 0 2px 8px rgba(40,70,140,0.06);
+    --input-bg: rgba(255,255,255,0.7);
+    --danger: #e5484d;
+    --hover: rgba(79,124,255,0.08);
+    --divider: rgba(30,50,90,0.08);
+    --scrollbar: rgba(100,130,180,0.35);
+  }
+  html[data-theme="dark"] {
+    --bg: #0c1019;
+    --bg-grad: radial-gradient(1200px 600px at 10% -10%, #1b2740 0%, transparent 60%),
+               radial-gradient(900px 500px at 110% 10%, #2a1a30 0%, transparent 55%),
+               #0c1019;
+    --card: rgba(22,28,42,0.6);
+    --card-border: rgba(255,255,255,0.06);
+    --text: #e8eefc;
+    --text-soft: #a3b1c9;
+    --text-mute: #6b7a94;
+    --accent: #6c93ff;
+    --accent-soft: rgba(108,147,255,0.16);
+    --shadow: 0 24px 50px -24px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.3);
+    --input-bg: rgba(255,255,255,0.05);
+    --danger: #ff6b6b;
+    --hover: rgba(108,147,255,0.12);
+    --divider: rgba(255,255,255,0.07);
+    --scrollbar: rgba(120,150,200,0.3);
+  }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
-        body { background-color: var(--bg-dark); color: var(--text-main); overflow-x: hidden; }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { height:100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg-grad);
+    background-attachment: fixed;
+    color: var(--text);
+    min-height: 100vh;
+    transition: background .4s, color .3s;
+    display: flex;
+    justify-content: center;
+    padding: 32px 24px 60px;
+  }
 
-        /* 背景光效 */
-        .bg-glow {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
-            background: radial-gradient(circle at 50% 10%, rgba(0, 243, 255, 0.1), transparent 30%);
-        }
+  .app { width:100%; max-width:1120px; display:flex; flex-direction:column; gap:28px; position: relative; }
 
-        /* 顶部导航 */
-        header {
-            padding: 20px 50px; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .logo { font-size: 1.5rem; font-weight: 900; letter-spacing: 2px; color: #fff; text-shadow: 0 0 10px var(--primary); }
-        .logo span { color: var(--primary); }
+  /* 顶部 */
+  .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
+  .hello-block h1 { font-size:26px; font-weight:700; letter-spacing:-0.02em; line-height:1.25; }
+  .hello-block h1 span { color:var(--accent); }
+  .hello-block p { font-size:13.5px; color:var(--text-soft); margin-top:6px; }
+  .top-right { display:flex; align-items:center; gap:14px; position: relative; z-index: 100; }
 
-        /* 游戏区域 */
-        .game-section { display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
-        .game-header { text-align: center; margin-bottom: 20px; }
-        .game-header h1 { font-size: 2.5rem; margin-bottom: 10px; text-transform: uppercase; color: var(--primary); text-shadow: 0 0 10px rgba(0, 243, 255, 0.4); }
-        .game-header p { color: var(--text-muted); }
+  .pill {
+    display:flex; align-items:center; gap:18px;
+    background:var(--card); border:1px solid var(--card-border);
+    backdrop-filter:blur(18px) saturate(160%);
+    padding:12px 22px; border-radius:20px; box-shadow:var(--shadow);
+  }
+  .clock { text-align:right; line-height:1.2; }
+  .clock .t { font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-0.5px; }
+  .clock .d { font-size:11.5px; color:var(--text-mute); font-weight:500; margin-top:2px; }
+  .divider-v { width:1px; align-self:stretch; background:var(--divider); margin:4px 0; }
 
-        /* Canvas 画布 */
-        #gameCanvas {
-            background: #000;
-            border: 2px solid #1a1a1a;
-            border-radius: 10px;
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.1);
-            cursor: none; /* 隐藏鼠标，用飞船代替 */
-        }
+  .weather-mini { display:flex; align-items:center; gap:10px; cursor:pointer; position:relative; padding: 4px 0;}
+  .weather-mini .emoji { font-size:28px; line-height:1; }
+  .weather-mini .info .temp { font-size:18px; font-weight:700; }
+  .weather-mini .info .place { font-size:11px; color:var(--text-mute); font-weight:500; margin-top:1px; white-space:nowrap; }
 
-        /* 真实游戏库展示 */
-        .library { max-width: 1200px; margin: 60px auto; padding: 0 20px; }
-        .library-title { font-size: 2rem; margin-bottom: 30px; border-left: 5px solid var(--danger); padding-left: 15px; }
-        .game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        
-        .game-card {
-            background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px;
-            padding: 25px; transition: 0.3s; position: relative; overflow: hidden;
-        }
-        .game-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 20px rgba(0,243,255,0.1); }
-        .game-card h3 { font-size: 1.4rem; margin-bottom: 10px; color: #fff; }
-        .game-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
-        .tag { display: inline-block; padding: 4px 10px; background: rgba(0,243,255,0.1); color: var(--primary); border-radius: 4px; font-size: 0.8rem; margin-bottom: 15px; border: 1px solid rgba(0,243,255,0.3); }
+  /* 城市选择下拉 */
+  .city-dropdown {
+    position:absolute; top:calc(100% + 12px); right:0;
+    background:var(--card); backdrop-filter:blur(24px) saturate(180%);
+    border:1px solid var(--card-border); border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.15); padding:12px; min-width:240px;
+    display:none; z-index:9999 !important; cursor:default;
+  }
+  .city-dropdown.show { display:block; }
+  .city-dropdown input {
+    width:100%; background:var(--input-bg); border:1.5px solid var(--divider);
+    border-radius:10px; padding:9px 12px; font-size:13px; color:var(--text);
+    outline:none; margin-bottom:8px;
+  }
+  .city-dropdown input:focus { border-color:var(--accent); }
+  .city-list { max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; }
+  .city-item {
+    padding:9px 12px; border-radius:9px; font-size:13px; cursor:pointer;
+    color:var(--text-soft); transition:background .12s;
+  }
+  .city-item:hover { background:var(--hover); color:var(--text); }
+  .city-tip { font-size:11px; color:var(--text-mute); padding:6px 12px; text-align:center; }
 
-        footer { text-align: center; padding: 40px; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); }
+  .theme-btn {
+    width:46px; height:46px; border-radius:16px;
+    border:1px solid var(--card-border); background:var(--card);
+    backdrop-filter:blur(18px); color:var(--text-soft);
+    font-size:20px; display:grid; place-items:center;
+    cursor:pointer; box-shadow:var(--shadow);
+    transition:transform .2s, background .3s, color .3s;
+  }
+  .theme-btn:hover { transform:translateY(-2px); color:var(--accent); }
 
-        /* 手机适配 */
-        @media (max-width: 768px) {
-            header { padding: 20px; }
-            #gameCanvas { width: 100%; height: auto; }
-            .game-header h1 { font-size: 1.8rem; }
-        }
-    </style>
+  /* 搜索 */
+  .search-wrap { position:relative; width:100%; z-index: 10; }
+  .search-box {
+    display:flex; align-items:center;
+    background:var(--card); backdrop-filter:blur(20px) saturate(180%);
+    border:1.5px solid var(--card-border); border-radius:22px;
+    padding:6px 6px 6px 22px; box-shadow:var(--shadow);
+    transition:border-color .2s, box-shadow .2s, background .3s;
+  }
+  .search-box:focus-within { border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-soft), var(--shadow); }
+  .search-box .icon { font-size:18px; color:var(--text-mute); margin-right:12px; flex-shrink:0; }
+  .search-box input {
+    flex:1; border:none; outline:none; background:transparent;
+    font-size:15.5px; color:var(--text); padding:12px 0;
+  }
+  .search-box input::placeholder { color:var(--text-mute); }
+  .search-box button {
+    border:none; background:linear-gradient(135deg, var(--accent), #6a8dff);
+    color:#fff; font-size:14px; font-weight:600; padding:11px 26px;
+    border-radius:16px; cursor:pointer; transition:transform .15s, filter .15s;
+  }
+  .search-box button:hover { filter:brightness(1.06); transform:scale(1.02); }
+  .search-box button:active { transform:scale(0.98); }
+
+  .suggestions {
+    position:absolute; top:calc(100% + 10px); left:0; right:0;
+    background:var(--card); backdrop-filter:blur(24px) saturate(180%);
+    border:1px solid var(--card-border); border-radius:18px;
+    box-shadow:var(--shadow); overflow:hidden; z-index:50;
+    display:none; animation:pop .16s ease;
+  }
+  .suggestions.show { display:block; }
+  @keyframes pop { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+  .sug-item { display:flex; align-items:center; gap:12px; padding:12px 20px; cursor:pointer; font-size:14px; color:var(--text-soft); transition:background .12s; }
+  .sug-item:hover { background:var(--hover); color:var(--text); }
+  .sug-item .sug-icon { font-size:15px; opacity:.7; width:18px; text-align:center; }
+  .sug-item .sug-text { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .sug-item .sug-hint { font-size:11px; color:var(--text-mute); }
+
+  /* ======= 拖拽网格 ======= */
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 20px;
+  }
+  .widget {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 22px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px) saturate(160%);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    overflow: hidden;
+  }
+  /* 拖拽抓手 */
+  .widget-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    cursor: grab;
+    user-select: none;
+  }
+  .widget-header:active { cursor: grabbing; }
+  .widget-title {
+    font-size: 15px; font-weight: 650; display: flex; align-items: center; gap: 8px;
+  }
+  .widget-title .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+  .widget.dragging {
+    opacity: 0.6; transform: scale(0.98); border-color: var(--accent); z-index: 1000;
+  }
+
+  @media (min-width: 861px) {
+    .col-12 { grid-column: span 12; }
+    .col-8 { grid-column: span 8; }
+    .col-6 { grid-column: span 6; }
+    .col-4 { grid-column: span 4; }
+  }
+  @media (max-width: 860px) {
+    .grid-container { grid-template-columns: 1fr; }
+    .widget { grid-column: span 1 !important; }
+  }
+
+  /* --- 天气模块 --- */
+  .weather-expanded { display: flex; flex-direction: column; gap: 20px; }
+  .we-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .we-main { display: flex; align-items: center; gap: 16px; }
+  .we-main .emoji { font-size: 56px; line-height: 1; }
+  .we-main .temp { font-size: 42px; font-weight: 700; line-height: 1; }
+  .we-main .desc { font-size: 15px; font-weight: 500; color: var(--text-soft); margin-top: 4px;}
+  
+  .we-details {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
+    background: var(--input-bg); padding: 14px; border-radius: 16px;
+  }
+  .we-item { text-align: center; font-size: 13px; }
+  .we-item .label { color: var(--text-mute); margin-bottom: 4px; font-size: 11px;}
+  .we-item .val { font-weight: 600; color: var(--text); }
+
+  /* 逐小时预报横向滚动 */
+  .hourly-container {
+    display: flex; overflow-x: auto; gap: 6px; padding-bottom: 10px;
+    scrollbar-width: thin; padding-top: 10px; border-bottom: 1px solid var(--divider);
+  }
+  .hourly-container::-webkit-scrollbar { height: 6px; }
+  .hourly-container::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 6px; }
+  .hourly-item {
+    min-width: 60px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+    background: transparent;
+  }
+  .hourly-item .h-time { font-size: 13px; color: var(--text-soft); font-weight: 500;}
+  .hourly-item .h-icon { font-size: 22px; line-height: 1; margin: 4px 0;}
+  .hourly-item .h-temp { font-size: 15px; font-weight: 600; }
+
+  /* 3天预报 */
+  .we-forecast { display: flex; gap: 8px; margin-top: 4px;}
+  .forecast-day {
+    flex: 1; padding: 10px; text-align: center;
+    display: flex; flex-direction: column; gap: 4px; align-items: center;
+    border-right: 1px solid var(--divider);
+  }
+  .forecast-day:last-child { border-right: none; }
+  .forecast-day .day-name { font-size: 12px; color: var(--text-soft); font-weight: 600;}
+  .forecast-day .f-emoji { font-size: 20px; margin: 2px 0; }
+  .forecast-day .f-temp { font-size: 12.5px; font-weight: 600;}
+  .forecast-day .f-temp span { font-weight: 400; color: var(--text-mute); margin-left:4px;}
+  
+  /* --- 快捷访问 --- */
+  .shortcuts-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(80px, 1fr)); gap:12px; }
+  .sc {
+    position:relative; background:var(--input-bg); border:1px solid transparent;
+    border-radius:16px; padding:16px 10px; display:flex; flex-direction:column; align-items:center; gap:10px;
+    cursor:pointer; text-decoration:none; color:var(--text-soft); transition:transform .15s;
+  }
+  .sc:hover { transform:translateY(-3px); border-color:var(--accent); color:var(--text); }
+  .sc .fav { width:36px; height:36px; border-radius:10px; display:grid; place-items:center; background:var(--card); }
+  .sc .fav img { width:24px; height:24px; }
+  .sc .name { font-size:12px; font-weight:550; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; }
+  .sc .del { position:absolute; top:2px; right:2px; border:none; background:transparent; color:var(--danger); font-size:14px; cursor:pointer; display:none; }
+  
+  /* --- 待办 --- */
+  .todo-input { display:flex; gap:8px; margin-bottom:14px; }
+  .todo-input input {
+    flex:1; background:var(--input-bg); border:none; border-radius:12px;
+    padding:10px 14px; font-size:13.5px; color:var(--text); outline:none;
+  }
+  .todo-input button {
+    width:40px; border:none; border-radius:12px; background:var(--accent); color:#fff;
+    font-size:20px; cursor:pointer;
+  }
+  .todo-list { display:flex; flex-direction:column; gap:8px; max-height:200px; overflow-y:auto; padding-right:4px;}
+  .todo-item {
+    display:flex; align-items:center; gap:10px; padding:10px 12px;
+    border-radius:12px; background:var(--input-bg); border:1px solid transparent;
+  }
+  .todo-item.done { opacity:0.55; }
+  .todo-item.done .txt { text-decoration:line-through; color:var(--text-mute); }
+  .todo-item input[type="checkbox"] {
+    appearance:none; width:18px; height:18px; border-radius:5px;
+    border:2px solid var(--text-mute); cursor:pointer; flex-shrink:0; position:relative;
+  }
+  .todo-item input[type="checkbox"]:checked { background:var(--accent); border-color:var(--accent); }
+  .todo-item input[type="checkbox"]:checked::after { content:'✓'; position:absolute; inset:0; display:grid; place-items:center; color:#fff; font-size:12px; }
+  .todo-item .txt { flex:1; font-size:13px; }
+  .todo-item .x { border:none; background:transparent; color:var(--text-mute); cursor:pointer; font-size:16px; }
+
+  /* --- 计时器 --- */
+  .timer-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; height: 100%; }
+  .timer-circle {
+    position: relative; width: 140px; height: 140px; border-radius: 50%;
+    background: conic-gradient(var(--accent) var(--progress, 100%), var(--divider) 0%);
+    display: grid; place-items: center;
+  }
+  .timer-inner {
+    width: 120px; height: 120px; border-radius: 50%; background: var(--card);
+    display: grid; place-items: center; font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums;
+  }
+  .timer-actions { display: flex; gap: 8px; }
+  .timer-btn {
+    background: var(--input-bg); border: none; border-radius: 8px; padding: 6px 12px;
+    font-size: 12px; font-weight: 600; color: var(--text-soft); cursor: pointer; transition: 0.15s;
+  }
+  .timer-btn:hover { background: var(--accent-soft); color: var(--accent); }
+  .timer-btn.active { background: var(--accent); color: #fff; }
+  
+  /* --- 格言 --- */
+  .quote-text { font-size:14px; line-height:1.6; font-weight:500; }
+  .quote-author { margin-top:12px; font-size:12px; color:var(--text-mute); text-align:right; }
+
+  /* 模态框 & Toast */
+  .modal-mask { position:fixed; inset:0; background:rgba(10,15,30,0.4); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; z-index:1000; padding:20px; }
+  .modal-mask.show { display:flex; }
+  .modal { width:100%; max-width:380px; background:var(--card); border-radius:26px; padding:26px; }
+  .modal h3 { font-size:17px; font-weight:700; margin-bottom:20px; }
+  .field { margin-bottom:16px; }
+  .field label { display:block; font-size:12px; font-weight:600; color:var(--text-soft); margin-bottom:7px; }
+  .field input { width:100%; background:var(--input-bg); border:1.5px solid var(--divider); border-radius:13px; padding:12px 15px; font-size:14px; color:var(--text); outline:none; }
+  .modal-actions { display:flex; gap:10px; margin-top:24px; }
+  .modal-actions button { flex:1; border:none; border-radius:14px; padding:13px; font-size:14px; font-weight:600; cursor:pointer; }
+  .btn-cancel { background:var(--input-bg); color:var(--text-soft); }
+  .btn-ok { background:var(--accent); color:#fff; }
+  .toast {
+    position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(80px);
+    background:var(--accent); color:#fff; padding:12px 24px; border-radius:14px;
+    font-size:13.5px; font-weight:600; box-shadow:0 14px 30px -8px rgba(79,124,255,0.6);
+    opacity:0; transition:opacity .25s, transform .25s; z-index:2000; pointer-events:none;
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
 </head>
 <body>
-    <div class="bg-glow"></div>
+<div class="app">
 
-    <header>
-        <div class="logo">'s 游戏基地<span>.GAMING</span></div>
-    </header>
-
-    <!-- 核心游戏区 -->
-    <section class="game-section">
-        <div class="game-header">
-            <!-- 游戏名字我也帮你改得更酷了一点 -->
-            <h1>星际防卫战</h1>
-            <p>移动鼠标控制战机，躲避红色陨石。看看你能拿多少分！</p>
+  <!-- 顶部 -->
+  <div class="topbar">
+    <div class="hello-block">
+      <h1 id="greeting">你好<span>。</span></h1>
+      <p id="subline">今天也要元气满满 ✨</p>
+    </div>
+    <div class="top-right">
+      <div class="pill">
+        <div class="clock">
+          <div class="t" id="time">--:--</div>
+          <div class="d" id="date">加载中…</div>
         </div>
-        <!-- 游戏画布 -->
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
-    </section>
-
-    <!-- 游戏库展示 -->
-    <section class="library">
-        <h2 class="library-title">次世代 3A 巨作推荐</h2>
-        <div class="game-grid">
-            <div class="game-card">
-                <span class="tag">开放世界</span>
-                <h3>赛博朋克 2077</h3>
-                <p>夜之城，充满欲望与罪恶的未来都市。沉浸式剧情与绝佳的光追画面，让你体验真实的未来生存法则。</p>
+        <div class="divider-v"></div>
+        <div class="weather-mini" id="weatherArea">
+          <div class="emoji" id="wEmojiMini">⛅</div>
+          <div class="info">
+            <div class="temp" id="wTempMini">--°</div>
+            <div class="place" id="wPlaceMini">定位中</div>
+          </div>
+          <div class="city-dropdown" id="cityDropdown">
+            <input type="text" id="citySearchInput" placeholder="搜索城市名称…" autocomplete="off">
+            <div class="city-list" id="cityList">
+              <div class="city-tip">输入城市拼音或中文查找</div>
             </div>
-            <div class="game-card">
-                <span class="tag">魂系动作</span>
-                <h3>艾尔登法环</h3>
-                <p>宫崎英高的巅峰之作。在广袤的交界地探索未知，受苦与成就并存，这是属于褪色者的史诗。</p>
-            </div>
-            <div class="game-card">
-                <span class="tag">国产之光</span>
-                <h3>黑神话：悟空</h3>
-                <p>基于虚幻 5 打造的东方神话世界。完美还原的西游史诗，每一场Boss战都让人热血沸腾。</p>
-            </div>
+          </div>
         </div>
-    </section>
+      </div>
+      <button class="theme-btn" id="themeBtn" title="切换主题">🌙</button>
+    </div>
+  </div>
 
-    <footer>
-        <p>© 2024 zyh's 游戏基地 | 由 GitHub Pages 强力驱动</p>
-    </footer>
+  <!-- 搜索 -->
+  <div class="search-wrap">
+    <div class="search-box">
+      <span class="icon">🔍</span>
+      <input id="searchInput" type="text" placeholder="搜索或输入网址…" autocomplete="off" spellcheck="false">
+      <button id="searchBtn">搜索</button>
+    </div>
+    <div class="suggestions" id="suggestions"></div>
+  </div>
 
-    <!-- 游戏逻辑代码 -->
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+  <!-- 可拖拽网格 -->
+  <div class="grid-container" id="draggableGrid">
+    
+    <!-- 天气卡 (12列) -->
+    <div class="widget col-12" draggable="false" data-id="weather">
+      <div class="widget-header">
+        <div class="widget-title"><span class="dot"></span> 天气详情</div>
+      </div>
+      <div class="weather-expanded">
+        <div class="we-top">
+          <div class="we-main">
+            <div class="emoji" id="wEmojiLarge">⛅</div>
+            <div>
+              <div class="temp" id="wTempLarge">--°</div>
+              <div class="desc" id="wDescLarge">获取中...</div>
+            </div>
+          </div>
+          <div style="text-align: right; font-size: 15px; font-weight: 700;" id="wCityName">北京</div>
+        </div>
+        
+        <!-- 详细指标 (6项) -->
+        <div class="we-details">
+          <div class="we-item"><div class="label">风向</div><div class="val" id="wWindDir">--</div></div>
+          <div class="we-item"><div class="label">风力</div><div class="val" id="wWindScale">--级</div></div>
+          <div class="we-item"><div class="label">湿度</div><div class="val" id="wHumidity">--%</div></div>
+          <div class="we-item"><div class="label">气压</div><div class="val" id="wPressure">--hPa</div></div>
+          <div class="we-item"><div class="label">紫外线</div><div class="val" id="wUv">--</div></div>
+          <div class="we-item"><div class="label">能见度</div><div class="val" id="wVis">--km</div></div>
+        </div>
 
-        // 游戏变量
-        let score = 0;
-        let gameOver = false;
-        let frameCount = 0;
+        <!-- 24小时预报 (横向滑动) -->
+        <div class="hourly-container" id="hourlyList">
+          <!-- JS 动态填充 -->
+        </div>
 
-        // 玩家飞船
-        const player = {
-            x: canvas.width / 2,
-            y: canvas.height - 50,
-            radius: 15,
-            speed: 5
-        };
+        <!-- 3天预报 -->
+        <div class="we-forecast" id="forecastList"></div>
+      </div>
+    </div>
 
-        // 陨石数组
-        let asteroids = [];
+    <!-- 计时器 (4列) -->
+    <div class="widget col-4" draggable="false" data-id="timer">
+      <div class="widget-header">
+        <div class="widget-title"><span class="dot"></span> 焦点计时</div>
+      </div>
+      <div class="timer-wrap">
+        <div class="timer-circle" id="timerCircle" style="--progress: 100%;">
+          <div class="timer-inner" id="timerDisplay">25:00</div>
+        </div>
+        <div class="timer-actions">
+          <button class="timer-btn active" data-min="25">25分</button>
+          <button class="timer-btn" data-min="15">15分</button>
+          <button class="timer-btn" data-min="45">45分</button>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:4px;">
+          <button class="timer-btn" id="btnStartTimer" style="background:var(--accent); color:#fff;">开始</button>
+          <button class="timer-btn" id="btnResetTimer">重置</button>
+        </div>
+      </div>
+    </div>
 
-        // 鼠标控制
-        canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            
-            player.x = (e.clientX - rect.left) * scaleX;
-            player.y = (e.clientY - rect.top) * scaleY;
+    <!-- 待办 (8列) -->
+    <div class="widget col-8" draggable="false" data-id="todo">
+      <div class="widget-header">
+        <div class="widget-title"><span class="dot"></span> 待办事项</div>
+        <span style="font-size:11.5px; color:var(--text-mute); background:var(--input-bg); padding:2px 10px; border-radius:20px;" id="todoCount">0 项</span>
+      </div>
+      <div class="todo-input">
+        <input id="todoInput" type="text" placeholder="添加新任务…" maxlength="120">
+        <button id="addTodoBtn">＋</button>
+      </div>
+      <div class="todo-list" id="todoList"></div>
+    </div>
+
+    <!-- 快捷访问 (6列) -->
+    <div class="widget col-6" draggable="false" data-id="shortcuts">
+      <div class="widget-header">
+        <div class="widget-title"><span class="dot"></span> 快捷访问</div>
+        <button class="timer-btn" id="addShortcutBtn">＋ 添加</button>
+      </div>
+      <div class="shortcuts-grid" id="shortcutsGrid"></div>
+    </div>
+
+    <!-- 格言 (6列) -->
+    <div class="widget col-6" draggable="false" data-id="quote">
+      <div class="widget-header">
+        <div class="widget-title"><span class="dot"></span> 每日格言</div>
+        <button class="timer-btn" id="refreshQuote">换一句</button>
+      </div>
+      <div class="quote-text" id="quoteText">保持专注，一切皆有可能。</div>
+      <div class="quote-author" id="quoteAuthor">— 每日灵感</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-mask" id="modalMask">
+  <div class="modal">
+    <h3>添加快捷方式</h3>
+    <div class="field">
+      <label>网站名称</label>
+      <input id="mName" type="text" placeholder="例如：GitHub" maxlength="20">
+    </div>
+    <div class="field">
+      <label>网址（URL）</label>
+      <input id="mUrl" type="text" placeholder="https://github.com" spellcheck="false">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="mCancel">取消</button>
+      <button class="btn-ok" id="mOk">添加</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ================= 🔧 配置区 =================
+  const QWEATHER_KEY = '2c55c096e05040a3909355dd97aef46a'; 
+  const API_HOST = 'm233jru63j.re.qweatherapi.com'; 
+  // ==============================================
+
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} },
+  };
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(()=> t.classList.remove('show'), 2000);
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // ================= 主题 & 时钟 =================
+  const themeBtn = $('#themeBtn');
+  function applyTheme(mode) {
+    document.documentElement.setAttribute('data-theme', mode);
+    themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
+    store.set('nt_theme', mode);
+  }
+  applyTheme(store.get('nt_theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  themeBtn.addEventListener('click', () => {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+
+  function updateClock() {
+    const now = new Date();
+    $('#time').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const weekdays = ['周日','周一','周二','周三','周四','周五','周六'];
+    $('#date').textContent = `${now.getMonth()+1}月${now.getDate()}日 ${weekdays[now.getDay()]}`;
+
+    // 每次刷新都重新计算
+    const h = now.getHours();
+    let greet = '你好';
+    if (h < 5) greet = '夜深了';
+    else if (h < 9) greet = '早上好';
+    else if (h < 12) greet = '上午好';
+    else if (h === 12) greet = '中午好';  // 只有 12:00 - 12:59 算中午
+    else if (h < 18) greet = '下午好';    // 13:00 - 17:59 算下午
+    else if (h < 23) greet = '晚上好';
+    else greet = '夜深了';
+    
+    $('#greeting').innerHTML = `${greet}<span>。</span>`;
+  }
+  updateClock();
+  // 定时器：每20秒检查一次（防止页面挂后台太久导致时间错乱）
+  setInterval(updateClock, 1000 * 20);
+  
+  // 监听页面切回（比如从其他网页切回来立刻校准）
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      updateClock();
+    }
+  });
+
+  // ================= 和风天气 =================
+  const weatherArea = $('#weatherArea'), cityDropdown = $('#cityDropdown');
+  const citySearchInput = $('#citySearchInput'), cityList = $('#cityList');
+  let currentCity = store.get('nt_city', { id: '101010100', name: '北京' });
+
+  function iconToEmoji(code) {
+    const c = parseInt(code);
+    if (c === 100) return '☀️';
+    if (c >= 101 && c <= 103) return '⛅';
+    if (c === 104) return '☁️';
+    if (c >= 150 && c <= 153) return '🌙';
+    if (c >= 300 && c <= 399) return '⛈️';
+    if (c >= 400 && c <= 499) return '❄️';
+    if (c >= 500 && c <= 515) return '🌫️';
+    if (c >= 300 && c <= 305) return '🌧️';
+    if (c >= 306 && c <= 399) return '⛈️';
+    return '⛅';
+  }
+
+  async function fetchAllWeather(cityId) {
+    try {
+      const [nowRes, hourlyRes, dailyRes] = await Promise.all([
+        fetch(`https://${API_HOST}/v7/weather/now?location=${cityId}&key=${QWEATHER_KEY}`),
+        fetch(`https://${API_HOST}/v7/weather/24h?location=${cityId}&key=${QWEATHER_KEY}`),
+        fetch(`https://${API_HOST}/v7/weather/3d?location=${cityId}&key=${QWEATHER_KEY}`)
+      ]);
+      
+      const nowData = await nowRes.json();
+      const hourlyData = await hourlyRes.json();
+      const dailyData = await dailyRes.json();
+
+      if (nowData.code === '200') {
+        const now = nowData.now;
+        const emoji = iconToEmoji(now.icon);
+        
+        $('#wEmojiMini').textContent = emoji;
+        $('#wTempMini').textContent = now.temp + '°';
+        $('#wPlaceMini').textContent = currentCity.name;
+
+        $('#wEmojiLarge').textContent = emoji;
+        $('#wTempLarge').textContent = now.temp + '°';
+        $('#wDescLarge').textContent = now.text;
+        $('#wCityName').textContent = currentCity.name;
+
+        $('#wWindDir').textContent = now.windDir;
+        $('#wWindScale').textContent = now.windScale + '级';
+        $('#wHumidity').textContent = now.humidity + '%';
+        $('#wPressure').textContent = now.pressure + 'hPa';
+        $('#wVis').textContent = now.vis + 'km';
+        $('#wUv').textContent = now.uvIndex !== undefined ? now.uvIndex : '--'; 
+
+        if (hourlyData.code === '200' && hourlyData.hourly) {
+          const hList = $('#hourlyList');
+          hList.innerHTML = '';
+          hourlyData.hourly.slice(0, 24).forEach((h, index) => {
+            const timeStr = index === 0 ? '现在' : h.fxTime.split('T')[1].substring(0,5);
+            const hEmoji = iconToEmoji(h.icon);
+            const div = document.createElement('div');
+            div.className = 'hourly-item';
+            div.innerHTML = `
+              <div class="h-time">${timeStr}</div>
+              <div class="h-icon">${hEmoji}</div>
+              <div class="h-temp">${h.temp}°</div>
+            `;
+            hList.appendChild(div);
+          });
+        }
+
+        if (dailyData.code === '200' && dailyData.daily) {
+          const dList = $('#forecastList');
+          dList.innerHTML = '';
+          for(let i = 0; i < 3; i++) {
+            const d = dailyData.daily[i];
+            const dayName = i === 0 ? '今天' : i === 1 ? '明天' : '后天';
+            const dEmoji = iconToEmoji(d.iconDay);
+            const el = document.createElement('div');
+            el.className = 'forecast-day';
+            el.innerHTML = `
+              <div class="day-name">${dayName}</div>
+              <div class="f-emoji">${dEmoji}</div>
+              <div class="f-temp">${d.tempMin}° <span>/</span> ${d.tempMax}°</div>
+            `;
+            dList.appendChild(el);
+          }
+        }
+      } else {
+        $('#wDescLarge').textContent = '天气获取失败';
+      }
+    } catch (e) {
+      $('#wDescLarge').textContent = '请用本地服务器运行';
+      console.error('天气请求失败:', e);
+    }
+  }
+
+  // 城市搜索
+  async function searchCity(keyword) {
+    if (!keyword) return;
+    cityList.innerHTML = `<div class="city-tip">搜索中...</div>`;
+    try {
+      const res = await fetch(`https://${API_HOST}/geo/v2/city/lookup?location=${encodeURIComponent(keyword)}&key=${QWEATHER_KEY}&number=10`);
+      const data = await res.json();
+      
+      if (data.code === '200' && data.location && data.location.length > 0) {
+        cityList.innerHTML = '';
+        data.location.forEach(loc => {
+          const div = document.createElement('div');
+          div.className = 'city-item';
+          div.textContent = `${loc.name} (${loc.adm1}${loc.adm2 && loc.adm2 !== loc.adm1 ? ' ' + loc.adm2 : ''})`;
+          div.addEventListener('click', () => {
+            currentCity = { id: loc.id, name: loc.name };
+            store.set('nt_city', currentCity);
+            fetchAllWeather(currentCity.id);
+            cityDropdown.classList.remove('show');
+            citySearchInput.value = '';
+          });
+          cityList.appendChild(div);
         });
+      } else {
+        cityList.innerHTML = `<div class="city-tip">未找到 (代码: ${data.code})</div>`;
+      }
+    } catch (e) {
+      cityList.innerHTML = `<div class="city-tip">搜索被拦截，请用服务器</div>`;
+    }
+  }
 
-        // 点击重启
-        canvas.addEventListener('click', () => {
-            if (gameOver) {
-                score = 0;
-                asteroids = [];
-                gameOver = false;
-                frameCount = 0;
-                requestAnimationFrame(update);
-            }
-        });
+  let searchTimer;
+  citySearchInput.addEventListener('input', (e) => {
+    clearTimeout(searchTimer);
+    const val = e.target.value.trim();
+    if (!val) {
+      cityList.innerHTML = `<div class="city-tip">输入拼音或中文</div>`;
+      return;
+    }
+    searchTimer = setTimeout(() => searchCity(val), 500);
+  });
 
-        // 生成陨石
-        function spawnAsteroid() {
-            asteroids.push({
-                x: Math.random() * canvas.width,
-                y: -30,
-                radius: Math.random() * 15 + 10,
-                speed: Math.random() * 3 + 2
-            });
+  weatherArea.addEventListener('click', (e) => {
+    if (e.target.closest('.city-dropdown')) return;
+    cityDropdown.classList.toggle('show');
+    if (cityDropdown.classList.contains('show')) setTimeout(() => citySearchInput.focus(), 100);
+  });
+  document.addEventListener('click', (e) => {
+    if (!weatherArea.contains(e.target)) cityDropdown.classList.remove('show');
+  });
+
+  fetchAllWeather(currentCity.id);
+  setInterval(() => fetchAllWeather(currentCity.id), 1000 * 60 * 30);
+
+  // ================= 搜索 =================
+  const searchInput = $('#searchInput'), searchBtn = $('#searchBtn'), suggestions = $('#suggestions');
+  const engines = [
+    { name: 'Google', url: 'https://www.google.com/search?q=', icon: '🌐' },
+    { name: 'Bing',   url: 'https://www.bing.com/search?q=', icon: '🔎' },
+    { name: '百度',   url: 'https://www.baidu.com/s?wd=', icon: '🔍' },
+    { name: 'GitHub', url: 'https://github.com/search?q=', icon: '🐙' },
+  ];
+  let engineIdx = store.get('nt_engine', 0);
+
+  function detectUrl(q) {
+    const t = q.trim();
+    if (!t) return null;
+    if (/^https?:\/\//i.test(t)) return t;
+    if (/^[\w-]+(\.[\w-]+)+([/?#].*)?$/.test(t) && !t.includes(' ')) return 'https://' + t;
+    return null;
+  }
+  function doSearch() {
+    const q = searchInput.value.trim();
+    if (!q) return;
+    const direct = detectUrl(q);
+    if (direct) window.open(direct, '_blank');
+    else window.open(engines[engineIdx].url + encodeURIComponent(q), '_blank');
+    suggestions.classList.remove('show');
+    searchInput.value = '';
+  }
+  searchBtn.addEventListener('click', doSearch);
+  searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+  
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim();
+    if (!q) { suggestions.classList.remove('show'); return; }
+    suggestions.innerHTML = '';
+    const direct = detectUrl(q);
+    if (direct) {
+      const div = document.createElement('div');
+      div.className = 'sug-item';
+      div.innerHTML = `<span class="sug-icon">🔗</span><span class="sug-text">${escapeHtml(direct)}</span><span class="sug-hint">打开网址</span>`;
+      div.addEventListener('click', () => { window.open(direct, '_blank'); suggestions.classList.remove('show'); searchInput.value = ''; });
+      suggestions.appendChild(div);
+    }
+    engines.forEach(eng => {
+      const div = document.createElement('div');
+      div.className = 'sug-item';
+      div.innerHTML = `<span class="sug-icon">${eng.icon}</span><span class="sug-text">${escapeHtml(q)}</span><span class="sug-hint">在 ${eng.name} 搜索</span>`;
+      div.addEventListener('click', () => { window.open(eng.url + encodeURIComponent(q), '_blank'); suggestions.classList.remove('show'); searchInput.value = ''; });
+      suggestions.appendChild(div);
+    });
+    suggestions.classList.add('show');
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) suggestions.classList.remove('show'); });
+
+  // ================= 快捷方式 =================
+  const DEFAULT_SHORTCUTS = [
+    { name: 'Google', url: 'https://www.google.com' },
+    { name: 'YouTube', url: 'https://www.youtube.com' },
+    { name: 'GitHub', url: 'https://github.com' },
+    { name: '知乎', url: 'https://www.zhihu.com' },
+  ];
+  let shortcuts = store.get('nt_shortcuts', null);
+  if (!Array.isArray(shortcuts) || !shortcuts.length) {
+    shortcuts = DEFAULT_SHORTCUTS.slice();
+    store.set('nt_shortcuts', shortcuts);
+  }
+  function faviconUrl(u) {
+    try { return `https://www.google.com/s2/favicons?domain=${new URL(u).hostname}&sz=64`; } catch(e) { return ''; }
+  }
+  function renderShortcuts() {
+    const grid = $('#shortcutsGrid');
+    grid.innerHTML = '';
+    shortcuts.forEach((sc, idx) => {
+      const a = document.createElement('a');
+      a.className = 'sc'; a.href = sc.url; a.target = '_blank'; a.title = sc.url;
+      a.innerHTML = `
+        <span class="fav"><img src="${faviconUrl(sc.url)}" alt="" onerror="this.parentElement.textContent='${escapeHtml((sc.name||'?')[0])}'"></span>
+        <span class="name">${escapeHtml(sc.name)}</span>
+        <button class="del" data-idx="${idx}">×</button>
+      `;
+      a.addEventListener('mouseenter', () => a.querySelector('.del').style.display = 'block');
+      a.addEventListener('mouseleave', () => a.querySelector('.del').style.display = 'none');
+      a.querySelector('.del').addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        shortcuts.splice(idx, 1); store.set('nt_shortcuts', shortcuts); renderShortcuts();
+      });
+      grid.appendChild(a);
+    });
+  }
+  renderShortcuts();
+
+  const modalMask = $('#modalMask'), mName = $('#mName'), mUrl = $('#mUrl');
+  $('#addShortcutBtn').addEventListener('click', () => {
+    mName.value = ''; mUrl.value = ''; modalMask.classList.add('show'); setTimeout(()=> mName.focus(), 80);
+  });
+  $('#mCancel').addEventListener('click', () => modalMask.classList.remove('show'));
+  modalMask.addEventListener('click', e => { if (e.target === modalMask) modalMask.classList.remove('show'); });
+  $('#mOk').addEventListener('click', () => {
+    let name = mName.value.trim(), url = mUrl.value.trim();
+    if (!name) { toast('请输入名称'); mName.focus(); return; }
+    if (!url) { toast('请输入网址'); mUrl.focus(); return; }
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    try { new URL(url); } catch(e) { toast('网址格式不正确'); return; }
+    if (shortcuts.length >= 8) { toast('最多8个快捷方式'); return; }
+    shortcuts.push({ name, url }); store.set('nt_shortcuts', shortcuts);
+    renderShortcuts(); modalMask.classList.remove('show'); toast('已添加 ✨');
+  });
+
+  // ================= 待办 =================
+  let todos = store.get('nt_todos', null);
+  if (!Array.isArray(todos)) todos = [];
+  function renderTodos() {
+    const list = $('#todoList'), count = $('#todoCount');
+    list.innerHTML = '';
+    if (!todos.length) {
+      list.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-mute); font-size:13px;">还没有任务，享受空闲吧 🌿</div>`;
+      count.textContent = '0 项'; return;
+    }
+    const undone = todos.filter(t=>!t.done).length;
+    count.textContent = `${undone}/${todos.length} 项`;
+    todos.forEach(t => {
+      const el = document.createElement('div');
+      el.className = 'todo-item' + (t.done ? ' done' : '');
+      el.innerHTML = `
+        <input type="checkbox" ${t.done ? 'checked' : ''}>
+        <span class="txt">${escapeHtml(t.text)}</span>
+        <button class="x">×</button>
+      `;
+      el.querySelector('input').addEventListener('change', e => {
+        t.done = e.target.checked; el.classList.toggle('done', t.done); store.set('nt_todos', todos); renderTodos();
+      });
+      el.querySelector('.x').addEventListener('click', () => {
+        todos = todos.filter(x => x.id !== t.id); store.set('nt_todos', todos); renderTodos();
+      });
+      list.appendChild(el);
+    });
+  }
+  function addTodo() {
+    const input = $('#todoInput'), text = input.value.trim();
+    if (!text) return;
+    todos.unshift({ id: Date.now()+Math.random(), text, done: false });
+    store.set('nt_todos', todos); input.value = ''; renderTodos();
+  }
+  $('#addTodoBtn').addEventListener('click', addTodo);
+  $('#todoInput').addEventListener('keydown', e => { if (e.key === 'Enter') addTodo(); });
+  renderTodos();
+
+  // ================= 计时器 =================
+  let timerTotal = 25 * 60, timerLeft = timerTotal, timerInt = null, isRunning = false;
+  const timerDisplay = $('#timerDisplay'), timerCircle = $('#timerCircle'), btnStartTimer = $('#btnStartTimer');
+
+  function updateTimerUI() {
+    const m = Math.floor(timerLeft / 60), s = timerLeft % 60;
+    timerDisplay.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    timerCircle.style.setProperty('--progress', `${(timerLeft / timerTotal) * 100}%`);
+  }
+  function stopTimer() { clearInterval(timerInt); isRunning = false; btnStartTimer.textContent = '开始'; }
+
+  btnStartTimer.addEventListener('click', () => {
+    if (isRunning) {
+      stopTimer();
+    } else {
+      if (timerLeft <= 0) timerLeft = timerTotal;
+      isRunning = true;
+      btnStartTimer.textContent = '暂停';
+      timerInt = setInterval(() => {
+        timerLeft--; updateTimerUI();
+        if (timerLeft <= 0) {
+          stopTimer();
+          try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+            oscillator.connect(audioCtx.destination); oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.5);
+          } catch(e) {}
+          toast('时间到！休息一下吧 ☕');
+          timerLeft = timerTotal; updateTimerUI();
         }
+      }, 1000);
+    }
+  });
+  $('#btnResetTimer').addEventListener('click', () => { stopTimer(); timerLeft = timerTotal; updateTimerUI(); });
+  $$('.timer-btn[data-min]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      $$('.timer-btn[data-min]').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      stopTimer(); timerTotal = parseInt(e.target.dataset.min) * 60;
+      timerLeft = timerTotal; updateTimerUI();
+    });
+  });
+  updateTimerUI();
 
-        // 绘制飞船
-        function drawPlayer() {
-            ctx.beginPath();
-            // 飞船形状（三角形）
-            ctx.moveTo(player.x, player.y - player.radius);
-            ctx.lineTo(player.x - player.radius, player.y + player.radius);
-            ctx.lineTo(player.x + player.radius, player.y + player.radius);
-            ctx.closePath();
-            
-            // 霓虹发光效果
-            ctx.fillStyle = '#00f3ff';
-            ctx.shadowColor = '#00f3ff';
-            ctx.shadowBlur = 15;
-            ctx.fill();
-            ctx.shadowBlur = 0; // 重置阴影
-        }
+  // ================= 格言 =================
+  const QUOTES = [
+    { t: '种一棵树最好的时间是十年前，其次是现在。', a: '中国谚语' },
+    { t: '简洁是智慧的灵魂。', a: '莎士比亚' },
+    { t: '未来属于那些相信自己梦想之美的人。', a: '埃莉诺·罗斯福' },
+    { t: '行动是治愈恐惧的良药。', a: '威廉·詹姆斯' },
+    { t: '学而不思则罔，思而不学则殆。', a: '孔子' },
+  ];
+  let lastQuote = -1;
+  function showQuote() {
+    let i;
+    do { i = Math.floor(Math.random() * QUOTES.length); } while (i === lastQuote && QUOTES.length > 1);
+    lastQuote = i;
+    $('#quoteText').textContent = `“${QUOTES[i].t}”`;
+    $('#quoteAuthor').textContent = `— ${QUOTES[i].a}`;
+  }
+  showQuote();
+  $('#refreshQuote').addEventListener('click', showQuote);
 
-        // 绘制陨石
-        function drawAsteroids() {
-            asteroids.forEach((ast) => {
-                ctx.beginPath();
-                ctx.arc(ast.x, ast.y, ast.radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#ff003c';
-                ctx.shadowColor = '#ff003c';
-                ctx.shadowBlur = 15;
-                ctx.fill();
-                ctx.shadowBlur = 0;
-            });
-        }
+  // ================= 拖拽排序功能 =================
+  const grid = document.getElementById('draggableGrid');
+  let draggedItem = null;
 
-        // 碰撞检测
-        function checkCollision() {
-            for (let i = 0; i < asteroids.length; i++) {
-                const dx = player.x - asteroids[i].x;
-                const dy = player.y - asteroids[i].y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
+  function saveLayout() {
+    const order = Array.from(grid.children).map(child => child.dataset.id);
+    store.set('nt_layout_order', order);
+  }
+  function loadLayout() {
+    const savedOrder = store.get('nt_layout_order', null);
+    if (savedOrder) {
+      savedOrder.forEach(id => {
+        const el = grid.querySelector(`.widget[data-id="${id}"]`);
+        if (el) grid.appendChild(el);
+      });
+    }
+  }
+  loadLayout();
 
-                if (distance < player.radius + asteroids[i].radius) {
-                    gameOver = true;
-                }
-            }
-        }
+  const widgets = $$('.widget');
+  widgets.forEach(widget => {
+    const header = widget.querySelector('.widget-header');
+    
+    header.addEventListener('mousedown', () => widget.setAttribute('draggable', 'true'));
+    header.addEventListener('mouseup', () => widget.setAttribute('draggable', 'false'));
 
-        // 绘制分数和结束画面
-        function drawUI() {
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '20px Arial';
-            ctx.fillText('得分: ' + score, 20, 30);
+    widget.addEventListener('dragstart', (e) => {
+      if (widget.getAttribute('draggable') !== 'true') {
+        e.preventDefault(); return;
+      }
+      draggedItem = widget;
+      setTimeout(() => widget.classList.add('dragging'), 0);
+      e.dataTransfer.effectAllowed = 'move';
+    });
 
-            if (gameOver) {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                ctx.fillStyle = '#ff003c';
-                ctx.font = 'bold 40px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('战机已坠毁', canvas.width/2, canvas.height/2 - 20);
-                
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '20px Arial';
-                ctx.fillText('点击屏幕重新开始', canvas.width/2, canvas.height/2 + 30);
-                ctx.textAlign = 'start';
-            }
-        }
+    widget.addEventListener('dragend', () => {
+      widget.classList.remove('dragging');
+      widget.setAttribute('draggable', 'false');
+      draggedItem = null;
+      saveLayout();
+    });
 
-        // 游戏主循环
-        function update() {
-            if (gameOver) {
-                drawUI();
-                return;
-            }
+    widget.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (!draggedItem || draggedItem === widget) return;
 
-            // 清屏并绘制星空背景
-            ctx.fillStyle = '#050505';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const rect = widget.getBoundingClientRect();
+      const midpoint = rect.top + rect.height / 2;
+      
+      if (e.clientY < midpoint) {
+        grid.insertBefore(draggedItem, widget);
+      } else {
+        grid.insertBefore(draggedItem, widget.nextSibling);
+      }
+    });
+  });
 
-            // 控制陨石生成速度
-            frameCount++;
-            if (frameCount % 30 === 0) {
-                spawnAsteroid();
-                score += 10;
-            }
-
-            // 更新陨石位置
-            for (let i = asteroids.length - 1; i >= 0; i--) {
-                asteroids[i].y += asteroids[i].speed;
-                // 移出屏幕则删除
-                if (asteroids[i].y > canvas.height + 30) {
-                    asteroids.splice(i, 1);
-                }
-            }
-
-            // 渲染
-            drawPlayer();
-            drawAsteroids();
-            checkCollision();
-            drawUI();
-
-            requestAnimationFrame(update);
-        }
-
-        // 启动游戏
-        requestAnimationFrame(update);
-    </script>
+})();
+</script>
 </body>
 </html>
