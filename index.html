@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>sweet🍉的小站</title>
+<style>
+  /* ================= 基础重置 ================= */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    /* 清新天蓝色渐变背景，带一点云朵气泡感 */
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    background-image: 
+      radial-gradient(rgba(255, 255, 255, 0.8) 2px, transparent 2px),
+      linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    background-size: 40px 40px, 100% 100%;
+    
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  /* 主容器 */
+  .container {
+    max-width: 950px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 整体居中 */
+    margin-top: -5vh;
+  }
+
+  /* ================= 标题区域 ================= */
+  .title-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 标题居中 */
+    width: 100%;
+  }
+
+  .title {
+    font-size: 4.5rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    text-shadow: 0 4px 15px rgba(255, 255, 255, 0.8);
+  }
+
+  .title .en {
+    font-family: 'Georgia', serif; 
+    font-style: italic;
+    transform: rotate(-3deg); 
+  }
+
+  .title .emoji {
+    font-size: 4rem;
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(10deg); }
+  }
+
+  .title .zh {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #0284c7;
+  }
+
+  /* 蓝色渐变线（缩短一点，显得更精致） */
+  .underline {
+    width: 60%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #38bdf8 50%, transparent 100%);
+    border-radius: 2px;
+    margin-bottom: 45px; 
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+  }
+
+  /* ================= 中间操作区（左右对称） ================= */
+  .action-area {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 600px; /* 限制宽度，让左右元素更紧凑 */
+    margin-bottom: 40px;
+  }
+
+  /* “我的小作品”链接 */
+  .my-works {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #0284c7;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .my-works::before {
+    content: '✨';
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+  }
+
+  .my-works:hover {
+    color: #0369a1; 
+    text-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
+    transform: translateX(5px);
+  }
+
+  .my-works:hover::before {
+    transform: rotate(20deg) scale(1.2);
+  }
+
+  /* “新标签页”按钮 */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 32px;
+    background: #ffffff;
+    backdrop-filter: blur(10px); 
+    border: 1px solid rgba(255, 255, 255, 0.5); 
+    border-radius: 50px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #0369a1;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 15px rgba(3, 105, 161, 0.1);
+    white-space: nowrap;
+  }
+
+  .btn:hover {
+    transform: translateY(-3px);
+    border-color: #38bdf8;
+    color: #0284c7;
+    box-shadow: 0 10px 25px rgba(56, 189, 248, 0.3);
+  }
+
+  .btn svg {
+    width: 20px;
+    height: 20px;
+    fill: #38bdf8;
+    transition: fill 0.3s, transform 0.3s;
+  }
+
+  .btn:hover svg {
+    fill: #0284c7;
+    transform: rotate(5deg);
+  }
+
+  /* ================= 底部简介区（居中） ================= */
+  .description {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #475569;
+    text-align: center; /* 文字居中 */
+    letter-spacing: 0.5px;
+  }
+
+  /* 颜文字特效 */
+  .kaomoji {
+    display: inline-block;
+    margin-left: 8px;
+    font-family: 'Courier New', Courier, monospace;
+    color: #0284c7;
+    font-weight: bold;
+    cursor: default;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .kaomoji:hover {
+    transform: translateY(-5px) scale(1.15);
+    color: #38bdf8;
+    text-shadow: 0 0 15px rgba(56, 189, 248, 0.8);
+  }
+
+  /* ================= 响应式适配 ================= */
+  @media (max-width: 768px) {
+    body {
+      align-items: flex-start;
+      padding-top: 15vh;
+    }
+    .container {
+      margin-top: 0;
+    }
+    .title {
+      font-size: 2.8rem;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .title .emoji { font-size: 2.8rem; }
+    .title .zh { font-size: 2rem; }
+    
+    .action-area {
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .description {
+      font-size: 1rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 标题区域（完美居中） -->
+    <div class="title-wrap">
+      <h1 class="title">
+        <span class="en">sweet</span>
+        <span class="emoji">🍉</span>
+        <span class="zh">的小站</span>
+      </h1>
+      <!-- 蓝色渐变线 -->
+      <div class="underline"></div>
+    </div>
+
+    <!-- 中间排版区：我的小作品 与 新标签页 左右对称 -->
+    <div class="action-area">
+      <!-- 左侧：我的小作品 -->
+      <a href="#" class="my-works" onclick="alert('之后可以把这里换成你的小作品链接！'); return false;">
+        我的小作品
+      </a>
+
+      <!-- 右侧：新标签页按钮 -->
+      <a href="https://sweetwatermelons.github.io/newtab.html" target="_blank" class="btn">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+        新标签页
+      </a>
+    </div>
+
+    <!-- 底部：简介 -->
+    <p class="description">
+      喜欢神秘的东西qwq，顺便搞一点小代码~
+      <span class="kaomoji">(˘•ω•˘)◞⁺✧</span>
+    </p>
+
+  </div>
+
+</body>
+</html>
