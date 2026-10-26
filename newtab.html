@@ -55,7 +55,7 @@
     transition: background .4s, color .3s;
     display: flex;
     justify-content: center;
-    padding: 32px 24px 60px;
+    padding: 32px 24px 80px;
   }
 
   .app { width:100%; max-width:1120px; display:flex; flex-direction:column; gap:28px; position: relative; }
@@ -99,10 +99,7 @@
   }
   .city-dropdown input:focus { border-color:var(--accent); }
   .city-list { max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; }
-  .city-item {
-    padding:9px 12px; border-radius:9px; font-size:13px; cursor:pointer;
-    color:var(--text-soft); transition:background .12s;
-  }
+  .city-item { padding:9px 12px; border-radius:9px; font-size:13px; cursor:pointer; color:var(--text-soft); transition:background .12s; }
   .city-item:hover { background:var(--hover); color:var(--text); }
   .city-tip { font-size:11px; color:var(--text-mute); padding:6px 12px; text-align:center; }
 
@@ -127,18 +124,10 @@
   }
   .search-box:focus-within { border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-soft), var(--shadow); }
   .search-box .icon { font-size:18px; color:var(--text-mute); margin-right:12px; flex-shrink:0; }
-  .search-box input {
-    flex:1; border:none; outline:none; background:transparent;
-    font-size:15.5px; color:var(--text); padding:12px 0;
-  }
+  .search-box input { flex:1; border:none; outline:none; background:transparent; font-size:15.5px; color:var(--text); padding:12px 0; }
   .search-box input::placeholder { color:var(--text-mute); }
-  .search-box button {
-    border:none; background:linear-gradient(135deg, var(--accent), #6a8dff);
-    color:#fff; font-size:14px; font-weight:600; padding:11px 26px;
-    border-radius:16px; cursor:pointer; transition:transform .15s, filter .15s;
-  }
+  .search-box button { border:none; background:linear-gradient(135deg, var(--accent), #6a8dff); color:#fff; font-size:14px; font-weight:600; padding:11px 26px; border-radius:16px; cursor:pointer; transition:transform .15s, filter .15s; }
   .search-box button:hover { filter:brightness(1.06); transform:scale(1.02); }
-  .search-box button:active { transform:scale(0.98); }
 
   .suggestions {
     position:absolute; top:calc(100% + 10px); left:0; right:0;
@@ -155,7 +144,7 @@
   .sug-item .sug-text { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .sug-item .sug-hint { font-size:11px; color:var(--text-mute); }
 
-  /* ======= 拖拽网格 ======= */
+  /* ======= 网格与组件 ======= */
   .grid-container {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
@@ -173,157 +162,177 @@
     position: relative;
     transition: box-shadow 0.2s, border-color 0.2s;
     overflow: hidden;
+    min-height: 180px;
+    /* 允许拖拽，但通过 JS 限制触发区域 */
+    cursor: grab;
   }
+  .widget:active { cursor: grabbing; }
   .widget-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 16px;
     cursor: grab;
-    user-select: none;
   }
   .widget-header:active { cursor: grabbing; }
-  .widget-title {
-    font-size: 15px; font-weight: 650; display: flex; align-items: center; gap: 8px;
-  }
-  .widget-title .dot {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
-    box-shadow: 0 0 0 4px var(--accent-soft);
-  }
-  .widget.dragging {
-    opacity: 0.6; transform: scale(0.98); border-color: var(--accent); z-index: 1000;
-  }
+  .widget-title { font-size: 15px; font-weight: 650; display: flex; align-items: center; gap: 8px; }
+  .widget-title .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  
+  .widget.dragging { opacity: 0.4; transform: scale(0.98); border-color: var(--accent); z-index: 1000; }
+  .widget.hidden-widget { display: none !important; }
 
-  @media (min-width: 861px) {
-    .col-12 { grid-column: span 12; }
-    .col-8 { grid-column: span 8; }
-    .col-6 { grid-column: span 6; }
-    .col-4 { grid-column: span 4; }
-  }
-  @media (max-width: 860px) {
-    .grid-container { grid-template-columns: 1fr; }
-    .widget { grid-column: span 1 !important; }
-  }
+  .col-12 { grid-column: span 12; }
+  .col-8 { grid-column: span 8; }
+  .col-6 { grid-column: span 6; }
+  .col-4 { grid-column: span 4; }
 
-  /* ======= 天气面板 ======= */
-  .weather-expanded { display: flex; flex-direction: column; gap: 24px; }
+  .resize-handle {
+    position: absolute; bottom: 0; right: 0; width: 24px; height: 24px;
+    cursor: se-resize; z-index: 10;
+    background: linear-gradient(135deg, transparent 50%, var(--divider) 50%);
+    border-bottom-right-radius: 24px;
+    transition: background 0.2s;
+  }
+  .resize-handle:hover { background: linear-gradient(135deg, transparent 40%, var(--accent) 50%); }
+
+  /* ======= 组件详情样式 ======= */
+  /* 天气 */
+  .weather-expanded { display: flex; flex-direction: column; gap: 20px; height: 100%;}
   .we-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
   .we-main { display: flex; align-items: center; gap: 20px; }
-  
-  .we-main .emoji { 
-    width: 80px; height: 80px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 72px; line-height: 1;
-  }
-  .we-main .temp { 
-    font-size: 56px; font-weight: 900; line-height: 0.9; letter-spacing: -2px;
-  }
-  .we-main .desc { 
-    font-size: 16px; font-weight: 500; color: var(--text-soft); margin-top: 6px;
-  }
-  
-  .we-details {
-    display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
-    background: var(--input-bg); padding: 16px; border-radius: 16px;
-  }
+  .we-main .emoji { width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; font-size: 64px; line-height: 1; }
+  .we-main .temp { font-size: 50px; font-weight: 900; line-height: 0.9; letter-spacing: -2px; }
+  .we-main .desc { font-size: 15px; font-weight: 500; color: var(--text-soft); margin-top: 6px; }
+  .we-details { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; background: var(--input-bg); padding: 14px; border-radius: 16px; }
   .we-item { text-align: center; font-size: 13px; display: flex; flex-direction: column; gap: 6px;}
-  .we-item .label { color: var(--text-mute); font-size: 12px; font-weight: 500;}
-  .we-item .val { font-weight: 700; color: var(--text); font-size: 15px;}
-
-  /* 24小时预报横向滑动 */
-  .hourly-container {
-    display: flex; overflow-x: auto; gap: 20px; padding-bottom: 10px;
-    scrollbar-width: thin; padding-top: 10px; border-bottom: 1px solid var(--divider);
-    align-items: flex-start;
-  }
+  .we-item .label { color: var(--text-mute); font-size: 11px; font-weight: 500;}
+  .we-item .val { font-weight: 700; color: var(--text); font-size: 14px;}
+  .hourly-container { display: flex; overflow-x: auto; gap: 16px; padding-bottom: 8px; scrollbar-width: thin; padding-top: 8px; border-bottom: 1px solid var(--divider); align-items: flex-start; }
   .hourly-container::-webkit-scrollbar { height: 4px; }
   .hourly-container::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
-  .hourly-item {
-    min-width: 48px; display: flex; flex-direction: column; align-items: center; gap: 10px;
-    background: transparent;
-  }
-  .hourly-item .h-time { font-size: 13px; color: var(--text-soft); font-weight: 600; height: 18px; display: flex; align-items: center;}
-  .hourly-item .h-icon { 
-    width: 36px; height: 36px; 
-    display: flex; align-items: center; justify-content: center; 
-    font-size: 32px; line-height: 1; margin: 2px 0;
-  }
-  .hourly-item .h-temp { font-size: 17px; font-weight: 800; height: 20px; display: flex; align-items: center;}
-
-  /* 3天预报 */
+  .hourly-item { min-width: 44px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .hourly-item .h-time { font-size: 12px; color: var(--text-soft); font-weight: 600; height: 18px; display: flex; align-items: center;}
+  .hourly-item .h-icon { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 26px; line-height: 1; margin: 2px 0; }
+  .hourly-item .h-temp { font-size: 15px; font-weight: 800; height: 20px; display: flex; align-items: center;}
   .we-forecast { display: flex; gap: 8px; margin-top: 4px;}
-  .forecast-day {
-    flex: 1; padding: 10px; text-align: center;
-    display: flex; flex-direction: column; gap: 4px; align-items: center;
-    border-right: 1px solid var(--divider);
-  }
+  .forecast-day { flex: 1; padding: 8px; text-align: center; display: flex; flex-direction: column; gap: 4px; align-items: center; border-right: 1px solid var(--divider); }
   .forecast-day:last-child { border-right: none; }
   .forecast-day .day-name { font-size: 12px; color: var(--text-soft); font-weight: 600;}
   .forecast-day .f-emoji { font-size: 20px; margin: 2px 0; }
   .forecast-day .f-temp { font-size: 13px; font-weight: 600;}
   .forecast-day .f-temp span { font-weight: 400; color: var(--text-mute); margin-left:4px;}
 
-  /* --- 快捷访问 --- */
-  .shortcuts-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(80px, 1fr)); gap:12px; }
-  .sc {
-    position:relative; background:var(--input-bg); border:1px solid transparent;
-    border-radius:16px; padding:16px 10px; display:flex; flex-direction:column; align-items:center; gap:10px;
-    cursor:pointer; text-decoration:none; color:var(--text-soft); transition:transform .15s;
-  }
-  .sc:hover { transform:translateY(-3px); border-color:var(--accent); color:var(--text); }
-  .sc .fav { width:36px; height:36px; border-radius:10px; display:grid; place-items:center; background:var(--card); }
-  .sc .fav img { width:24px; height:24px; }
-  .sc .name { font-size:12px; font-weight:550; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; }
-  .sc .del { position:absolute; top:2px; right:2px; border:none; background:transparent; color:var(--danger); font-size:14px; cursor:pointer; display:none; }
-  
-  /* --- 待办 --- */
+  /* 计时器 */
+  .timer-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; flex: 1; }
+  .timer-circle { position: relative; width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(var(--accent) var(--progress, 100%), var(--divider) 0%); display: grid; place-items: center; transition: background 0.1s linear; }
+  .timer-inner { width: 120px; height: 120px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .timer-input { width: 32px; background: transparent; border: none; color: var(--text); font-size: 24px; font-weight: 700; text-align: center; outline: none; padding: 0; }
+  .timer-input::-webkit-outer-spin-button, .timer-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .timer-input:focus { color: var(--accent); background: var(--input-bg); border-radius: 6px; }
+  .timer-sep { font-size: 20px; color: var(--text-soft); margin: 0 2px; }
+  .timer-actions { display: flex; gap: 10px; }
+  .timer-btn { background: var(--input-bg); border: none; border-radius: 10px; padding: 8px 16px; font-size: 13px; font-weight: 600; color: var(--text-soft); cursor: pointer; transition: 0.15s; }
+  .timer-btn:hover { background: var(--accent-soft); color: var(--accent); }
+  .timer-btn.primary { background: var(--accent); color: #fff; }
+
+  /* 待办 */
   .todo-input { display:flex; gap:8px; margin-bottom:14px; }
-  .todo-input input {
-    flex:1; background:var(--input-bg); border:none; border-radius:12px;
-    padding:10px 14px; font-size:13.5px; color:var(--text); outline:none;
-  }
-  .todo-input button {
-    width:40px; border:none; border-radius:12px; background:var(--accent); color:#fff;
-    font-size:20px; cursor:pointer;
-  }
-  .todo-list { display:flex; flex-direction:column; gap:8px; max-height:200px; overflow-y:auto; padding-right:4px;}
-  .todo-item {
-    display:flex; align-items:center; gap:10px; padding:10px 12px;
-    border-radius:12px; background:var(--input-bg); border:1px solid transparent;
-  }
+  .todo-input input { flex:1; background:var(--input-bg); border:none; border-radius:12px; padding:10px 14px; font-size:13.5px; color:var(--text); outline:none; }
+  .todo-input button { width:40px; border:none; border-radius:12px; background:var(--accent); color:#fff; font-size:20px; cursor:pointer; }
+  .todo-list { display:flex; flex-direction:column; gap:8px; overflow-y:auto; padding-right:4px; flex: 1;}
+  .todo-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; background:var(--input-bg); border:1px solid transparent; }
   .todo-item.done { opacity:0.55; }
   .todo-item.done .txt { text-decoration:line-through; color:var(--text-mute); }
-  .todo-item input[type="checkbox"] {
-    appearance:none; width:18px; height:18px; border-radius:5px;
-    border:2px solid var(--text-mute); cursor:pointer; flex-shrink:0; position:relative;
-  }
+  .todo-item input[type="checkbox"] { appearance:none; width:18px; height:18px; border-radius:5px; border:2px solid var(--text-mute); cursor:pointer; flex-shrink:0; position:relative; }
   .todo-item input[type="checkbox"]:checked { background:var(--accent); border-color:var(--accent); }
   .todo-item input[type="checkbox"]:checked::after { content:'✓'; position:absolute; inset:0; display:grid; place-items:center; color:#fff; font-size:12px; }
   .todo-item .txt { flex:1; font-size:13px; }
   .todo-item .x { border:none; background:transparent; color:var(--text-mute); cursor:pointer; font-size:16px; }
 
-  /* --- 计时器 --- */
-  .timer-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; height: 100%; }
-  .timer-circle {
-    position: relative; width: 140px; height: 140px; border-radius: 50%;
-    background: conic-gradient(var(--accent) var(--progress, 100%), var(--divider) 0%);
-    display: grid; place-items: center;
-  }
-  .timer-inner {
-    width: 120px; height: 120px; border-radius: 50%; background: var(--card);
-    display: grid; place-items: center; font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums;
-  }
-  .timer-actions { display: flex; gap: 8px; }
-  .timer-btn {
-    background: var(--input-bg); border: none; border-radius: 8px; padding: 6px 12px;
-    font-size: 12px; font-weight: 600; color: var(--text-soft); cursor: pointer; transition: 0.15s;
-  }
-  .timer-btn:hover { background: var(--accent-soft); color: var(--accent); }
-  .timer-btn.active { background: var(--accent); color: #fff; }
-  
-  /* --- 格言 --- */
+  /* 快捷访问 */
+  .shortcuts-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(80px, 1fr)); gap:12px; align-content: start;}
+  .sc { position:relative; background:var(--input-bg); border:1px solid transparent; border-radius:16px; padding:16px 10px; display:flex; flex-direction:column; align-items:center; gap:10px; cursor:pointer; text-decoration:none; color:var(--text-soft); transition:transform .15s; }
+  .sc:hover { transform:translateY(-3px); border-color:var(--accent); color:var(--text); }
+  .sc .fav { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow: hidden; }
+  .sc .fav img { width: 24px; height: 24px; object-fit: contain; }
+  .sc .name { font-size:12px; font-weight:550; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; }
+  .sc .del { position:absolute; top:2px; right:2px; border:none; background:transparent; color:var(--danger); font-size:14px; cursor:pointer; display:none; }
+
+  /* 格言 */
   .quote-text { font-size:14px; line-height:1.6; font-weight:500; }
   .quote-author { margin-top:12px; font-size:12px; color:var(--text-mute); text-align:right; }
+
+  /* 新增的小组件样式 */
+  .calendar-header { text-align: center; font-weight: 700; font-size: 16px; margin-bottom: 12px; }
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 12px; }
+  .cal-weekday { color: var(--text-mute); font-weight: 600; margin-bottom: 4px; }
+  .cal-day { padding: 6px 0; border-radius: 8px; cursor: default; }
+  .cal-day.today { background: var(--accent); color: #fff; font-weight: 700; box-shadow: 0 2px 8px rgba(79,124,255,0.4); }
+  .cal-day:not(.empty):hover { background: var(--hover); }
+  .world-clock-list { display: flex; flex-direction: column; gap: 12px; }
+  .wc-item { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+  .wc-city { font-weight: 600; color: var(--text-soft); }
+  .wc-time { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .progress-group { display: flex; flex-direction: column; gap: 16px; margin-top: 4px;}
+  .prog-item { display: flex; flex-direction: column; gap: 6px; }
+  .prog-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--text-soft); }
+  .prog-bar { width: 100%; height: 8px; border-radius: 4px; background: var(--divider); overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), #6a8dff); transition: width 0.5s ease; }
+  .prog-fill.pink { background: linear-gradient(90deg, #ff6b6b, #ff9a9e); }
+  .fishing-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 8px;}
+  .fishing-time { font-size: 36px; font-weight: 900; color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: -1px;}
+  .fishing-text { font-size: 13px; color: var(--text-soft); font-weight: 500;}
+
+  /* ================= 左下角添加组件悬浮按钮 & 菜单 ================= */
+  .add-widget-btn {
+    position: fixed; bottom: 40px; left: 40px;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-size: 32px; font-weight: 300;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 25px rgba(79,124,255,0.4);
+    cursor: pointer; z-index: 1000;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .add-widget-btn:hover { transform: scale(1.1) rotate(90deg); }
+  .add-widget-btn.active { transform: scale(1.1) rotate(45deg); }
+
+  .widget-menu {
+    position: fixed; bottom: 110px; left: 40px;
+    background: var(--card); backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border); border-radius: 20px;
+    box-shadow: var(--shadow); padding: 10px;
+    display: flex; flex-direction: column; gap: 4px;
+    z-index: 999; opacity: 0; pointer-events: none;
+    transform: translateY(20px); transition: all 0.3s ease;
+    max-height: 60vh; overflow-y: auto;
+  }
+  .widget-menu.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  .widget-menu::-webkit-scrollbar { width: 4px; }
+  .widget-menu::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
+  .menu-item {
+    padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600;
+    color: var(--text-soft); cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    transition: background 0.2s;
+  }
+  .menu-item:hover { background: var(--hover); color: var(--text); }
+  .menu-item .status { font-size: 12px; color: var(--accent); }
+
+  /* ================= 底部导航 & 电子木鱼 ================= */
+  .footer-nav { display: flex; justify-content: center; gap: 20px; margin-top: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .footer-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; border-radius: 50px; background: var(--card); border: 1px solid var(--card-border); color: var(--text-soft); text-decoration: none; font-size: 14px; font-weight: 600; box-shadow: var(--shadow); transition: all 0.3s ease; }
+  .footer-btn:hover { transform: translateY(-3px); border-color: var(--accent); color: var(--accent); }
+  .footer-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+  .footer-text { text-align: center; font-size: 13px; color: var(--text-mute); margin-bottom: 40px;}
+  .footer-text a { color: var(--accent); text-decoration: none; font-weight: 600; transition: color 0.2s;}
+  .footer-text a:hover { color: #3b66f5; text-decoration: underline; }
+
+  .muyu-container { position: fixed; bottom: 40px; right: 40px; z-index: 999; display: flex; flex-direction: column; align-items: center; cursor: pointer; user-select: none; }
+  .muyu-emoji { font-size: 80px; line-height: 1; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15)); transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .muyu-container:active .muyu-emoji { transform: scale(0.85); }
+  .merit-text { position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-size: 20px; font-weight: 800; color: #ffb6c1; text-shadow: 0 2px 4px rgba(0,0,0,0.1); opacity: 0; pointer-events: none; }
+  @keyframes floatUpFade { 0% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -80px) scale(1.5); } }
 
   /* 模态框 & Toast */
   .modal-mask { position:fixed; inset:0; background:rgba(10,15,30,0.4); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; z-index:1000; padding:20px; }
@@ -337,13 +346,19 @@
   .modal-actions button { flex:1; border:none; border-radius:14px; padding:13px; font-size:14px; font-weight:600; cursor:pointer; }
   .btn-cancel { background:var(--input-bg); color:var(--text-soft); }
   .btn-ok { background:var(--accent); color:#fff; }
-  .toast {
-    position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(80px);
-    background:var(--accent); color:#fff; padding:12px 24px; border-radius:14px;
-    font-size:13.5px; font-weight:600; box-shadow:0 14px 30px -8px rgba(79,124,255,0.6);
-    opacity:0; transition:opacity .25s, transform .25s; z-index:2000; pointer-events:none;
-  }
+  .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--accent); color:#fff; padding:12px 24px; border-radius:14px; font-size:13.5px; font-weight:600; box-shadow:0 14px 30px -8px rgba(79,124,255,0.6); opacity:0; transition:opacity .25s, transform .25s; z-index:2000; pointer-events:none; }
   .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width: 860px) {
+    .grid-container { grid-template-columns: 1fr; }
+    .widget { grid-column: span 1 !important; }
+    .footer-nav { flex-direction: column; align-items: center; }
+    .footer-btn { width: 100%; justify-content: center; }
+    .muyu-container { bottom: 20px; right: 20px; }
+    .muyu-emoji { font-size: 60px; }
+    .add-widget-btn { bottom: 20px; left: 20px; width: 46px; height: 46px; font-size: 26px; }
+    .widget-menu { bottom: 80px; left: 20px; }
+  }
 </style>
 </head>
 <body>
@@ -369,9 +384,7 @@
           </div>
           <div class="city-dropdown" id="cityDropdown">
             <input type="text" id="citySearchInput" placeholder="搜索城市名称…" autocomplete="off">
-            <div class="city-list" id="cityList">
-              <div class="city-tip">输入城市拼音或中文查找</div>
-            </div>
+            <div class="city-list" id="cityList"><div class="city-tip">输入城市拼音或中文查找</div></div>
           </div>
         </div>
       </div>
@@ -390,10 +403,9 @@
 
   <div class="grid-container" id="draggableGrid">
     
-    <div class="widget col-12" draggable="false" data-id="weather">
-      <div class="widget-header">
-        <div class="widget-title"><span class="dot"></span> 天气详情</div>
-      </div>
+    <!-- 天气卡 (默认12列) -->
+    <div class="widget col-12" data-id="weather" draggable="true">
+      <div class="widget-header"><div class="widget-title"><span class="dot"></span> 天气详情</div></div>
       <div class="weather-expanded">
         <div class="we-top">
           <div class="we-main">
@@ -405,8 +417,6 @@
           </div>
           <div style="text-align: right; font-size: 20px; font-weight: 800;" id="wCityName">北京</div>
         </div>
-        
-        <!-- 详细指标 (现在包含体感温度) -->
         <div class="we-details">
           <div class="we-item"><div class="label">风向</div><div class="val" id="wWindDir">--</div></div>
           <div class="we-item"><div class="label">风力</div><div class="val" id="wWindScale">--级</div></div>
@@ -415,33 +425,35 @@
           <div class="we-item"><div class="label">体感温度</div><div class="val" id="wFeelsLike">--°</div></div>
           <div class="we-item"><div class="label">能见度</div><div class="val" id="wVis">--km</div></div>
         </div>
-
         <div class="hourly-container" id="hourlyList"></div>
         <div class="we-forecast" id="forecastList"></div>
       </div>
+      <div class="resize-handle"></div>
     </div>
 
-    <div class="widget col-4" draggable="false" data-id="timer">
-      <div class="widget-header">
-        <div class="widget-title"><span class="dot"></span> 焦点计时</div>
-      </div>
+    <!-- 计时器 (默认4列) -->
+    <div class="widget col-4" data-id="timer" draggable="true">
+      <div class="widget-header"><div class="widget-title"><span class="dot"></span> 焦点计时</div></div>
       <div class="timer-wrap">
         <div class="timer-circle" id="timerCircle" style="--progress: 100%;">
-          <div class="timer-inner" id="timerDisplay">25:00</div>
+          <div class="timer-inner">
+            <input type="number" id="inputH" class="timer-input" min="0" max="99" placeholder="00" value="00">
+            <span class="timer-sep">:</span>
+            <input type="number" id="inputM" class="timer-input" min="0" max="59" placeholder="25" value="25">
+            <span class="timer-sep">:</span>
+            <input type="number" id="inputS" class="timer-input" min="0" max="59" placeholder="00" value="00">
+          </div>
         </div>
         <div class="timer-actions">
-          <button class="timer-btn active" data-min="25">25分</button>
-          <button class="timer-btn" data-min="15">15分</button>
-          <button class="timer-btn" data-min="45">45分</button>
-        </div>
-        <div style="display:flex; gap:8px; margin-top:4px;">
-          <button class="timer-btn" id="btnStartTimer" style="background:var(--accent); color:#fff;">开始</button>
+          <button class="timer-btn primary" id="btnStartTimer">开始</button>
           <button class="timer-btn" id="btnResetTimer">重置</button>
         </div>
       </div>
+      <div class="resize-handle"></div>
     </div>
 
-    <div class="widget col-8" draggable="false" data-id="todo">
+    <!-- 待办 (默认8列) -->
+    <div class="widget col-8" data-id="todo" draggable="true">
       <div class="widget-header">
         <div class="widget-title"><span class="dot"></span> 待办事项</div>
         <span style="font-size:11.5px; color:var(--text-mute); background:var(--input-bg); padding:2px 10px; border-radius:20px;" id="todoCount">0 项</span>
@@ -451,28 +463,114 @@
         <button id="addTodoBtn">＋</button>
       </div>
       <div class="todo-list" id="todoList"></div>
+      <div class="resize-handle"></div>
     </div>
 
-    <div class="widget col-6" draggable="false" data-id="shortcuts">
+    <!-- 快捷访问 (默认6列) -->
+    <div class="widget col-6" data-id="shortcuts" draggable="true">
       <div class="widget-header">
         <div class="widget-title"><span class="dot"></span> 快捷访问</div>
         <button class="timer-btn" id="addShortcutBtn">＋ 添加</button>
       </div>
       <div class="shortcuts-grid" id="shortcutsGrid"></div>
+      <div class="resize-handle"></div>
     </div>
 
-    <div class="widget col-6" draggable="false" data-id="quote">
+    <!-- 格言 (默认6列) -->
+    <div class="widget col-6" data-id="quote" draggable="true">
       <div class="widget-header">
         <div class="widget-title"><span class="dot"></span> 每日格言</div>
         <button class="timer-btn" id="refreshQuote">换一句</button>
       </div>
       <div class="quote-text" id="quoteText">保持专注，一切皆有可能。</div>
       <div class="quote-author" id="quoteAuthor">— 每日灵感</div>
+      <div class="resize-handle"></div>
+    </div>
+
+    <!-- 新增：日历 -->
+    <div class="widget col-4" data-id="calendar" draggable="true">
+      <div class="widget-header"><div class="widget-title"><span class="dot"></span> 日历</div></div>
+      <div class="calendar-header" id="calMonth">10月 2023</div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+      <div class="resize-handle"></div>
+    </div>
+
+    <!-- 新增：世界时钟 -->
+    <div class="widget col-4" data-id="worldclock" draggable="true">
+      <div class="widget-header"><div class="widget-title"><span class="dot"></span> 世界时钟</div></div>
+      <div class="world-clock-list" id="worldClockList"></div>
+      <div class="resize-handle"></div>
+    </div>
+
+    <!-- 新增：进度条 -->
+    <div class="widget col-4" data-id="progress" draggable="true">
+      <div class="widget-header"><div class="widget-title"><span class="dot"></span> 进度条</div></div>
+      <div class="progress-group">
+        <div class="prog-item">
+          <div class="prog-label"><span>今天</span><span id="progTodayText">0%</span></div>
+          <div class="prog-bar"><div class="prog-fill" id="progToday" style="width: 0%;"></div></div>
+        </div>
+        <div class="prog-item">
+          <div class="prog-label"><span>本周</span><span id="progWeekText">0%</span></div>
+          <div class="prog-bar"><div class="prog-fill" id="progWeek" style="width: 0%;"></div></div>
+        </div>
+        <div class="prog-item">
+          <div class="prog-label"><span>今年</span><span id="progYearText">0%</span></div>
+          <div class="prog-bar"><div class="prog-fill pink" id="progYear" style="width: 0%;"></div></div>
+        </div>
+      </div>
+      <div class="resize-handle"></div>
+    </div>
+
+    <!-- 新增：摸鱼倒计时 -->
+    <div class="widget col-4" data-id="fishing" draggable="true">
+      <div class="widget-header"><div class="widget-title"><span class="dot"></span> 摸鱼倒计时</div></div>
+      <div class="fishing-wrap">
+        <div class="fishing-time" id="fishingTime">--:--:--</div>
+        <div class="fishing-text">距离 18:00 下班还有</div>
+      </div>
+      <div class="resize-handle"></div>
     </div>
 
   </div>
+
+  <div class="footer-nav">
+    <a href="https://sweetwatermelons.github.io/" target="_blank" class="footer-btn">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> 返回首页
+    </a>
+    <a href="https://github.com/sweetwatermelons" target="_blank" class="footer-btn">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg> 欢迎进入我的GitHub主页
+    </a>
+  </div>
+
+  <div class="footer-text">
+    如果好用的话，记得给个star哦~ <br>
+    <a href="https://github.com/sweetwatermelons/sweetwatermelons.github.io" target="_blank">点击进入仓库</a>
+  </div>
+
 </div>
 
+<!-- 电子木鱼 -->
+<div class="muyu-container" id="muyu">
+  <div class="merit-text" id="meritText">功德+1</div>
+  <div class="muyu-emoji">🪵</div>
+</div>
+
+<!-- 左下角添加组件菜单 -->
+<div class="widget-menu" id="widgetMenu">
+  <div class="menu-item" data-target="weather">天气详情 <span class="status">隐藏</span></div>
+  <div class="menu-item" data-target="timer">焦点计时 <span class="status">隐藏</span></div>
+  <div class="menu-item" data-target="todo">待办事项 <span class="status">隐藏</span></div>
+  <div class="menu-item" data-target="shortcuts">快捷访问 <span class="status">隐藏</span></div>
+  <div class="menu-item" data-target="quote">每日格言 <span class="status">隐藏</span></div>
+  <div class="menu-item" data-target="calendar">日历 <span class="status">隐藏</span></div>
+  <div class="menu-item" data-target="worldclock">世界时钟 <span class="status">隐藏</span></div>
+  <div class="menu-item" data-target="progress">进度条 <span class="status">隐藏</span></div>
+  <div class="menu-item" data-target="fishing">摸鱼倒计时 <span class="status">隐藏</span></div>
+</div>
+<div class="add-widget-btn" id="addWidgetBtn">＋</div>
+
+<!-- 模态框 -->
 <div class="modal-mask" id="modalMask">
   <div class="modal">
     <h3>添加快捷方式</h3>
@@ -587,7 +685,6 @@
         const now = nowData.now;
         const nowEmoji = iconToEmoji(now.icon);
         
-        // 1. 顶部实时天气
         $('#wTempLarge').textContent = now.temp + '°';
         $('#wEmojiLarge').textContent = nowEmoji;
         $('#wDescLarge').textContent = now.text;
@@ -597,7 +694,6 @@
         $('#wTempMini').textContent = now.temp + '°';
         $('#wPlaceMini').textContent = currentCity.name;
 
-        // 2. 指标数据（新增体感温度）
         $('#wWindDir').textContent = now.windDir;
         $('#wWindScale').textContent = now.windScale + '级';
         $('#wHumidity').textContent = now.humidity + '%';
@@ -605,24 +701,18 @@
         $('#wFeelsLike').textContent = now.feelsLike + '°'; 
         $('#wVis').textContent = now.vis + 'km';
 
-        // 3. 渲染 24 小时预报
         if (hourlyData.code === '200' && hourlyData.hourly) {
           const hList = $('#hourlyList');
           hList.innerHTML = '';
-          
           const currentHour = new Date().getHours();
-
           hourlyData.hourly.forEach((h) => {
             const timeStr = h.fxTime.split('T')[1].substring(0, 5);
             const hHour = parseInt(timeStr.split(':')[0]);
             const hEmoji = iconToEmoji(h.icon);
-            
             const div = document.createElement('div');
             div.className = 'hourly-item';
-            
             const isCurrentHour = (hHour === currentHour);
             const timeStyle = isCurrentHour ? 'style="color: var(--accent); font-weight: 800;"' : '';
-            
             div.innerHTML = `
               <div class="h-time" ${timeStyle}>${timeStr}</div>
               <div class="h-icon">${hEmoji}</div>
@@ -632,7 +722,6 @@
           });
         }
 
-        // 4. 渲染3天预报
         if (dailyData.code === '200' && dailyData.daily) {
           const dList = $('#forecastList');
           dList.innerHTML = '';
@@ -659,14 +748,12 @@
     }
   }
 
-  // 城市搜索
   async function searchCity(keyword) {
     if (!keyword) return;
     cityList.innerHTML = `<div class="city-tip">搜索中...</div>`;
     try {
       const res = await fetch(`https://${API_HOST}/geo/v2/city/lookup?location=${encodeURIComponent(keyword)}&key=${QWEATHER_KEY}&number=10`);
       const data = await res.json();
-      
       if (data.code === '200' && data.location && data.location.length > 0) {
         cityList.innerHTML = '';
         data.location.forEach(loc => {
@@ -777,26 +864,65 @@
     shortcuts = DEFAULT_SHORTCUTS.slice();
     store.set('nt_shortcuts', shortcuts);
   }
+
   function faviconUrl(u) {
-    try { return `https://www.google.com/s2/favicons?domain=${new URL(u).hostname}&sz=64`; } catch(e) { return ''; }
+    try { 
+      const host = new URL(u).hostname;
+      return `https://favicon.im/${host}?larger=true`; 
+    } catch(e) { return ''; }
   }
+
+  function handleFavError(imgElement, name) {
+    imgElement.style.display = 'none';
+    const container = imgElement.parentElement;
+    container.style.background = getGradientColor(name);
+    container.style.color = '#fff';
+    container.style.fontWeight = 'bold';
+    container.style.fontSize = '16px';
+    container.textContent = getIconText(name);
+  }
+
+  function getGradientColor(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    const h1 = Math.abs(hash) % 360;
+    const h2 = (h1 + 40) % 360; 
+    return `linear-gradient(135deg, hsl(${h1}, 80%, 65%), hsl(${h2}, 75%, 50%))`;
+  }
+
+  function getIconText(name) {
+    if (!name) return '?';
+    if (/[\u4e00-\u9fa5]/.test(name)) return name.charAt(0);
+    if (name.length >= 2) return name.substring(0, 2).toUpperCase();
+    return name.charAt(0).toUpperCase();
+  }
+
   function renderShortcuts() {
     const grid = $('#shortcutsGrid');
     grid.innerHTML = '';
     shortcuts.forEach((sc, idx) => {
       const a = document.createElement('a');
       a.className = 'sc'; a.href = sc.url; a.target = '_blank'; a.title = sc.url;
+      
+      const safeName = escapeHtml(sc.name || '?');
+      const iconUrl = faviconUrl(sc.url);
+
       a.innerHTML = `
-        <span class="fav"><img src="${faviconUrl(sc.url)}" alt="" onerror="this.parentElement.textContent='${escapeHtml((sc.name||'?')[0])}'"></span>
-        <span class="name">${escapeHtml(sc.name)}</span>
+        <span class="fav">
+          <img src="${iconUrl}" alt="" onerror="handleFavError(this, '${safeName}')">
+        </span>
+        <span class="name">${safeName}</span>
         <button class="del" data-idx="${idx}">×</button>
       `;
+      
       a.addEventListener('mouseenter', () => a.querySelector('.del').style.display = 'block');
       a.addEventListener('mouseleave', () => a.querySelector('.del').style.display = 'none');
+      
       a.querySelector('.del').addEventListener('click', (e) => {
         e.preventDefault(); e.stopPropagation();
         shortcuts.splice(idx, 1); store.set('nt_shortcuts', shortcuts); renderShortcuts();
       });
+      
       grid.appendChild(a);
     });
   }
@@ -858,50 +984,128 @@
   $('#todoInput').addEventListener('keydown', e => { if (e.key === 'Enter') addTodo(); });
   renderTodos();
 
-  // ================= 计时器 =================
-  let timerTotal = 25 * 60, timerLeft = timerTotal, timerInt = null, isRunning = false;
-  const timerDisplay = $('#timerDisplay'), timerCircle = $('#timerCircle'), btnStartTimer = $('#btnStartTimer');
+  // ================= 自由输入计时器 =================
+  let timerTotal = 25 * 60; 
+  let timerLeft = timerTotal;
+  let timerInt = null;
+  let isRunning = false;
 
-  function updateTimerUI() {
-    const m = Math.floor(timerLeft / 60), s = timerLeft % 60;
-    timerDisplay.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    timerCircle.style.setProperty('--progress', `${(timerLeft / timerTotal) * 100}%`);
+  const timerCircle = $('#timerCircle');
+  const btnStartTimer = $('#btnStartTimer');
+  
+  const inputH = $('#inputH');
+  const inputM = $('#inputM');
+  const inputS = $('#inputS');
+
+  function updateTimerCircle() {
+    if (timerTotal === 0) {
+      timerCircle.style.setProperty('--progress', '0%');
+      return;
+    }
+    const percent = (timerLeft / timerTotal) * 100;
+    timerCircle.style.setProperty('--progress', `${percent}%`);
   }
-  function stopTimer() { clearInterval(timerInt); isRunning = false; btnStartTimer.textContent = '开始'; }
+
+  function updateInputsFromLeft() {
+    const h = Math.floor(timerLeft / 3600);
+    const m = Math.floor((timerLeft % 3600) / 60);
+    const s = timerLeft % 60;
+    
+    inputH.value = String(h).padStart(2, '0');
+    inputM.value = String(m).padStart(2, '0');
+    inputS.value = String(s).padStart(2, '0');
+  }
+
+  function getInputSeconds() {
+    const h = parseInt(inputH.value) || 0;
+    const m = parseInt(inputM.value) || 0;
+    const s = parseInt(inputS.value) || 0;
+    return (h * 3600) + (m * 60) + s;
+  }
+
+  function stopTimer() {
+    clearInterval(timerInt);
+    isRunning = false;
+    btnStartTimer.textContent = '开始';
+    btnStartTimer.classList.add('primary');
+  }
+
+  [inputH, inputM, inputS].forEach(input => {
+    input.addEventListener('input', () => {
+      if (isRunning) stopTimer();
+      
+      if (input === inputM || input === inputS) {
+        if (input.value > 59) input.value = 59;
+      }
+      if (input.value < 0) input.value = 0;
+
+      timerTotal = getInputSeconds();
+      timerLeft = timerTotal;
+      updateTimerCircle();
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        btnStartTimer.click();
+      }
+    });
+  });
 
   btnStartTimer.addEventListener('click', () => {
     if (isRunning) {
       stopTimer();
     } else {
-      if (timerLeft <= 0) timerLeft = timerTotal;
+      timerTotal = getInputSeconds();
+      if (timerTotal <= 0) return; 
+      
+      if (timerLeft <= 0 || timerLeft > timerTotal) {
+        timerLeft = timerTotal;
+      }
+      
       isRunning = true;
       btnStartTimer.textContent = '暂停';
+      btnStartTimer.classList.remove('primary');
+      
       timerInt = setInterval(() => {
-        timerLeft--; updateTimerUI();
+        timerLeft--;
+        
+        if (timerLeft >= 0) {
+          updateInputsFromLeft();
+          updateTimerCircle();
+        }
+        
         if (timerLeft <= 0) {
           stopTimer();
+          timerLeft = 0;
+          updateInputsFromLeft();
+          updateTimerCircle();
+          
           try {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioCtx.createOscillator();
-            oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-            oscillator.connect(audioCtx.destination); oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.5);
+            oscillator.type = 'sine'; 
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+            oscillator.connect(audioCtx.destination); 
+            oscillator.start(); 
+            oscillator.stop(audioCtx.currentTime + 0.5);
           } catch(e) {}
           toast('时间到！休息一下吧 ☕');
-          timerLeft = timerTotal; updateTimerUI();
         }
       }, 1000);
     }
   });
-  $('#btnResetTimer').addEventListener('click', () => { stopTimer(); timerLeft = timerTotal; updateTimerUI(); });
-  $$('.timer-btn[data-min]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      $$('.timer-btn[data-min]').forEach(b => b.classList.remove('active'));
-      e.target.classList.add('active');
-      stopTimer(); timerTotal = parseInt(e.target.dataset.min) * 60;
-      timerLeft = timerTotal; updateTimerUI();
-    });
+
+  $('#btnResetTimer').addEventListener('click', () => {
+    stopTimer();
+    timerTotal = getInputSeconds();
+    timerLeft = timerTotal;
+    updateInputsFromLeft();
+    updateTimerCircle();
   });
-  updateTimerUI();
+
+  updateInputsFromLeft();
+  updateTimerCircle();
 
   // ================= 格言 =================
   const QUOTES = [
@@ -922,61 +1126,317 @@
   showQuote();
   $('#refreshQuote').addEventListener('click', showQuote);
 
-  // ================= 拖拽排序功能 =================
-  const grid = document.getElementById('draggableGrid');
-  let draggedItem = null;
+  // ================= 电子木鱼 =================
+  const muyu = $('#muyu');
+  const meritText = $('#meritText');
+  muyu.addEventListener('click', () => {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(300, audioCtx.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.1);
+      gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.1);
+    } catch(e) {}
+    meritText.style.animation = 'none';
+    meritText.offsetHeight;
+    meritText.style.animation = 'floatUpFade 0.8s ease-out forwards';
+  });
 
-  function saveLayout() {
-    const order = Array.from(grid.children).map(child => child.dataset.id);
-    store.set('nt_layout_order', order);
-  }
-  function loadLayout() {
-    const savedOrder = store.get('nt_layout_order', null);
-    if (savedOrder) {
-      savedOrder.forEach(id => {
-        const el = grid.querySelector(`.widget[data-id="${id}"]`);
-        if (el) grid.appendChild(el);
-      });
+  // ================= 新增小工具逻辑 =================
+  // 1. 日历
+  function renderCalendar() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const today = now.getDate();
+    
+    $('#calMonth').textContent = `${year}年 ${month + 1}月`;
+    
+    const grid = $('#calendarGrid');
+    grid.innerHTML = '';
+    
+    const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+    weekdays.forEach(w => {
+      const div = document.createElement('div');
+      div.className = 'cal-weekday';
+      div.textContent = w;
+      grid.appendChild(div);
+    });
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    for (let i = 0; i < firstDay; i++) {
+      const div = document.createElement('div');
+      div.className = 'cal-day empty';
+      grid.appendChild(div);
+    }
+    
+    for (let i = 1; i <= daysInMonth; i++) {
+      const div = document.createElement('div');
+      div.className = 'cal-day' + (i === today ? ' today' : '');
+      div.textContent = i;
+      grid.appendChild(div);
     }
   }
-  loadLayout();
+  renderCalendar();
+  setInterval(renderCalendar, 1000 * 60 * 60);
 
-  const widgets = $$('.widget');
-  widgets.forEach(widget => {
-    const header = widget.querySelector('.widget-header');
+  // 2. 世界时钟
+  function renderWorldClock() {
+    const cities = [
+      { name: '北京', tz: 'Asia/Shanghai' },
+      { name: '伦敦', tz: 'Europe/London' },
+      { name: '纽约', tz: 'America/New_York' },
+      { name: '东京', tz: 'Asia/Tokyo' }
+    ];
     
-    header.addEventListener('mousedown', () => widget.setAttribute('draggable', 'true'));
-    header.addEventListener('mouseup', () => widget.setAttribute('draggable', 'false'));
-
-    widget.addEventListener('dragstart', (e) => {
-      if (widget.getAttribute('draggable') !== 'true') {
-        e.preventDefault(); return;
-      }
-      draggedItem = widget;
-      setTimeout(() => widget.classList.add('dragging'), 0);
-      e.dataTransfer.effectAllowed = 'move';
+    const list = $('#worldClockList');
+    list.innerHTML = '';
+    
+    cities.forEach(c => {
+      const timeStr = new Date().toLocaleTimeString('zh-CN', { timeZone: c.tz, hour12: false, hour: '2-digit', minute: '2-digit' });
+      const div = document.createElement('div');
+      div.className = 'wc-item';
+      div.innerHTML = `<span class="wc-city">${c.name}</span><span class="wc-time">${timeStr}</span>`;
+      list.appendChild(div);
     });
+  }
+  renderWorldClock();
+  setInterval(renderWorldClock, 1000 * 10);
 
-    widget.addEventListener('dragend', () => {
-      widget.classList.remove('dragging');
-      widget.setAttribute('draggable', 'false');
-      draggedItem = null;
-      saveLayout();
-    });
+  // 3. 进度条
+  function updateProgressBars() {
+    const now = new Date();
+    
+    // 今天
+    const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+    const todayPercent = ((h * 3600 + m * 60 + s) / 86400) * 100;
+    $('#progToday').style.width = `${todayPercent}%`;
+    $('#progTodayText').textContent = `${todayPercent.toFixed(1)}%`;
+    
+    // 本周
+    const dayOfWeek = now.getDay() === 0 ? 7 : now.getDay(); 
+    const weekPercent = (((dayOfWeek - 1) * 86400 + (h * 3600 + m * 60 + s)) / (7 * 86400)) * 100;
+    $('#progWeek').style.width = `${weekPercent}%`;
+    $('#progWeekText').textContent = `${weekPercent.toFixed(1)}%`;
+    
+    // 今年
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
+    const yearPercent = ((now - startOfYear) / (endOfYear - startOfYear)) * 100;
+    $('#progYear').style.width = `${yearPercent}%`;
+    $('#progYearText').textContent = `${yearPercent.toFixed(1)}%`;
+  }
+  updateProgressBars();
+  setInterval(updateProgressBars, 1000 * 60);
 
-    widget.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      if (!draggedItem || draggedItem === widget) return;
+  // 4. 摸鱼倒计时
+  function updateFishingTime() {
+    const now = new Date();
+    const target = new Date();
+    target.setHours(18, 0, 0, 0); // 下午6点下班
+    
+    if (now > target) {
+      target.setDate(target.getDate() + 1);
+    }
+    
+    const diff = target - now;
+    const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+    
+    $('#fishingTime').textContent = `${h}:${m}:${s}`;
+  }
+  updateFishingTime();
+  setInterval(updateFishingTime, 1000);
 
-      const rect = widget.getBoundingClientRect();
-      const midpoint = rect.top + rect.height / 2;
+  // ================= 系统核心：组件状态管理 =================
+  const grid = document.getElementById('draggableGrid');
+  
+  const defaultConfig = {
+    weather: { size: 12, visible: true, order: 1 },
+    timer: { size: 4, visible: true, order: 2 },
+    todo: { size: 8, visible: true, order: 3 },
+    shortcuts: { size: 6, visible: true, order: 4 },
+    quote: { size: 6, visible: true, order: 5 },
+    calendar: { size: 4, visible: true, order: 6 },
+    worldclock: { size: 4, visible: true, order: 7 },
+    progress: { size: 4, visible: true, order: 8 },
+    fishing: { size: 4, visible: true, order: 9 }
+  };
+  
+  let widgetConfig = store.get('nt_widgetConfig', defaultConfig);
+  Object.keys(defaultConfig).forEach(k => {
+    if (!widgetConfig[k]) widgetConfig[k] = defaultConfig[k];
+  });
+
+  function saveConfig() {
+    store.set('nt_widgetConfig', widgetConfig);
+  }
+
+  function applyWidgetState() {
+    const widgets = Array.from(grid.querySelectorAll('.widget'));
+    widgets.sort((a, b) => widgetConfig[a.dataset.id].order - widgetConfig[b.dataset.id].order);
+    
+    widgets.forEach(w => {
+      grid.appendChild(w);
+      const conf = widgetConfig[w.dataset.id];
       
-      if (e.clientY < midpoint) {
-        grid.insertBefore(draggedItem, widget);
+      if (conf.visible) {
+        w.classList.remove('hidden-widget');
       } else {
-        grid.insertBefore(draggedItem, widget.nextSibling);
+        w.classList.add('hidden-widget');
+      }
+      
+      w.className = w.className.replace(/col-\d+/g, '');
+      w.classList.add(`col-${conf.size}`);
+    });
+
+    document.querySelectorAll('.menu-item').forEach(item => {
+      const id = item.dataset.target;
+      const statusSpan = item.querySelector('.status');
+      if (widgetConfig[id].visible) {
+        statusSpan.textContent = '已显示';
+        statusSpan.style.color = 'var(--accent)';
+      } else {
+        statusSpan.textContent = '已隐藏';
+        statusSpan.style.color = 'var(--text-mute)';
       }
     });
+  }
+
+  applyWidgetState();
+
+  // 菜单显隐控制
+  const addWidgetBtn = $('#addWidgetBtn');
+  const widgetMenu = $('#widgetMenu');
+  
+  addWidgetBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    addWidgetBtn.classList.toggle('active');
+    widgetMenu.classList.toggle('show');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!widgetMenu.contains(e.target) && e.target !== addWidgetBtn) {
+      addWidgetBtn.classList.remove('active');
+      widgetMenu.classList.remove('show');
+    }
+  });
+
+  document.querySelectorAll('.menu-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const id = item.dataset.target;
+      widgetConfig[id].visible = !widgetConfig[id].visible;
+      saveConfig();
+      applyWidgetState();
+    });
+  });
+
+  // ================= 网格系统：拖拽排序 (修复版) =================
+  let draggedItem = null;
+
+  grid.addEventListener('dragstart', (e) => {
+    const widget = e.target.closest('.widget');
+    if (!widget) return;
+    
+    // 如果点的是输入框、按钮、a标签或缩放把手，禁止拖拽
+    if (e.target.closest('input, textarea, button, a, .resize-handle')) {
+      e.preventDefault();
+      return;
+    }
+    
+    draggedItem = widget;
+    setTimeout(() => widget.classList.add('dragging'), 0);
+    e.dataTransfer.effectAllowed = 'move';
+  });
+
+  grid.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    if (!draggedItem) return;
+    
+    const target = e.target.closest('.widget');
+    if (!target || target === draggedItem || target.classList.contains('hidden-widget')) return;
+
+    const rect = target.getBoundingClientRect();
+    const midpoint = rect.top + rect.height / 2;
+    
+    if (e.clientY < midpoint) {
+      grid.insertBefore(draggedItem, target);
+    } else {
+      grid.insertBefore(draggedItem, target.nextSibling);
+    }
+    
+    const currentOrder = Array.from(grid.children).map(c => c.dataset.id);
+    currentOrder.forEach((id, index) => {
+      if(widgetConfig[id]) widgetConfig[id].order = index;
+    });
+    saveConfig();
+  });
+
+  grid.addEventListener('dragend', () => {
+    if (draggedItem) draggedItem.classList.remove('dragging');
+    draggedItem = null;
+  });
+
+  // ================= 网格系统：右下角缩放 =================
+  let resizingItem = null;
+  let startX = 0;
+  let startSize = 0;
+
+  document.querySelectorAll('.resize-handle').forEach(handle => {
+    handle.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      resizingItem = e.target.closest('.widget');
+      startX = e.clientX;
+      startSize = widgetConfig[resizingItem.dataset.id].size;
+      
+      document.body.style.cursor = 'se-resize';
+      document.body.style.userSelect = 'none';
+    });
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!resizingItem) return;
+    
+    const deltaX = e.clientX - startX;
+    const colWidth = grid.offsetWidth / 12;
+    const deltaCols = Math.round(deltaX / colWidth);
+    
+    let newSize = startSize + deltaCols;
+    
+    const validSizes = [4, 6, 8, 12];
+    let closest = validSizes.reduce((prev, curr) => {
+      return (Math.abs(curr - newSize) < Math.abs(prev - newSize) ? curr : prev);
+    });
+    
+    if (newSize < 3) closest = 4;
+    if (newSize > 11) closest = 12;
+
+    if (widgetConfig[resizingItem.dataset.id].size !== closest) {
+      widgetConfig[resizingItem.dataset.id].size = closest;
+      
+      resizingItem.className = resizingItem.className.replace(/col-\d+/g, '');
+      resizingItem.classList.add(`col-${closest}`);
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (resizingItem) {
+      saveConfig();
+      resizingItem = null;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
   });
 
 })();
