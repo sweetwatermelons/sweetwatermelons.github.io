@@ -147,7 +147,7 @@
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     gap: 20px;
-    grid-auto-flow: dense; /* 保证卡片变换尺寸时能自动填补空隙 */
+    grid-auto-flow: dense; 
   }
   .widget {
     background: var(--card);
@@ -168,7 +168,7 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: 16px;
-    cursor: grab; /* 只有按住头部才能拖拽大组件 */
+    cursor: grab; 
   }
   .widget-header:active { cursor: grabbing; }
   .widget-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
@@ -311,7 +311,7 @@
   .quote-text { font-size:14px; line-height:1.6; font-weight:500; }
   .quote-author { margin-top:12px; font-size:12px; color:var(--text-mute); text-align:right; }
 
-  /* 日历 (带农历与返回今天) */
+  /* 日历 */
   .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 600; font-size: 15px; }
   .cal-nav-group { display: flex; align-items: center; gap: 8px; }
   .cal-nav-btn { background: var(--input-bg); border: none; border-radius: 6px; width: 28px; height: 28px; display: grid; place-items: center; cursor: pointer; color: var(--text); font-size: 16px; transition: 0.2s;}
@@ -335,9 +335,19 @@
   
   .cal-day.today { background: var(--accent); color: #fff; box-shadow: 0 2px 6px rgba(0,103,192,0.3); }
   .cal-day.today .lunar { color: rgba(255,255,255,0.8); }
-  .cal-day.holiday .lunar { color: var(--danger); }
-  .cal-day.today.holiday .lunar { color: #ffeb3b; }
   .cal-day:not(.empty):hover { background: var(--hover); }
+
+  /* 节日倒计时 */
+  .holiday-list { display: flex; flex-direction: column; gap: 12px; }
+  .holiday-item { 
+    display: flex; justify-content: space-between; align-items: center; 
+    padding: 12px 16px; background: var(--input-bg); border-radius: 12px;
+    transition: 0.2s;
+  }
+  .holiday-item:hover { transform: translateX(4px); border-left: 3px solid var(--accent); }
+  .holiday-name { font-weight: 600; font-size: 15px; color: var(--text-soft); }
+  .holiday-days { font-size: 18px; font-weight: 800; color: var(--accent); }
+  .holiday-days span { font-size: 12px; font-weight: 600; color: var(--text-mute); margin-left: 2px; }
 
   /* 世界时钟 */
   .world-clock-list { display: flex; flex-direction: column; gap: 12px; }
@@ -352,12 +362,86 @@
   .prog-bar { width: 100%; height: 8px; border-radius: 4px; background: var(--divider); overflow: hidden; }
   .prog-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width 0.5s ease; }
 
-  /* 摸鱼倒计时 */
-  .fishing-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 8px;}
-  .fishing-time { font-size: 36px; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: -1px;}
-  .fishing-text { font-size: 13px; color: var(--text-soft); font-weight: 500;}
+  /* 打工倒计时 */
+  .work-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; }
+  .work-time { font-size: 36px; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: -1px;}
+  .work-status { font-size: 13px; color: var(--text-soft); font-weight: 500; }
+  .work-config { display: flex; gap: 8px; margin-top: 8px; }
+  .work-config input { 
+    background: var(--input-bg); border: 1px solid var(--divider); border-radius: 6px; 
+    padding: 6px; font-size: 12px; color: var(--text); outline: none; width: 70px; text-align: center;
+  }
+  .work-config input:focus { border-color: var(--accent); }
 
-  /* ================= 底部导航 & 电子木鱼 ================= */
+  /* ======= 迷你记事本 ======= */
+  .notepad-container { display: flex; flex-direction: column; height: 100%; gap: 10px; }
+  .notepad-toolbar { display: flex; gap: 4px; padding-bottom: 10px; border-bottom: 1px solid var(--divider); }
+  .notepad-btn { 
+    background: transparent; border: none; border-radius: 6px; 
+    width: 32px; height: 32px; display: grid; place-items: center; 
+    cursor: pointer; color: var(--text); font-size: 15px; transition: 0.2s;
+  }
+  .notepad-btn:hover { background: var(--hover); color: var(--accent); }
+  .notepad-btn.active { background: var(--accent-soft); color: var(--accent); }
+  
+  .notepad-editor {
+    flex: 1; width: 100%; min-height: 120px; outline: none; 
+    font-family: inherit; font-size: 14px; line-height: 1.6; 
+    color: var(--text); overflow-y: auto;
+    white-space: pre-wrap; word-wrap: break-word;
+  }
+  .notepad-editor[placeholder]:empty::before {
+    content: attr(placeholder);
+    color: var(--text-mute);
+    cursor: text;
+  }
+
+  /* ================= 底部导航 & 电子木鱼 & 添加组件 ================= */
+  .add-widget-btn {
+    position: fixed; bottom: 40px; left: 40px;
+    width: 48px; height: 48px; border-radius: 12px;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,103,192,0.3);
+    cursor: pointer; z-index: 1000;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .add-widget-btn::before {
+    content: '+';
+    font-size: 26px;
+    font-weight: 300;
+    line-height: 1;
+    display: block;
+    margin-top: -2px;
+  }
+  .add-widget-btn:hover { transform: scale(1.05); }
+  .add-widget-btn.active { transform: scale(1.05) rotate(45deg); }
+
+  .widget-menu {
+    position: fixed; bottom: 100px; left: 40px;
+    background: var(--card); backdrop-filter: blur(30px) saturate(150%);
+    border: 1px solid var(--card-border); border-radius: 12px;
+    box-shadow: var(--shadow); padding: 8px;
+    display: flex; flex-direction: column; gap: 2px;
+    z-index: 999; opacity: 0; pointer-events: none;
+    transform: translateY(10px); transition: all 0.2s ease;
+    max-height: 60vh; overflow-y: auto;
+  }
+  .widget-menu.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  .widget-menu::-webkit-scrollbar { width: 4px; }
+  .widget-menu::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
+  
+  .menu-item {
+    padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 500;
+    color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    transition: background 0.2s;
+    user-select: none;
+  }
+  .menu-item:hover { background: var(--hover); }
+  .menu-item .status { font-size: 12px; font-weight: 600; transition: color 0.2s; }
+  .menu-item .status.hidden-state { color: var(--text-mute); }
+  .menu-item .status.visible-state { color: var(--accent); }
+
   .footer-nav { display: flex; justify-content: center; gap: 20px; margin-top: 10px; margin-bottom: 10px; flex-wrap: wrap; }
   .footer-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; border-radius: 8px; background: var(--card); border: 1px solid var(--card-border); color: var(--text); text-decoration: none; font-size: 14px; font-weight: 500; box-shadow: var(--shadow); transition: all 0.3s ease; }
   .footer-btn:hover { transform: translateY(-2px); border-color: var(--accent); color: var(--accent); }
@@ -396,6 +480,9 @@
     .footer-btn { width: 100%; justify-content: center; }
     .muyu-container { bottom: 20px; right: 20px; }
     .muyu-emoji { font-size: 60px; }
+    .add-widget-btn { bottom: 20px; left: 20px; width: 46px; height: 46px; }
+    .add-widget-btn::before { font-size: 24px; }
+    .widget-menu { bottom: 80px; left: 20px; }
   }
 </style>
 </head>
@@ -536,7 +623,7 @@
       <div class="resize-handle"></div>
     </div>
 
-    <!-- 日历 (带农历与返回今天) -->
+    <!-- 日历 (纯净版) -->
     <div class="widget col-4" data-id="calendar">
       <div class="widget-header"><div class="widget-title"><span class="dot"></span> 日历</div></div>
       <div class="calendar-header">
@@ -548,6 +635,13 @@
         </div>
       </div>
       <div class="calendar-grid" id="calendarGrid"></div>
+      <div class="resize-handle"></div>
+    </div>
+
+    <!-- 节日倒计时 -->
+    <div class="widget col-4" data-id="holiday">
+      <div class="widget-header"><div class="widget-title"><span class="dot"></span> 近期节日</div></div>
+      <div class="holiday-list" id="holidayList"></div>
       <div class="resize-handle"></div>
     </div>
 
@@ -578,12 +672,38 @@
       <div class="resize-handle"></div>
     </div>
 
-    <!-- 摸鱼倒计时 -->
+    <!-- 打工倒计时 (自定义时间) -->
     <div class="widget col-4" data-id="fishing">
-      <div class="widget-header"><div class="widget-title"><span class="dot"></span> 摸鱼倒计时</div></div>
-      <div class="fishing-wrap">
-        <div class="fishing-time" id="fishingTime">--:--:--</div>
-        <div class="fishing-text">距离 18:00 下班还有</div>
+      <div class="widget-header">
+        <div class="widget-title"><span class="dot"></span> 打工倒计时</div>
+        <button class="timer-btn" id="toggleWorkConfig">⚙️</button>
+      </div>
+      
+      <div class="work-wrap">
+        <div class="work-time" id="workTime">--:--:--</div>
+        <div class="work-status" id="workStatus">未到上班时间</div>
+        
+        <!-- 时间设置面板 -->
+        <div class="work-config" id="workConfig" style="display: none;">
+          <input type="time" id="workStart" value="09:00" title="上班时间">
+          <span style="color: var(--text-mute); font-size: 12px; align-self: center;">至</span>
+          <input type="time" id="workEnd" value="18:00" title="下班时间">
+        </div>
+      </div>
+      <div class="resize-handle"></div>
+    </div>
+
+    <!-- 迷你记事本 -->
+    <div class="widget col-6" data-id="notepad">
+      <div class="widget-header"><div class="widget-title"><span class="dot"></span> 迷你记事本</div></div>
+      <div class="notepad-container">
+        <div class="notepad-toolbar">
+          <button class="notepad-btn" data-cmd="bold" title="加粗">B</button>
+          <button class="notepad-btn" data-cmd="italic" title="斜体" style="font-style: italic;">I</button>
+          <button class="notepad-btn" data-cmd="underline" title="下划线" style="text-decoration: underline;">U</button>
+          <button class="notepad-btn" data-cmd="strikeThrough" title="删除线" style="text-decoration: line-through;">S</button>
+        </div>
+        <div class="notepad-editor" id="notepadEditor" contenteditable="true" placeholder="在这里记录你的灵感..."></div>
       </div>
       <div class="resize-handle"></div>
     </div>
@@ -605,6 +725,12 @@
   </div>
 
 </div>
+
+<!-- 左下角添加组件悬浮按钮 & 菜单 -->
+<div class="widget-menu" id="widgetMenu">
+  <!-- 由 JS 动态渲染 -->
+</div>
+<div class="add-widget-btn" id="addWidgetBtn"></div>
 
 <!-- 电子木鱼 -->
 <div class="muyu-container" id="muyu">
@@ -894,7 +1020,7 @@
   });
   document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) suggestions.classList.remove('show'); });
 
-  // ================= 快捷方式 (不限数量 + 完美滚动) =================
+  // ================= 快捷方式 =================
   const DEFAULT_SHORTCUTS = [
     { name: 'Google', url: 'https://www.google.com' },
     { name: 'YouTube', url: 'https://www.youtube.com' },
@@ -974,7 +1100,6 @@
   }
   renderShortcuts();
 
-  // 局部排版面板逻辑
   const inlinePanel = $('#shortcutsLayoutPanel');
   const inlineList = $('#inlineList');
 
@@ -1037,7 +1162,6 @@
     if (!url) { toast('请输入网址'); mUrl.focus(); return; }
     if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
     try { new URL(url); } catch(e) { toast('网址格式不正确'); return; }
-    // 移除了最多8个的限制！
     shortcuts.push({ name, url }); store.set('nt_shortcuts', shortcuts);
     renderShortcuts(); renderInlineLayout(); modalMask.classList.remove('show'); toast('已添加 ✨');
   });
@@ -1204,7 +1328,7 @@
   updateInputsFromLeft();
   updateTimerCircle();
 
-  // ================= 格言 (增加数量) =================
+  // ================= 格言 =================
   const QUOTES = [
     { t: '种一棵树最好的时间是十年前，其次是现在。', a: '中国谚语' },
     { t: '简洁是智慧的灵魂。', a: '莎士比亚' },
@@ -1262,24 +1386,32 @@
   });
 
   // ================= 新增小工具逻辑 =================
-  // 1. 日历 (带农历与返回今天)
+  // 1. 日历
   let currentCalDate = new Date();
 
-  const lunarInfo = [0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,
-    0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,
-    0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,
-    0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,
-    0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,
-    0x06ca0,0x0b550,0x15355,0x04da0,0x0a5b0,0x14573,0x052b0,0x0a9a8,0x0e950,0x06aa0,
-    0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,
-    0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6,
-    0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,
-    0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x055c0,0x0ab60,0x096d5,0x092e0,
-    0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,
-    0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,
-    0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,
-    0x05aa0,0x076a3,0x096d0,0x04afb,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,
-    0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0];
+  const lunarInfo = [
+    0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2, // 1900-1909
+    0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977, // 1910-1919
+    0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970, // 1920-1929
+    0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950, // 1930-1939
+    0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557, // 1940-1949
+    0x06ca0,0x0b550,0x15355,0x04da0,0x0a5b0,0x14573,0x052b0,0x0a9a8,0x0e950,0x06aa0, // 1950-1959
+    0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0, // 1960-1969
+    0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6, // 1970-1979
+    0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570, // 1980-1989
+    0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x055c0,0x0ab60,0x096d5,0x092e0, // 1990-1999
+    0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5, // 2000-2009
+    0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930, // 2010-2019
+    0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530, // 2020-2029
+    0x05aa0,0x076a3,0x096d0,0x04afb,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45, // 2030-2039
+    0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0, // 2040-2049
+    0x14b63,0x09370,0x049f8,0x04970,0x064b0,0x168a6,0x0ea50,0x06b20,0x1a6c4,0x0aae0, // 2050-2059
+    0x0a2e0,0x0d2e3,0x0c960,0x0d557,0x0d4a0,0x0da50,0x05d55,0x056a0,0x0a6d0,0x055d4, // 2060-2069
+    0x052d0,0x0a9b8,0x0a950,0x0b4a0,0x0b6a6,0x0ad50,0x055a0,0x0aba4,0x0a5b0,0x052b0, // 2070-2079
+    0x0b273,0x06930,0x07337,0x06aa0,0x0ad50,0x14b55,0x04b60,0x0a570,0x054e4,0x0d160, // 2080-2089
+    0x0e968,0x0d520,0x0daa0,0x16aa6,0x056d0,0x04ae0,0x0a9d4,0x0a2d0,0x0d150,0x0f252, // 2090-2099
+    0x0d520 // 2100
+  ];
 
   function lYearDays(y) { let i, sum = 348; for (i = 0x8000; i > 0x8; i >>= 1) { sum += (lunarInfo[y - 1900] & i) ? 1 : 0; } return (sum + leapDays(y)); }
   function leapMonth(y) { return (lunarInfo[y - 1900] & 0xf); }
@@ -1303,17 +1435,10 @@
     let lunarMonth = i;
     let lunarDay = offset + 1;
     
-    const festivals = {
-      '1-1': '春节', '1-15': '元宵', '5-5': '端午',
-      '7-7': '七夕', '8-15': '中秋', '9-9': '重阳', '12-8': '腊八'
-    };
-    let isFest = festivals[`${lunarMonth}-${lunarDay}`];
-
     const monthNames = ['正','二','三','四','五','六','七','八','九','十','冬','腊'];
     const dayNames = ['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十','廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
     
-    if (isFest) return { text: isFest, isFest: true };
-    return { text: (lunarDay === 1 ? '闰'.repeat(isLeap) + monthNames[lunarMonth-1] + '月' : dayNames[lunarDay-1]), isFest: false };
+    return { text: (lunarDay === 1 ? '闰'.repeat(isLeap) + monthNames[lunarMonth-1] + '月' : dayNames[lunarDay-1]) };
   }
 
   function renderCalendar(date) {
@@ -1352,25 +1477,11 @@
       
       let className = 'cal-day';
       if (isToday) className += ' today';
-      if (lunar.isFest) className += ' holiday';
-      
       div.className = className;
-      
-      let solarFest = '';
-      if (month === 0 && i === 1) solarFest = '元旦';
-      if (month === 4 && i === 1) solarFest = '劳动节';
-      if (month === 9 && i === 1) solarFest = '国庆节';
-      
-      const lunarText = solarFest ? solarFest : lunar.text;
-      const isHoliday = lunar.isFest || solarFest !== '';
-
-      if (isHoliday && !div.classList.contains('holiday')) {
-        div.classList.add('holiday');
-      }
 
       div.innerHTML = `
         <div class="solar">${i}</div>
-        <div class="lunar">${lunarText}</div>
+        <div class="lunar">${lunar.text}</div>
       `;
       grid.appendChild(div);
     }
@@ -1390,7 +1501,60 @@
   });
   renderCalendar(currentCalDate);
 
-  // 2. 世界时钟
+  // 2. 节日倒计时
+  const HOLIDAY_DATES = {
+    '元旦': ['2023-01-01', '2024-01-01', '2025-01-01', '2026-01-01', '2027-01-01', '2028-01-01'],
+    '春节': ['2023-01-22', '2024-02-10', '2025-01-29', '2026-02-17', '2027-02-06', '2028-01-26'],
+    '劳动节': ['2023-05-01', '2024-05-01', '2025-05-01', '2026-05-01', '2027-05-01', '2028-05-01'],
+    '国庆节': ['2023-10-01', '2024-10-01', '2025-10-01', '2026-10-01', '2027-10-01', '2028-10-01'],
+    '中秋节': ['2023-09-29', '2024-09-17', '2025-10-06', '2026-09-25', '2027-09-15', '2028-10-03']
+  };
+
+  function renderHolidays() {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const list = [];
+
+    for (const [name, dates] of Object.entries(HOLIDAY_DATES)) {
+      let nextDate = null;
+      for (const dStr of dates) {
+        const d = new Date(dStr);
+        if (d >= today) {
+          nextDate = d;
+          break;
+        }
+      }
+      if (nextDate) {
+        const diffTime = nextDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        list.push({ name, days: diffDays });
+      }
+    }
+
+    list.sort((a, b) => a.days - b.days);
+
+    const container = $('#holidayList');
+    container.innerHTML = '';
+    
+    if (list.length === 0) {
+      container.innerHTML = '<div style="text-align: center; color: var(--text-mute); padding: 20px;">暂无近期节日</div>';
+      return;
+    }
+
+    list.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'holiday-item';
+      if (item.days === 0) {
+        el.innerHTML = `<span class="holiday-name">${item.name}</span><span class="holiday-days" style="color: var(--danger);">就是今天</span>`;
+      } else {
+        el.innerHTML = `<span class="holiday-name">${item.name}</span><span class="holiday-days">${item.days}<span>天</span></span>`;
+      }
+      container.appendChild(el);
+    });
+  }
+  renderHolidays();
+
+  // 3. 世界时钟
   function renderWorldClock() {
     const cities = [
       { name: '北京', tz: 'Asia/Shanghai' },
@@ -1413,7 +1577,7 @@
   renderWorldClock();
   setInterval(renderWorldClock, 1000 * 10);
 
-  // 3. 进度条
+  // 4. 进度条
   function updateProgressBars() {
     const now = new Date();
     
@@ -1436,29 +1600,106 @@
   updateProgressBars();
   setInterval(updateProgressBars, 1000 * 60);
 
-  // 4. 摸鱼倒计时
-  function updateFishingTime() {
-    const now = new Date();
-    const target = new Date();
-    target.setHours(18, 0, 0, 0);
-    
-    if (now > target) {
-      target.setDate(target.getDate() + 1);
-    }
-    
-    const diff = target - now;
-    const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
-    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-    
-    $('#fishingTime').textContent = `${h}:${m}:${s}`;
-  }
-  updateFishingTime();
-  setInterval(updateFishingTime, 1000);
+  // 5. 打工倒计时
+  let workStartTime = store.get('nt_workStart', '09:00');
+  let workEndTime = store.get('nt_workEnd', '18:00');
 
-  // ================= 核心：组件配置 =================
+  const workStartInput = $('#workStart');
+  const workEndInput = $('#workEnd');
+  workStartInput.value = workStartTime;
+  workEndInput.value = workEndTime;
+
+  workStartInput.addEventListener('change', (e) => {
+    workStartTime = e.target.value;
+    store.set('nt_workStart', workStartTime);
+    updateWorkTime();
+  });
+  workEndInput.addEventListener('change', (e) => {
+    workEndTime = e.target.value;
+    store.set('nt_workEnd', workEndTime);
+    updateWorkTime();
+  });
+
+  $('#toggleWorkConfig').addEventListener('click', () => {
+    const panel = $('#workConfig');
+    if (panel.style.display === 'none') {
+      panel.style.display = 'flex';
+    } else {
+      panel.style.display = 'none';
+    }
+  });
+
+  function parseTime(timeStr) {
+    const [h, m] = timeStr.split(':').map(Number);
+    return { h, m };
+  }
+
+  function updateWorkTime() {
+    const now = new Date();
+    const { h: startH, m: startM } = parseTime(workStartTime);
+    const { h: endH, m: endM } = parseTime(workEndTime);
+
+    const startDate = new Date(now);
+    startDate.setHours(startH, startM, 0, 0);
+
+    const endDate = new Date(now);
+    endDate.setHours(endH, endM, 0, 0);
+
+    const timeDisplay = $('#workTime');
+    const statusDisplay = $('#workStatus');
+
+    if (now < startDate) {
+      const diff = startDate - now;
+      const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+      const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+      const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+      timeDisplay.textContent = `${h}:${m}:${s}`;
+      timeDisplay.style.color = 'var(--text-mute)';
+      statusDisplay.textContent = `未上班，距离上班还有`;
+    } else if (now >= startDate && now <= endDate) {
+      const diff = endDate - now;
+      const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+      const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+      const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+      timeDisplay.textContent = `${h}:${m}:${s}`;
+      timeDisplay.style.color = 'var(--accent)';
+      statusDisplay.textContent = `摸鱼中，距离下班还有`;
+    } else {
+      timeDisplay.textContent = `00:00:00`;
+      timeDisplay.style.color = 'var(--accent)';
+      statusDisplay.textContent = `已下班，享受生活吧！`;
+    }
+  }
+  updateWorkTime();
+  setInterval(updateWorkTime, 1000);
+
+  // 6. 迷你记事本
+  const notepadEditor = $('#notepadEditor');
+  notepadEditor.innerHTML = store.get('nt_notepad', '');
+  
+  let saveTimer;
+  notepadEditor.addEventListener('input', () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      store.set('nt_notepad', notepadEditor.innerHTML);
+    }, 500);
+  });
+
+  const notepadBtns = $$('.notepad-btn');
+  notepadBtns.forEach(btn => {
+    btn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const cmd = btn.dataset.cmd;
+      document.execCommand(cmd, false, null);
+      btn.classList.toggle('active', document.queryCommandState(cmd));
+      notepadEditor.focus();
+    });
+  });
+
+  // ================= 核心：组件配置与状态管理 =================
   const grid = document.getElementById('draggableGrid');
   
+  // 修复: 确保所有组件有明确的 name 属性
   const defaultConfig = {
     weather: { size: 12, visible: true, order: 1, name: '天气详情' },
     timer: { size: 4, visible: true, order: 2, name: '焦点计时' },
@@ -1466,14 +1707,18 @@
     shortcuts: { size: 6, visible: true, order: 4, name: '快捷访问' },
     quote: { size: 6, visible: true, order: 5, name: '每日格言' },
     calendar: { size: 4, visible: true, order: 6, name: '日历' },
-    worldclock: { size: 4, visible: true, order: 7, name: '世界时钟' },
-    progress: { size: 4, visible: true, order: 8, name: '进度条' },
-    fishing: { size: 4, visible: true, order: 9, name: '摸鱼倒计时' }
+    holiday: { size: 4, visible: true, order: 7, name: '节日倒计时' },
+    worldclock: { size: 4, visible: true, order: 8, name: '世界时钟' },
+    progress: { size: 4, visible: true, order: 9, name: '进度条' },
+    fishing: { size: 4, visible: true, order: 10, name: '打工倒计时' },
+    notepad: { size: 6, visible: true, order: 11, name: '迷你记事本' }
   };
   
   let widgetConfig = store.get('nt_widgetConfig', defaultConfig);
   Object.keys(defaultConfig).forEach(k => {
     if (!widgetConfig[k]) widgetConfig[k] = defaultConfig[k];
+    // 兼容之前可能缺失的 name
+    if (!widgetConfig[k].name) widgetConfig[k].name = defaultConfig[k].name;
   });
 
   function saveConfig() {
@@ -1500,6 +1745,58 @@
   }
 
   applyWidgetState();
+
+  // ================= 修复：菜单渲染与状态实时更新 =================
+  const addWidgetBtn = $('#addWidgetBtn');
+  const widgetMenu = $('#widgetMenu');
+
+  function renderMenu() {
+    widgetMenu.innerHTML = '';
+    // 按当前排版顺序渲染菜单列表
+    const sortedKeys = Object.keys(widgetConfig).sort((a,b) => widgetConfig[a].order - widgetConfig[b].order);
+    
+    sortedKeys.forEach(key => {
+      const conf = widgetConfig[key];
+      const item = document.createElement('div');
+      item.className = 'menu-item';
+      
+      const isVisible = conf.visible;
+      const statusText = isVisible ? '显示中' : '已隐藏';
+      const statusClass = isVisible ? 'visible-state' : 'hidden-state';
+
+      // 确保 name 存在且被正确渲染
+      item.innerHTML = `
+        <span>${conf.name || '未知组件'}</span>
+        <span class="status ${statusClass}">${statusText}</span>
+      `;
+      
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        widgetConfig[key].visible = !widgetConfig[key].visible;
+        saveConfig();
+        applyWidgetState();
+        renderMenu(); // 实时重新渲染菜单
+      });
+
+      widgetMenu.appendChild(item);
+    });
+  }
+
+  addWidgetBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    addWidgetBtn.classList.toggle('active');
+    const isShowing = widgetMenu.classList.toggle('show');
+    if (isShowing) {
+      renderMenu(); // 打开时重新渲染，确保数据最新
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!widgetMenu.contains(e.target) && e.target !== addWidgetBtn) {
+      addWidgetBtn.classList.remove('active');
+      widgetMenu.classList.remove('show');
+    }
+  });
 
   // ================= 网格系统：大组件拖拽排序 =================
   let draggedItem = null;
@@ -1583,12 +1880,10 @@
     
     const deltaX = e.clientX - startX;
     const colWidth = grid.offsetWidth / 12;
-    // 现在可以自由计算任意列数，不再是只能选固定值
     const deltaCols = Math.round(deltaX / colWidth);
     
     let newSize = startSize + deltaCols;
     
-    // 限制在 1 到 12 列之间
     if (newSize < 1) newSize = 1;
     if (newSize > 12) newSize = 12;
 
