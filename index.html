@@ -14,7 +14,7 @@
   }
 
   body {
-    /* 清新天蓝色渐变背景 */
+    /* 极简天蓝色渐变背景 */
     background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
     background-image: 
       radial-gradient(rgba(255, 255, 255, 0.8) 2px, transparent 2px),
@@ -23,22 +23,22 @@
     
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* 底部整体使用宋体 */
-    font-family: 'Songti SC', 'SimSun', 'Georgia', serif;
+    font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
     padding: 20px;
-    overflow: hidden;
+    overflow-x: hidden;
   }
 
   /* 主容器 */
   .container {
-    max-width: 950px;
+    max-width: 1000px; /* 稍微加宽一点以容纳三个按钮 */
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center; 
-    margin-top: -5vh;
+    margin-top: -2vh;
   }
 
   /* ================= 标题区域 ================= */
@@ -60,13 +60,10 @@
     gap: 15px;
     margin-bottom: 20px;
     text-shadow: 0 4px 15px rgba(255, 255, 255, 0.8);
-    
-    /* 标题恢复为无衬线圆润字体 */
     font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
   }
 
   .title .en {
-    /* 英文部分保留一点衬线斜体优雅感 */
     font-family: 'Georgia', serif; 
     font-style: italic;
     transform: rotate(-3deg); 
@@ -90,27 +87,27 @@
     color: #0284c7;
   }
 
-  /* 蓝色渐变线 */
+  /* 粉色渐变线 */
   .underline {
     width: 60%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent 0%, #38bdf8 50%, transparent 100%);
+    height: 4px;
+    background: linear-gradient(90deg, transparent 0%, #ffb6c1 50%, transparent 100%);
     border-radius: 2px;
-    margin-bottom: 45px; 
-    box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+    margin-bottom: 35px; 
+    box-shadow: 0 0 12px rgba(255, 182, 193, 0.5);
   }
 
   /* ================= 中间操作区 ================= */
   .action-area {
     display: flex;
     align-items: center;
-    justify-content: center; 
-    gap: 40px; 
+    justify-content: space-between; 
     width: 100%;
-    margin-bottom: 40px;
+    max-width: 780px; /* 给三个按钮预留足够空间 */
+    margin-bottom: 35px;
   }
 
-  /* 我的小作品：纯文本，无链接，无光标 */
+  /* 我的小作品：纯文本 */
   .my-works {
     display: inline-flex;
     align-items: center;
@@ -118,7 +115,7 @@
     font-size: 1.35rem; 
     font-weight: 700;
     color: #0369a1; 
-    user-select: none; /* 防止文字被选中，看起来更像装饰 */
+    user-select: none;
   }
 
   .my-works::before {
@@ -127,17 +124,24 @@
     font-family: 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
   }
 
-  /* 新标签页：胶囊按钮样式 */
+  /* 右侧按钮组 */
+  .right-buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* 按钮间距 */
+  }
+
+  /* 胶囊按钮通用样式 */
   .btn {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 32px;
+    gap: 8px;
+    padding: 10px 20px;
     background: #ffffff;
     backdrop-filter: blur(10px); 
     border: 1px solid rgba(255, 255, 255, 0.5); 
     border-radius: 50px;
-    font-size: 1.15rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: #0369a1;
     text-decoration: none;
@@ -154,8 +158,8 @@
   }
 
   .btn svg {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     fill: #38bdf8;
     transition: fill 0.3s, transform 0.3s;
   }
@@ -172,6 +176,7 @@
     color: #475569;
     text-align: center; 
     letter-spacing: 1px; 
+    margin-bottom: 40px;
   }
 
   .kaomoji {
@@ -190,20 +195,45 @@
     text-shadow: 0 0 15px rgba(56, 189, 248, 0.8);
   }
 
+  /* ================= 页脚导航 ================= */
+  .footer-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+  }
+  
+  .footer-links a {
+    color: #0284c7;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+    padding: 8px 16px;
+    border-radius: 20px;
+  }
+  
+  .footer-links a:hover {
+    color: #fff;
+    background: #38bdf8;
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
+  }
+
+  .footer-text {
+    color: #64748b;
+    font-size: 13px;
+  }
+  .footer-text a {
+    padding: 0; 
+    font-size: 13px;
+    color: #0284c7;
+    font-weight: 600;
+  }
+  .footer-text a:hover { background: transparent; color: #38bdf8; box-shadow: none; text-decoration: underline;}
+
   /* ================= 响应式适配 ================= */
-  @media (max-width: 768px) {
-    body {
-      align-items: flex-start;
-      padding-top: 15vh;
-    }
-    .container {
-      margin-top: 0;
-    }
-    .title {
-      font-size: 2.8rem;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
+  @media (max-width: 860px) {
+    .title { font-size: 2.8rem; flex-wrap: wrap; gap: 8px; }
     .title .emoji { font-size: 2.8rem; }
     .title .zh { font-size: 2rem; }
     
@@ -212,9 +242,15 @@
       gap: 25px;
     }
     
-    .description {
-      font-size: 1rem;
+    .right-buttons {
+      flex-direction: column;
+      width: 100%;
+      gap: 12px;
     }
+    
+    .btn { width: 100%; justify-content: center; padding: 12px 20px; font-size: 1rem;}
+    
+    .description { font-size: 1rem; }
   }
 </style>
 </head>
@@ -228,28 +264,51 @@
         <span class="emoji">🍉</span>
         <span class="zh">的小站</span>
       </h1>
+      <!-- 粉色渐变线 -->
       <div class="underline"></div>
     </div>
 
-    <!-- 按钮区：纯文字 + 胶囊按钮 -->
+    <!-- 操作区 -->
     <div class="action-area">
-      <!-- 左侧：我的小作品（纯文本，无链接） -->
-      <span class="my-works">
-        我的小作品
-      </span>
+      <!-- 左侧：我的小作品 -->
+      <span class="my-works">我的小作品</span>
 
-      <!-- 右侧：新标签页（胶囊按钮） -->
-      <a href="https://sweetwatermelons.github.io/newtab.html" target="_blank" class="btn">
-        <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
-        新标签页
-      </a>
+      <!-- 右侧：三个按钮并排 -->
+      <div class="right-buttons">
+        <!-- 新标签页 -->
+        <a href="https://sweetwatermelons.github.io/newtab.html" target="_blank" class="btn">
+          <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+          新标签页
+        </a>
+        
+        <!-- 密码生成器 -->
+        <a href="https://sweetwatermelons.github.io/password.html" target="_blank" class="btn">
+          <svg viewBox="0 0 24 24"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+          密码生成器
+        </a>
+
+        <!-- 抽奖大转盘 (新增) -->
+        <a href="https://sweetwatermelons.github.io/luckywheel.html" target="_blank" class="btn">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 7.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5S6 9.83 6 9s.67-1.5 1.5-1.5zm0 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5-4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+          抽奖转盘
+        </a>
+      </div>
     </div>
 
-    <!-- 底部：简介 -->
+    <!-- 底部：简介文字 -->
     <p class="description">
       喜欢神秘的东西qwq，顺便搞一点小代码~
       <span class="kaomoji">(˘•ω•˘)◞⁺✧</span>
     </p>
+
+    <!-- 最底部：链接 -->
+    <div class="footer-links">
+      <a href="https://github.com/sweetwatermelons" target="_blank">欢迎进入我的GitHub主页</a>
+      <div class="footer-text">
+        如果好用的话，记得给个star哦~ 
+        <a href="https://github.com/sweetwatermelons/sweetwatermelons.github.io" target="_blank">点击进入仓库</a>
+      </div>
+    </div>
 
   </div>
 
