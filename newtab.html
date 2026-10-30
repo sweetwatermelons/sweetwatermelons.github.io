@@ -99,6 +99,21 @@
   }
   .city-dropdown input:focus { border-color:var(--accent); }
   .city-list { max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; }
+  .city-tip {
+    padding: 14px 10px;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--text-mute);
+    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.8px;
+    background: var(--input-bg);
+    border-radius: 8px;
+    margin-top: 8px;
+    border: 1px dashed var(--divider);
+    opacity: 0.85;
+    transition: all 0.2s ease;
+  }
   .city-item { padding:9px 12px; border-radius:8px; font-size:13px; cursor:pointer; color:var(--text-soft); transition:background .12s; }
   .city-item:hover { background:var(--hover); color:var(--text); }
 
@@ -143,12 +158,12 @@
   .sug-item .sug-text { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .sug-item .sug-hint { font-size:11px; color:var(--text-mute); }
 
-  /* ======= 网格与组件 ======= */
+  /* ======= 自由布局容器 ======= */
   .grid-container {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 20px;
-    grid-auto-flow: dense; 
+    position: relative;
+    width: 100%;
+    min-height: 600px;
+    overflow: visible;
   }
   .widget {
     background: var(--card);
@@ -159,51 +174,57 @@
     backdrop-filter: blur(30px) saturate(150%);
     display: flex;
     flex-direction: column;
-    position: relative;
+    position: absolute;
+    left: 0; top: 0;
+    width: 320px;
+    height: 240px;
+    box-sizing: border-box;
     transition: box-shadow 0.2s, border-color 0.2s;
     overflow: hidden;
-    min-height: 180px;
   }
   .widget-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 16px;
-    cursor: grab; 
+    cursor: grab;
+    user-select: none;
   }
   .widget-header:active { cursor: grabbing; }
   .widget-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
   .widget-title .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
-  
-  .widget.dragging { opacity: 0.4; transform: scale(0.98); border-color: var(--accent); z-index: 1000; }
+
+  .widget.dragging { opacity: 0.6; border-color: var(--accent); z-index: 1000 !important; }
   .widget.hidden-widget { display: none !important; }
 
-  .col-1 { grid-column: span 1; }
-  .col-2 { grid-column: span 2; }
-  .col-3 { grid-column: span 3; }
-  .col-4 { grid-column: span 4; }
-  .col-5 { grid-column: span 5; }
-  .col-6 { grid-column: span 6; }
-  .col-7 { grid-column: span 7; }
-  .col-8 { grid-column: span 8; }
-  .col-9 { grid-column: span 9; }
-  .col-10 { grid-column: span 10; }
-  .col-11 { grid-column: span 11; }
-  .col-12 { grid-column: span 12; }
-
+  /* ======= 8 方向缩放手柄 ======= */
   .resize-handle {
-    position: absolute; bottom: 0; right: 0; width: 24px; height: 24px;
-    cursor: se-resize; z-index: 20;
+    position: absolute;
+    z-index: 20;
+    touch-action: none;
   }
-  .resize-handle::after {
-    content: ''; position: absolute; bottom: 4px; right: 4px; width: 8px; height: 8px;
-    border-right: 2px solid var(--text-mute); border-bottom: 2px solid var(--text-mute);
-    border-radius: 0 0 2px 0; opacity: 0.5; transition: opacity 0.2s;
-  }
-  .resize-handle:hover::after { opacity: 1; border-color: var(--accent); }
+  .resize-n  { top: -4px; left: 8px; right: 8px; height: 8px; cursor: ns-resize; }
+  .resize-s  { bottom: -4px; left: 8px; right: 8px; height: 8px; cursor: ns-resize; }
+  .resize-w  { left: -4px; top: 8px; bottom: 8px; width: 8px; cursor: ew-resize; }
+  .resize-e  { right: -4px; top: 8px; bottom: 8px; width: 8px; cursor: ew-resize; }
+  .resize-nw { top: -4px; left: -4px; width: 12px; height: 12px; cursor: nwse-resize; }
+  .resize-ne { top: -4px; right: -4px; width: 12px; height: 12px; cursor: nesw-resize; }
+  .resize-sw { bottom: -4px; left: -4px; width: 12px; height: 12px; cursor: nesw-resize; }
+  .resize-se { bottom: -4px; right: -4px; width: 12px; height: 12px; cursor: nwse-resize; }
 
-  /* ======= 组件详情样式 ======= */
-  /* 天气 */
+  .resize-se::after {
+    content: '';
+    position: absolute; bottom: 4px; right: 4px;
+    width: 8px; height: 8px;
+    border-right: 2px solid var(--text-mute);
+    border-bottom: 2px solid var(--text-mute);
+    border-radius: 0 0 2px 0;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+  .resize-se:hover::after { opacity: 1; border-color: var(--accent); }
+
+  /* ======= 组件详情样式（保持不变） ======= */
   .weather-expanded { display: flex; flex-direction: column; gap: 20px; height: 100%;}
   .we-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
   .we-main { display: flex; align-items: center; gap: 20px; }
@@ -229,7 +250,6 @@
   .forecast-day .f-temp { font-size: 13px; font-weight: 600;}
   .forecast-day .f-temp span { font-weight: 400; color: var(--text-mute); margin-left:4px;}
 
-  /* 计时器 */
   .timer-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; flex: 1; }
   .timer-circle { position: relative; width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(var(--accent) var(--progress, 100%), var(--divider) 0%); display: grid; place-items: center; transition: background 0.1s linear; }
   .timer-inner { width: 120px; height: 120px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
@@ -242,7 +262,6 @@
   .timer-btn:hover { background: var(--hover); color: var(--text); }
   .timer-btn.primary { background: var(--accent); color: #fff; }
 
-  /* 待办 */
   .todo-input { display:flex; gap:8px; margin-bottom:14px; }
   .todo-input input { flex:1; background:var(--input-bg); border:1px solid var(--divider); border-radius:8px; padding:10px 14px; font-size:13.5px; color:var(--text); outline:none; }
   .todo-input input:focus { border-color: var(--accent); }
@@ -257,7 +276,6 @@
   .todo-item .txt { flex:1; font-size:13px; }
   .todo-item .x { border:none; background:transparent; color:var(--text-mute); cursor:pointer; font-size:16px; }
 
-  /* 快捷访问 */
   .shortcuts-grid { 
     display:flex; flex-wrap:wrap; gap:12px; align-content: start; 
     min-height: 80px; max-height: 240px; overflow-y: auto; padding-right: 4px;
@@ -283,7 +301,6 @@
   .sc .del { position:absolute; top:2px; right:2px; border:none; background:transparent; color:var(--danger); font-size:16px; cursor:pointer; display:none; z-index: 2;}
   .sc:hover .del { display:block; }
 
-  /* 快捷方式排版面板（已隐藏入口，保留结构） */
   .inline-layout-panel {
     position: absolute; inset: 0; z-index: 50;
     background: var(--card); backdrop-filter: blur(40px) saturate(180%);
@@ -309,11 +326,9 @@
   .inline-item:active { cursor: grabbing; }
   .inline-item.dragging-inline { opacity: 0.5; border: 2px dashed var(--accent); background: var(--accent-soft); }
 
-  /* 格言 */
   .quote-text { font-size:14px; line-height:1.6; font-weight:500; }
   .quote-author { margin-top:12px; font-size:12px; color:var(--text-mute); text-align:right; }
 
-  /* 日历 */
   .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 600; font-size: 15px; }
   .cal-nav-group { display: flex; align-items: center; gap: 8px; }
   .cal-nav-btn { background: var(--input-bg); border: none; border-radius: 6px; width: 28px; height: 28px; display: grid; place-items: center; cursor: pointer; color: var(--text); font-size: 16px; transition: 0.2s;}
@@ -339,8 +354,7 @@
   .cal-day.today .lunar { color: rgba(255,255,255,0.8); }
   .cal-day:not(.empty):hover { background: var(--hover); }
 
-  /* 节日倒计时 */
-  .holiday-list { display: flex; flex-direction: column; gap: 12px; }
+  .holiday-list { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
   .holiday-item { 
     display: flex; justify-content: space-between; align-items: center; 
     padding: 12px 16px; background: var(--input-bg); border-radius: 12px;
@@ -351,20 +365,17 @@
   .holiday-days { font-size: 18px; font-weight: 800; color: var(--accent); }
   .holiday-days span { font-size: 12px; font-weight: 600; color: var(--text-mute); margin-left: 2px; }
 
-  /* 世界时钟 */
   .world-clock-list { display: flex; flex-direction: column; gap: 12px; }
   .wc-item { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
   .wc-city { font-weight: 600; color: var(--text-soft); }
   .wc-time { font-weight: 600; font-variant-numeric: tabular-nums; }
 
-  /* 进度条 */
   .progress-group { display: flex; flex-direction: column; gap: 16px; margin-top: 4px;}
   .prog-item { display: flex; flex-direction: column; gap: 6px; }
   .prog-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--text-soft); }
   .prog-bar { width: 100%; height: 8px; border-radius: 4px; background: var(--divider); overflow: hidden; }
   .prog-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width 0.5s ease; }
 
-  /* 打工倒计时 */
   .work-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; }
   .work-time { font-size: 36px; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: -1px;}
   .work-status { font-size: 13px; color: var(--text-soft); font-weight: 500; }
@@ -375,7 +386,6 @@
   }
   .work-config input:focus { border-color: var(--accent); }
 
-  /* 迷你记事本 */
   .notepad-container { display: flex; flex-direction: column; height: 100%; gap: 10px; }
   .notepad-toolbar { display: flex; gap: 4px; padding-bottom: 10px; border-bottom: 1px solid var(--divider); }
   .notepad-btn { 
@@ -418,6 +428,20 @@
   }
   .add-widget-btn:hover { transform: scale(1.05); }
   .add-widget-btn.active { transform: scale(1.05) rotate(45deg); }
+    .tidy-btn {
+    position: fixed; bottom: 40px; left: 100px;
+    width: 48px; height: 48px; border-radius: 12px;
+    background: var(--card); border: 1px solid var(--card-border);
+    backdrop-filter: blur(30px) saturate(150%);
+    color: var(--text-soft);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow);
+    cursor: pointer; z-index: 1000;
+    font-size: 22px;
+    transition: transform 0.2s, color 0.2s, background 0.2s;
+  }
+  .tidy-btn:hover { transform: scale(1.05); color: var(--accent); }
+  .tidy-btn:active { transform: scale(0.95); }
 
   .widget-menu {
     position: fixed; bottom: 100px; left: 40px;
@@ -446,20 +470,139 @@
 
   .footer-nav { display: flex; justify-content: center; gap: 20px; margin-top: 10px; margin-bottom: 10px; flex-wrap: wrap; }
   .footer-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; border-radius: 8px; background: var(--card); border: 1px solid var(--card-border); color: var(--text); text-decoration: none; font-size: 14px; font-weight: 500; box-shadow: var(--shadow); transition: all 0.3s ease; }
-    .footer-btn:hover { transform: translateY(-2px); border-color: var(--accent); color: var(--accent); }
+  .footer-btn:hover { transform: translateY(-2px); border-color: var(--accent); color: var(--accent); }
   .footer-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+  /* ======= 新增的提示按钮样式 ======= */
+  .footer-btn-group { display: inline-flex; align-items: center; gap: 10px; }
+  .footer-tip-wrap { position: relative; display: inline-flex; }
+  .footer-tip-btn {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--input-bg); border: 1px solid var(--card-border);
+    color: var(--text-mute); font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    cursor: help; transition: all 0.2s ease; user-select: none;
+  }
+  .footer-tip-wrap:hover .footer-tip-btn { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .footer-tip-popup {
+    position: absolute; bottom: calc(100% + 12px); left: 50%;
+    transform: translateX(-50%) translateY(6px);
+    width: 280px; background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(10px);
+    color: #fff; padding: 14px 16px; border-radius: 12px;
+    font-size: 12.5px; line-height: 1.5; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000;
+  }
+  .footer-tip-popup::after {
+    content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    border-width: 6px; border-style: solid; border-color: rgba(30, 30, 30, 0.95) transparent transparent transparent;
+  }
+  .footer-tip-wrap:hover .footer-tip-popup { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+  .footer-tip-popup h5 {
+    margin: 0 0 8px 0; font-size: 13px; font-weight: 600; color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 6px;
+  }
+  .footer-tip-popup ul { margin: 0; padding: 0; list-style: none; }
+  .footer-tip-popup li { margin-bottom: 6px; color: #d1d1d1; }
+  .footer-tip-popup li:last-child { margin-bottom: 0; }
+  .footer-tip-popup strong { color: var(--accent); font-weight: 600; }
+  @media (max-width: 860px) {
+    .footer-tip-popup { left: auto; right: -10px; transform: translateX(0) translateY(6px); }
+    .footer-tip-popup::after { left: auto; right: 15px; }
+    .footer-tip-wrap:hover .footer-tip-popup { transform: translateX(0) translateY(0); }
+  }
 
   .footer-text { text-align: center; font-size: 13px; color: var(--text-mute); margin-bottom: 40px;}
   .footer-text a { color: var(--accent); text-decoration: none; font-weight: 600; transition: color 0.2s;}
   .footer-text a:hover { text-decoration: underline; }
 
-  .muyu-container { position: fixed; bottom: 40px; right: 40px; z-index: 999; display: flex; flex-direction: column; align-items: center; cursor: pointer; user-select: none; }
-  .muyu-emoji { font-size: 80px; line-height: 1; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15)); transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-  .muyu-container:active .muyu-emoji { transform: scale(0.85); }
-  .merit-text { position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-size: 20px; font-weight: 800; color: #ffb6c1; text-shadow: 0 2px 4px rgba(0,0,0,0.1); opacity: 0; pointer-events: none; }
+  /* 仓库按钮样式 */
+  .repo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
+    padding: 8px 24px;
+    background: #ffffff;
+    color: #333333 !important; /* 白底黑字 */
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 8px;
+    border: 1px solid var(--divider);
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  
+  .repo-btn:hover {
+    background: var(--accent);
+    color: #ffffff !important;
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 103, 192, 0.3);
+  }
+  
+  /* 适配深色模式，让白底不那么刺眼 */
+  html[data-theme="dark"] .repo-btn {
+    background: var(--input-bg);
+    color: var(--text) !important;
+    border-color: var(--card-border);
+  }
+  html[data-theme="dark"] .repo-btn:hover {
+    background: var(--accent);
+    color: #1a1a1a !important;
+  }
+
+  .muyu-container { 
+    position: fixed; 
+    bottom: 30px; 
+    right: 40px; 
+    z-index: 999; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    cursor: pointer; 
+    user-select: none; 
+  }
+  
+  /* 限制你的网络图片大小，并加阴影 */
+  .muyu-img { 
+    width: 80px; /* 调整这里可以改变大小，80px刚刚好 */
+    height: auto; 
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); 
+    transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    -webkit-user-drag: none; 
+    transform-origin: center bottom;
+  }
+  
+  /* 敲击时的回弹动画 */
+  .muyu-container:active .muyu-img { 
+    /* 缩放稍微减小，下沉高度减半 */
+    transform: scale(0.92, 0.88) translateY(4px); 
+  }
+  .merit-text { 
+    position: absolute; 
+    top: -10px; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    font-size: 26px; /* 楷体字稍微小一点，26px刚好 */
+    font-weight: bold; 
+    font-family: 'STKaiti', 'KaiTi', 'Kaiti SC', serif; /* 换成楷体 */
+    color: #ffffff; 
+    text-shadow: 
+      -1px -1px 0 #333,  
+       1px -1px 0 #333,
+      -1px  1px 0 #333,
+       1px  1px 0 #333,
+       0 0 12px currentColor, 
+       0 0 20px currentColor;
+    opacity: 0; 
+    pointer-events: none; 
+    white-space: nowrap; 
+    z-index: 100;
+  }
   @keyframes floatUpFade { 0% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -80px) scale(1.5); } }
 
-  /* 模态框 & Toast */
   .modal-mask { position:fixed; inset:0; background:rgba(0,0,0,0.3); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:1000; padding:20px; }
   .modal-mask.show { display:flex; }
   .modal { width:100%; max-width:380px; background:var(--card); border-radius:12px; padding:24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);}
@@ -476,14 +619,23 @@
   .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
   @media (max-width: 860px) {
-    .grid-container { grid-template-columns: 1fr; }
-    .widget { grid-column: span 1 !important; }
+    .grid-container { min-height: auto; }
+    .widget {
+      position: relative !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 100% !important;
+      height: auto !important;
+      margin-bottom: 20px;
+    }
+    .resize-handle { display: none; }
     .footer-nav { flex-direction: column; align-items: center; }
     .footer-btn { width: 100%; justify-content: center; }
     .muyu-container { bottom: 20px; right: 20px; }
     .muyu-emoji { font-size: 60px; }
     .add-widget-btn { bottom: 20px; left: 20px; width: 46px; height: 46px; }
     .add-widget-btn::before { font-size: 24px; }
+	    .tidy-btn { bottom: 20px; left: 76px; width: 46px; height: 46px; font-size: 20px; }
     .widget-menu { bottom: 80px; left: 20px; }
   }
 </style>
@@ -512,7 +664,7 @@
           </div>
           <div class="city-dropdown" id="cityDropdown">
             <input type="text" id="citySearchInput" placeholder="搜索城市名称…" autocomplete="off">
-            <div class="city-list" id="cityList"><div class="city-tip">输入城市拼音或中文查找</div></div>
+            <div class="city-list" id="cityList"><div class="city-tip">🔍 输入拼音或中文查找</div></div>
           </div>
         </div>
       </div>
@@ -532,7 +684,7 @@
   <div class="grid-container" id="draggableGrid">
     
     <!-- 天气卡 -->
-    <div class="widget col-12" data-id="weather">
+    <div class="widget" data-id="weather">
       <div class="widget-header"><div class="widget-title"><span class="dot"></span> 天气详情</div></div>
       <div class="weather-expanded">
         <div class="we-top">
@@ -556,11 +708,18 @@
         <div class="hourly-container" id="hourlyList"></div>
         <div class="we-forecast" id="forecastList"></div>
       </div>
-      <div class="resize-handle"></div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
     </div>
 
     <!-- 计时器 -->
-    <div class="widget col-4" data-id="timer">
+    <div class="widget" data-id="timer">
       <div class="widget-header"><div class="widget-title"><span class="dot"></span> 计时</div></div>
       <div class="timer-wrap">
         <div class="timer-circle" id="timerCircle" style="--progress: 100%;">
@@ -577,11 +736,18 @@
           <button class="timer-btn" id="btnResetTimer">重置</button>
         </div>
       </div>
-      <div class="resize-handle"></div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
     </div>
 
     <!-- 待办 -->
-    <div class="widget col-8" data-id="todo">
+    <div class="widget" data-id="todo">
       <div class="widget-header">
         <div class="widget-title"><span class="dot"></span> 待办事项</div>
         <span style="font-size:11.5px; color:var(--text-mute); background:var(--input-bg); padding:2px 10px; border-radius:20px;" id="todoCount">0 项</span>
@@ -591,11 +757,18 @@
         <button id="addTodoBtn">＋</button>
       </div>
       <div class="todo-list" id="todoList"></div>
-      <div class="resize-handle"></div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
     </div>
 
     <!-- 快捷访问 -->
-    <div class="widget col-6" data-id="shortcuts">
+    <div class="widget" data-id="shortcuts">
       <div class="widget-header">
         <div class="widget-title"><span class="dot"></span> 快捷访问</div>
         <div style="display:flex; gap:8px;">
@@ -609,22 +782,36 @@
         <div class="inline-list" id="inlineList"></div>
       </div>
 
-      <div class="resize-handle"></div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
     </div>
 
     <!-- 格言 -->
-    <div class="widget col-6" data-id="quote">
+    <div class="widget" data-id="quote">
       <div class="widget-header">
         <div class="widget-title"><span class="dot"></span> 每日格言</div>
         <button class="timer-btn" id="refreshQuote">换一句</button>
       </div>
       <div class="quote-text" id="quoteText">保持专注，一切皆有可能。</div>
       <div class="quote-author" id="quoteAuthor">— 每日灵感</div>
-      <div class="resize-handle"></div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
     </div>
 
     <!-- 日历 -->
-    <div class="widget col-4" data-id="calendar">
+    <div class="widget" data-id="calendar">
       <div class="widget-header"><div class="widget-title"><span class="dot"></span> 日历</div></div>
       <div class="calendar-header">
         <button class="cal-today-btn" id="calTodayBtn">今天</button>
@@ -635,25 +822,46 @@
         </div>
       </div>
       <div class="calendar-grid" id="calendarGrid"></div>
-      <div class="resize-handle"></div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
     </div>
 
     <!-- 节日倒计时 -->
-    <div class="widget col-4" data-id="holiday">
+    <div class="widget" data-id="holiday">
       <div class="widget-header"><div class="widget-title"><span class="dot"></span> 近期节日</div></div>
       <div class="holiday-list" id="holidayList"></div>
-      <div class="resize-handle"></div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
     </div>
 
     <!-- 世界时钟 -->
-    <div class="widget col-4" data-id="worldclock">
+    <div class="widget" data-id="worldclock">
       <div class="widget-header"><div class="widget-title"><span class="dot"></span> 世界时钟</div></div>
       <div class="world-clock-list" id="worldClockList"></div>
-      <div class="resize-handle"></div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
     </div>
 
     <!-- 进度条 -->
-    <div class="widget col-4" data-id="progress">
+    <div class="widget" data-id="progress">
       <div class="widget-header"><div class="widget-title"><span class="dot"></span> 进度条</div></div>
       <div class="progress-group">
         <div class="prog-item">
@@ -669,11 +877,18 @@
           <div class="prog-bar"><div class="prog-fill" id="progYear" style="width: 0%;"></div></div>
         </div>
       </div>
-      <div class="resize-handle"></div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
     </div>
 
     <!-- 打工倒计时 -->
-    <div class="widget col-4" data-id="fishing">
+    <div class="widget" data-id="fishing">
       <div class="widget-header">
         <div class="widget-title"><span class="dot"></span> 打工倒计时</div>
         <button class="timer-btn" id="toggleWorkConfig">⚙️</button>
@@ -689,11 +904,18 @@
           <input type="time" id="workEnd" value="18:00" title="下班时间">
         </div>
       </div>
-      <div class="resize-handle"></div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
     </div>
 
     <!-- 迷你记事本 -->
-    <div class="widget col-6" data-id="notepad">
+    <div class="widget" data-id="notepad">
       <div class="widget-header"><div class="widget-title"><span class="dot"></span> 迷你记事本</div></div>
       <div class="notepad-container">
         <div class="notepad-toolbar">
@@ -704,7 +926,14 @@
         </div>
         <div class="notepad-editor" id="notepadEditor" contenteditable="true" placeholder="在这里记录你的灵感..."></div>
       </div>
-      <div class="resize-handle"></div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
     </div>
 
   </div>
@@ -713,24 +942,63 @@
     <a href="https://sweetwatermelons.github.io/" target="_blank" class="footer-btn">
       <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> 返回首页
     </a>
-    <a href="https://github.com/sweetwatermelons" target="_blank" class="footer-btn">
-      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg> 欢迎进入我的GitHub主页
-    </a>
+    <div class="footer-btn-group">
+      <a href="https://github.com/sweetwatermelons" target="_blank" class="footer-btn">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg> 欢迎进入我的GitHub主页
+      </a>
+      
+      <!-- 这里是小提示按钮及气泡 -->
+      <div class="footer-tip-wrap">
+        <div class="footer-tip-btn">?</div>
+        <div class="footer-tip-popup">
+          <h5>💡 使用小贴士</h5>
+                    <ul>
+            <li>
+              <strong>🖐 拖动窗口：</strong><br>
+              鼠标按住卡片最上方的<strong>标题栏</strong>（带有小圆点和文字的地方），按住不放即可将卡片拖动到屏幕任意位置。
+            </li>
+            <li>
+              <strong>↔️ 自由缩放：</strong><br>
+              将鼠标移动到卡片的<strong>边缘或四个角</strong>。当鼠标变成“双向箭头”时，按住拖拽即可自由调整卡片的长宽尺寸。
+            </li>
+            <li>
+              <strong>🧹 一键整理：</strong><br>
+              卡片拖得太乱？点击左下角的扫把。它会根据你的视觉位置，自动把卡片吸附、紧凑地排列整齐。
+            </li>
+            <li>
+              <strong>➕ 显示与隐藏：</strong><br>
+              点击左下角的加号，会弹出组件列表。你可以直接点击名称来隐藏不需要的卡片，或者随时把它们召唤回来。
+            </li>
+            <li>
+              <strong>🌤 天气与城市：</strong><br>
+              点击右上角卡片上的“天气区域”，输入城市拼音（如：beijing）或中文，即可查询并切换你关注的城市。
+            </li>
+            <li>
+              <strong>📝 其他小功能：</strong><br>
+              支持计时器、待办打卡、日历、快捷网页、在线记事本，甚至还可以敲电子木鱼。
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="footer-text">
-    如果好用的话，记得给个star哦~ <br>
-    <a href="https://github.com/sweetwatermelons/sweetwatermelons.github.io" target="_blank">点击进入仓库</a>
+    如果觉得好用，去仓库点个 Star 支持一下哦~ ✨ <br>
+    <a href="https://github.com/sweetwatermelons/sweetwatermelons.github.io" target="_blank" class="repo-btn">
+      点击进入仓库
+    </a>
   </div>
 
 </div>
 
 <div class="widget-menu" id="widgetMenu"></div>
 <div class="add-widget-btn" id="addWidgetBtn"></div>
+<div class="tidy-btn" id="tidyBtn" title="一键整理">🧹</div>
 
 <div class="muyu-container" id="muyu">
-  <div class="merit-text" id="meritText">功德+1</div>
-  <div class="muyu-emoji">🪵</div>
+  <div class="merit-text" id="meritText">敲我</div>
+  <img class="muyu-img" src="https://cdn.luogu.com.cn/upload/image_hosting/st18pvxc.webp" alt="木鱼" draggable="false">
 </div>
 
 <div class="modal-mask" id="modalMask">
@@ -947,7 +1215,7 @@
     clearTimeout(searchTimer);
     const val = e.target.value.trim();
     if (!val) {
-      cityList.innerHTML = `<div class="city-tip">输入拼音或中文</div>`;
+      cityList.innerHTML = `<div class="city-tip">✏️ 请输入拼音或中文</div>`;
       return;
     }
     searchTimer = setTimeout(() => searchCity(val), 500);
@@ -955,7 +1223,7 @@
 
   weatherArea.addEventListener('click', (e) => {
     if (e.target.closest('.city-dropdown')) return;
-    cityDropdown.classList.toggle('show');
+	    cityDropdown.classList.toggle('show');
     if (cityDropdown.classList.contains('show')) setTimeout(() => citySearchInput.focus(), 100);
   });
   document.addEventListener('click', (e) => {
@@ -1056,7 +1324,7 @@
     return `linear-gradient(135deg, hsl(${h1}, 80%, 65%), hsl(${h2}, 75%, 50%))`;
   }
 
-    function getIconText(name) {
+  function getIconText(name) {
     if (!name) return '?';
     if (/[\u4e00-\u9fa5]/.test(name)) return name.charAt(0);
     if (name.length >= 2) return name.substring(0, 2).toUpperCase();
@@ -1383,7 +1651,7 @@
       if (timerLeft <= 0 || timerLeft > timerTotal) {
         timerLeft = timerTotal;
       }
-      timerOriginal = timerTotal;   // 新增：记住这次设定的总时长
+      timerOriginal = timerTotal;   // 记住这次设定的总时长
       
       isRunning = true;
       btnStartTimer.textContent = '暂停';
@@ -1450,7 +1718,755 @@
     { t: '星光不问赶路人，时光不负有心人。', a: '大冰' },
     { t: '凡是过往，皆为序章。', a: '莎士比亚' },
     { t: '心之所向，素履以往。', a: '木心' },
-    { t: '既然选择了远方，便只顾风雨兼程。', a: '汪国真' }
+    { t: '既然选择了远方，便只顾风雨兼程。', a: '汪国真' },
+    { t: '不为模糊不清的未来担忧，只为清清楚楚的现在努力。', a: '佚名' },
+    { t: '知足且上进，温柔而坚定。', a: '佚名' },
+    { t: '热爱可抵岁月漫长。', a: '佚名' },
+    { t: '万物皆有裂痕，那是光照进来的地方。', a: '莱昂纳德·科恩' },
+    { t: '你要做一个不动声色的大人了，不准情绪化，不准偷偷想念，不准回头看。', a: '村上春树' },
+    { t: '虽然辛苦，我还是会选择那种滚烫的人生。', a: '北野武' },
+    { t: '宝剑锋从磨砺出，梅花香自苦寒来。', a: '《警世贤文》' },
+    { t: '路漫漫其修远兮，吾将上下而求索。', a: '屈原' },
+    { t: '长风破浪会有时，直挂云帆济沧海。', a: '李白' },
+    { t: '海阔凭鱼跃，天高任鸟飞。', a: '古谚语' },
+    { t: '少壮不努力，老大徒伤悲。', a: '《长歌行》' },
+    { t: '纸上得来终觉浅，绝知此事要躬行。', a: '陆游' },
+    { t: '千磨万击还坚劲，任尔东西南北风。', a: '郑板桥' },
+    { t: '山重水复疑无路，柳暗花明又一村。', a: '陆游' },
+    { t: '不积跬步，无以至千里；不积小流，无以成江海。', a: '荀子' },
+    { t: '每一个不曾起舞的日子，都是对生命的辜负。', a: '尼采' },
+    { t: '你要搞清楚自己人生的剧本——不是你父母的续集，不是你子女的前传，更不是你朋友的外篇。', a: '尼采' },
+    { t: '如果你因失去了太阳而流泪，那么你也将失去群星了。', a: '泰戈尔' },
+    { t: '只有流过血的手指，才能弹出世间的绝唱。', a: '泰戈尔' },
+    { t: '黑夜无论怎样悠长，白昼总会到来。', a: '莎士比亚' },
+    { t: '生存还是毁灭，这是一个值得考虑的问题。', a: '莎士比亚' },
+    { t: '我荒废了时间，时间便把我荒废了。', a: '莎士比亚' },
+    { t: '书籍是全人类的营养品。', a: '莎士比亚' },
+    { t: '愿你的生命有够多的云翳，造成一个美丽的黄昏。', a: '冰心' },
+    { t: '生命是一袭华美的袍，爬满了虱子。', a: '张爱玲' },
+    { t: '知行合一。', a: '王阳明' },
+    { t: '吾生也有涯，而知也无涯。', a: '庄子' },
+    { t: '上善若水，水善利万物而不争。', a: '老子' },
+    { t: '天下难事，必作于易；天下大事，必作于细。', a: '老子' },
+    { t: '既然无处可逃，不如喜悦。既然没有净土，不如静心。既然没有如愿，不如释然。', a: '丰子恺' },
+    { t: '愿你走出半生，归来仍是少年。', a: '网络语录' },
+    { t: '这世界哪怕再叫人失望，也有一种叫美好的东西在暗处生长。', a: '《某某》' },
+    { t: '凡是让你变好的事情，过程都不会太舒服。', a: '佚名' },
+    { t: '你只管努力，剩下的交给时间。', a: '佚名' },
+    { t: '当你觉得晚了的时候，恰恰是最早的时候。', a: '佚名' },
+    { t: '不要因为走得太远，忘了我们为什么出发。', a: '纪伯伦' },
+    { t: '生活明朗，万物可爱，人间值得，未来可期。', a: '佚名' },
+    { t: '如果你知道去哪，全世界都会为你让路。', a: '《牧羊少年奇幻之旅》' },
+    { t: '当你凝视深渊时，深渊也在凝视着你。', a: '尼采' },
+    { t: '一个人知道自己为什么而活，就可以忍受任何一种生活。', a: '尼采' },
+    { t: '不能听命于自己者，就要受命于他人。', a: '尼采' },
+    { t: '其实人跟树是一样的，越是向往高处的阳光，它的根就越要伸向黑暗的地底。', a: '尼采' },
+    { t: '每一个优秀的人，都有一段沉默的时光。那一段时光，是付出了很多努力，忍受孤独和寂寞，不抱怨不诉苦，日后说起时，连自己都能被感动的日子。', a: '尼采' },
+    { t: '我希望你照自己的意思去理解自己，不要小看自己，被别人的意见引入歧途。', a: '泰戈尔' },
+    { t: '生如夏花之绚烂，死如秋叶之静美。', a: '泰戈尔' },
+    { t: '世界以痛吻我，要我报之以歌。', a: '泰戈尔' },
+    { t: '当你为错过太阳而哭泣的时候，你也要再错过群星了。', a: '泰戈尔' },
+    { t: '不要着急，最好的总会在最不经意的时候出现。', a: '泰戈尔' },
+    { t: '光是年轻的，却是古代的；影子是古老的，却是不朽的。', a: '泰戈尔' },
+    { t: '天空没有留下鸟的痕迹，但我已飞过。', a: '泰戈尔' },
+    { t: '哪里会有人喜欢孤独，只是不喜欢失望。', a: '村上春树' },
+    { t: '暴风雨结束后，你不会记得自己是怎样活下来的，你甚至不确定暴风雨真的结束了。但有一件事是确定的：当你穿过了暴风雨，你就不再是原来那个人。', a: '村上春树' },
+    { t: '你要记得那些黑暗中默默抱紧你的人，逗你笑的人，陪你彻夜聊天的人，坐车来看望你的人，带着你四处游荡的人，说想念你的人。是这些人组成你生命中一点一滴的温暖，是这些温暖使你远离阴霾，是这些温暖使你成为善良的人。', a: '村上春树' },
+    { t: '不管全世界所有人怎么说，我都认为自己的感受才是正确的。无论别人怎么看，我绝不打乱自己的节奏。喜欢的事自然可以坚持，不喜欢怎么也长久不了。', a: '村上春树' },
+    { t: '我一直以为人是慢慢变老的，其实不是，人是一瞬间变老的。', a: '村上春树' },
+    { t: '所谓人生，无非是一个不断丧失的过程。', a: '村上春树' },
+    { t: '希望你可以记住我，记住我这样活过，这样在你身边呆过。', a: '村上春树' },
+    { t: '如果我不再年轻，我希望我依然勇敢。', a: '佚名' },
+    { t: '只有极其努力，才能看起来毫不费力。', a: '佚名' },
+    { t: '你必须非常努力，才能相信自己是真正的天才。', a: '佚名' },
+    { t: '你的孤独，虽败犹荣。', a: '刘同' },
+    { t: '愿你一生努力，一生被爱，想要的都拥有，得不到的都释怀。', a: '八月长安' },
+    { t: '我有一杯酒，足以慰风尘。', a: '佚名' },
+    { t: '愿有岁月可回首，且以深情共白头。', a: '佚名' },
+    { t: '你若盛开，清风自来。', a: '三毛' },
+    { t: '如果有来生，要做一棵树，站成永恒，没有悲欢的姿势。一半在土里安详，一半在风里飞扬，一半洒落阴凉，一半沐浴阳光，非常沉默非常骄傲，从不依靠从不寻找。', a: '三毛' },
+    { t: '我来不及认真地年轻，待明白过来时，只能选择认真地老去。', a: '三毛' },
+    { t: '心之何如，有似万丈迷津，遥亘千里，其中并无舟子可以渡人，除了自渡，他人爱莫能助。', a: '三毛' },
+    { t: '岁月极美，在于它必然的流逝。春花、秋月、夏日、冬雪。', a: '三毛' },
+    { t: '一个人至少拥有一个梦想，有一个理由去坚强。心若没有栖息的地方，到哪里都是在流浪。', a: '三毛' },
+    { t: '用一秒钟转身离开，用一辈子去忘记。', a: '三毛' },
+    { t: '诺言的“诺”字和誓言的“誓”字都是有口无心的。', a: '三毛' },
+    { t: '一段感情能给你带来多大痛苦，就曾给你带来过多大快乐。', a: '三毛' },
+    { t: '不要害怕拒绝他人，如果自己的理由出于正当。当一个人开口提出要求的时候，他的心里根本预备好了两种答案。所以，给他任何一个其中的答案，都是意料中的。', a: '三毛' },
+    { t: '爱情如果不落到穿衣、吃饭、睡觉、数钱这些实实在在的生活中去，是不会长久的。真正的爱情，就是不紧张，就是可以在他面前无所顾忌地打嗝、放屁、挖耳朵、流鼻涕；真正爱你的人，就是那个你可以不洗脸、不梳头、不化妆见到的那个人。', a: '三毛' },
+    { t: '飞蛾扑火时，一定是极快乐幸福的。', a: '三毛' },
+    { t: '我笑，便面如春花，定是能感动人的，任他是谁。', a: '三毛' },
+    { t: '世上本没有路，走的人多了，也便成了路。', a: '鲁迅' },
+    { t: '时间就像海绵里的水，只要愿挤，总还是有的。', a: '鲁迅' },
+    { t: '唯有民魂是值得宝贵的，唯有他发扬起来，中国才有真进步。', a: '鲁迅' },
+    { t: '不在沉默中爆发，就在沉默中灭亡。', a: '鲁迅' },
+    { t: '真的猛士，敢于直面惨淡的人生，敢于正视淋漓的鲜血。', a: '鲁迅' },
+    { t: '哀其不幸，怒其不争。', a: '鲁迅' },
+    { t: '墨写的谎说，决掩不住血写的事实。', a: '鲁迅' },
+    { t: '从来如此，便对吗？', a: '鲁迅' },
+    { t: '人生最苦痛的是梦醒了无路可走。做梦的人是幸福的；倘没有看出可走的路，最要紧的是不要去惊醒他。', a: '鲁迅' },
+    { t: '希望是本无所谓有，无所谓无的。这正如地上的路；其实地上本没有路，走的人多了，也便成了路。', a: '鲁迅' },
+    { t: '我以我血荐轩辕。', a: '鲁迅' },
+    { t: '寄意寒星荃不察，我以我血荐轩辕。', a: '鲁迅' },
+    { t: '无情未必真豪杰，怜子如何不丈夫。', a: '鲁迅' },
+    { t: '度尽劫波兄弟在，相逢一笑泯恩仇。', a: '鲁迅' },
+    { t: '人生得一知己足矣，斯世当以同怀视之。', a: '鲁迅' },
+    { t: '我向来是不惮以最坏的恶意，来推测中国人的，然而我还不料，也不信竟会凶残到这地步。', a: '鲁迅' },
+    { t: '愿中国青年都摆脱冷气，只是向上走，不必听自暴自弃者流的话。能做事的做事，能发声的发声。有一分热，发一分光。就令萤火一般，也可以在黑暗里发一点光，不必等候炬火。', a: '鲁迅' },
+    { t: '生命的意义在于付出，在于给予，而不是在于接受，也不是在于争取。', a: '巴金' },
+    { t: '我不配做一盏灯，那么就让我做一块木柴吧。', a: '巴金' },
+    { t: '幼稚对于老成，有如孩子对于老人，决没有什么耻辱。', a: '巴金' },
+    { t: '奋斗就是生活，人生只有前进。', a: '巴金' },
+    { t: '理想不抛弃苦心追求的人，只要不停止追求，你们会沐浴在理想的光辉之中。', a: '巴金' },
+    { t: '我爱我的祖国，爱我的人民，离开了他们，我就无法生存，更无法写作。', a: '巴金' },
+    { t: '人生如同日记，每人都想记下自己的经历。但当他把记好的日记和他的誓言进行比较时，心情是何等谦卑啊！', a: '巴金' },
+    { t: '沉默容易使人跟朋友疏远。热烈的诉说和自由则使人们互相接近。', a: '巴金' },
+    { t: '为着追求光和热，人宁愿舍弃自己的生命。生命是可爱的。但寒冷的、寂寞的生，却不如轰轰烈烈的死。', a: '巴金' },
+    { t: '往事依稀浑似梦，都随风雨到心头。', a: '巴金' },
+    { t: '我之所以写作，不是我有才华，而是我有感情。', a: '巴金' },
+    { t: '最沉重的负担压迫着我们，让我们屈服于它，把我们压到地上。但在历代的爱情诗中，女人总渴望承受一个男性身体的重量。于是，最沉重的负担同时也成了最强盛的生命力的影像。负担越重，我们的生命越贴近大地，它就越真切实在。相反，当负担完全缺失，人就会变得比空气还轻，就会飘起来，就会远离大地和地上的生命，人也就只是一个半真的存在，其运动也会变得自由而没有意义。那么，到底选择什么？是重还是轻？', a: '米兰·昆德拉' },
+    { t: '人永远都无法知道自己该要什么，因为人只能活一次，既不能拿它跟前世相比，也不能在来生加以修正。没有任何方法可以检验哪种抉择是好的，因为不存在任何比较。一切都是马上经历，仅此一次，不能准备。', a: '米兰·昆德拉' },
+    { t: '遇见是两个人的事，离开却是一个人的决定，遇见是一个开始，离开却是为了遇见下一个离开。这是一个流行离开的世界，但是我们都不擅长告别。', a: '米兰·昆德拉' },
+    { t: '从现在起，我开始谨慎地选择我的生活，我不再轻易让自己迷失在各种诱惑里。我心中已经听到来自远方的呼唤，再不需要回过头去关心身后的种种是非与议论。我已无暇顾及过去，我要向前走。', a: '米兰·昆德拉' },
+    { t: '压倒她的不是重，而是不能承受的生命之轻。', a: '米兰·昆德拉' },
+    { t: '如果永恒轮回是最沉重的负担，那么我们的生活，在这一背景下，却可在其整个的灿烂轻盈之中得以展现。', a: '米兰·昆德拉' },
+    { t: '表面是清晰明了的谎言，背后却是晦涩难懂的真相。', a: '米兰·昆德拉' },
+    { t: '我思故我在。', a: '笛卡尔' },
+    { t: '读一切好书，就是和许多高尚的人谈话。', a: '笛卡尔' },
+    { t: '怀疑是智慧的开始。', a: '笛卡尔' },
+    { t: '知识就是力量。', a: '培根' },
+    { t: '阅读使人充实，会谈使人敏捷，写作使人精确。', a: '培根' },
+    { t: '合理安排时间，就等于节约时间。', a: '培根' },
+    { t: '人在身败名裂时，最易看出其真面目。', a: '培根' },
+    { t: '世间的很多事物，追求时候的兴致总要比享用时候的兴致浓烈。', a: '培根' },
+    { t: '人是一根能思想的苇草。', a: '帕斯卡' },
+    { t: '人是为了思考才被创造出来的。', a: '帕斯卡' },
+    { t: '几乎所有的痛苦都源于我们不懂得如何安静地待在房间里。', a: '帕斯卡' },
+    { t: '心有其理，理之所无。', a: '帕斯卡' },
+    { t: '人生的价值，并不是用时间，而是用深度去衡量的。', a: '列夫·托尔斯泰' },
+    { t: '幸福的人生是相似的，不幸的人生各有各的不幸。', a: '列夫·托尔斯泰' },
+    { t: '人并不是因为美丽才可爱，而是因为可爱才美丽。', a: '列夫·托尔斯泰' },
+    { t: '如果痛苦是人生的常态，那么快乐就是人生的奢侈品。', a: '列夫·托尔斯泰' },
+    { t: '有生活的时候就有幸福。', a: '列夫·托尔斯泰' },
+    { t: '人生的意义在于不断地完善自己。', a: '列夫·托尔斯泰' },
+    { t: '没有单纯、善良和真实，就没有伟大。', a: '列夫·托尔斯泰' },
+    { t: '理想是指路明灯。没有理想，就没有坚定的方向；没有方向，就没有生活。', a: '列夫·托尔斯泰' },
+    { t: '人只有献身于社会，才能找出那短暂而有风险的生命的意义。', a: '爱因斯坦' },
+    { t: '不要努力成为一个成功者，要努力成为一个有价值的人。', a: '爱因斯坦' },
+    { t: '教育就是当一个人把在学校所学全部忘光之后剩下的东西。', a: '爱因斯坦' },
+    { t: '想象力比知识更重要。', a: '爱因斯坦' },
+    { t: '只要你有一件合理的事去做，你的生活就会显得特别美好。', a: '爱因斯坦' },
+    { t: '一个人的价值，应该看他贡献什么，而不应当看他取得什么。', a: '爱因斯坦' },
+    { t: '逻辑会把你从A带到B，想象力能带你去任何地方。', a: '爱因斯坦' },
+    { t: '人生就像骑自行车，想保持平衡就得往前走。', a: '爱因斯坦' },
+    { t: '天才是百分之一的灵感加百分之九十九的汗水。', a: '爱迪生' },
+    { t: '如果你希望成功，当以恒心为良友，以经验为参谋，以当心为兄弟，以希望为哨兵。', a: '爱迪生' },
+    { t: '失败乃成功之母。', a: '爱迪生' },
+    { t: '我的人生哲学是工作，我要揭示大自然的奥秘，并以此为人类服务。我们在世的短暂的一生中，我不知道还有什么比这种服务更好的了。', a: '爱迪生' },
+    { t: '良好的性格由习惯构成。', a: '爱迪生' },
+    { t: '伟大人物的最明显标志，就是他坚强的意志，不管环境变换到何种地步，他的初衷与希望仍不会有丝毫的改变，而终于克服障碍，以达到期望的目的。', a: '爱迪生' },
+    { t: '当你站在山顶的时候，不要忘了山脚下的人。', a: '佚名' },
+    { t: '星光不问赶路人，时光不负有心人。', a: '大冰' },
+    { t: '愿你我在看不到彼此的岁月里，熠熠生辉。', a: '佚名' },
+    { t: '你要悄悄拔尖，然后惊艳所有人。', a: '佚名' },
+    { t: '半山腰太挤了，你得去山顶看看。', a: '佚名' },
+    { t: '你一定要努力，才能见到你想见的人。', a: '佚名' },
+    { t: '同是寒窗苦读，怎愿甘拜下风。', a: '佚名' },
+    { t: '如果结果不如你所愿，就在尘埃落定前奋力一搏。', a: '《夏目友人帐》' },
+    { t: '不要因为一次的失败，就放弃你原来决心想达到的目的。', a: '莎士比亚' },
+    { t: '忍耐是痛苦的，但它的果实是甜蜜的。', a: '卢梭' },
+    { t: '人生而自由，却无往不在枷锁之中。', a: '卢梭' },
+    { t: '我们手里的金钱是保持自由的一种工具。', a: '卢梭' },
+    { t: '最盲目的服从乃是奴隶们所仅存的唯一美德。', a: '卢梭' },
+    { t: '人是生而自由的，但却无往不在枷锁之中。自以为是其他一切的主人的人，反而比其他一切更是奴隶。', a: '卢梭' },
+    { t: '生活得最有意义的人，并不就是年岁活得最大的人，而是对生活最有感受的人。', a: '卢梭' },
+    { t: '你若要喜爱你自己的价值，你就得给世界创造价值。', a: '歌德' },
+    { t: '读一本好书，就是和许多高尚的人谈话。', a: '歌德' },
+    { t: '凡是自强不息者，最终都会成功。', a: '歌德' },
+    { t: '人生之所以有意义，就在于我们能够自己创造意义。', a: '歌德' },
+    { t: '谁若游戏人生，他就一事无成；谁不能主宰自己，便永远是一个奴隶。', a: '歌德' },
+    { t: '人只要有了目标，就不会迷失方向。', a: '歌德' },
+    { t: '谁要是游戏人生，他就一事无成；谁不能主宰自己，永远是一个奴隶。', a: '歌德' },
+    { t: '生命的价值不在于时间的长短，而在于你如何利用它。', a: '蒙田' },
+    { t: '最野蛮的是轻蔑自己。', a: '蒙田' },
+    { t: '我知道什么呢？', a: '蒙田' },
+    { t: '认识自己的无知是认识世界的最可靠的方法。', a: '蒙田' },
+    { t: '真正有知识的人的成长过程，就像麦穗的成长过程：麦穗空的时候，麦子长得很快，麦穗昂着头，骄傲地向上长；当麦穗成熟饱满时，它们开始谦虚，垂下麦芒。', a: '蒙田' },
+    { t: '最美好的事，是为理想而奋斗。', a: '苏格拉底' },
+    { t: '认识你自己。', a: '苏格拉底' },
+    { t: '未经审视的人生是不值得过的。', a: '苏格拉底' },
+    { t: '我知道我一无所知。', a: '苏格拉底' },
+    { t: '世界上最快乐的事，莫过于为理想而奋斗。', a: '苏格拉底' },
+    { t: '教育不是灌输，而是点燃火焰。', a: '苏格拉底' },
+    { t: '想左右天下的人，须先能左右自己。', a: '苏格拉底' },
+    { t: '智慧意味着自知无知。', a: '苏格拉底' },
+    { t: '吾爱吾师，吾更爱真理。', a: '亚里士多德' },
+    { t: '人生最终的价值在于觉醒和思考的能力，而不只在于生存。', a: '亚里士多德' },
+    { t: '优秀是一种习惯。', a: '亚里士多德' },
+    { t: '幸福是灵魂的一种合乎德性的活动。', a: '亚里士多德' },
+    { t: '求知是人类的本性。', a: '亚里士多德' },
+    { t: '挚友如异体同心。', a: '亚里士多德' },
+    { t: '在科学上进步而道义上落后的人，不是前进，而是后退。', a: '亚里士多德' },
+    { t: '幽默是受过教育的标志。', a: '亚里士多德' },
+    { t: '我除了知道我的无知这个事实外一无所知。', a: '苏格拉底' },
+    { t: '人类的幸福和欢乐在于奋斗，而最有价值的是为理想而奋斗。', a: '苏格拉底' },
+    { t: '把时间用在思考上是最能节省时间的事情。', a: '卡曾斯' },
+    { t: '我们唯一不得不害怕的就是害怕本身。', a: '罗斯福' },
+    { t: '昨天是历史，明天是谜团，今天是礼物，这就是为什么我们称之为现在。', a: '比尔·基恩' },
+    { t: '一个人的个性，就是他命运的先兆。', a: '佚名' },
+    { t: '凡是预则立，不预则废。', a: '《礼记》' },
+    { t: '玉不琢，不成器；人不学，不知道。', a: '《礼记》' },
+    { t: '博学之，审问之，慎思之，明辨之，笃行之。', a: '《礼记》' },
+    { t: '凡事顺其自然，遇事处之泰然，得意之时淡然，失意之时坦然。', a: '佚名' },
+    { t: '命里有时终须有，命里无时莫强求。', a: '佚名' },
+    { t: '己所不欲，勿施于人。', a: '孔子' },
+    { t: '三人行，必有我师焉。', a: '孔子' },
+    { t: '知之为知之，不知为不知，是知也。', a: '孔子' },
+    { t: '温故而知新，可以为师矣。', a: '孔子' },
+    { t: '学而不厌，诲人不倦。', a: '孔子' },
+    { t: '君子坦荡荡，小人长戚戚。', a: '孔子' },
+    { t: '岁寒，然后知松柏之后凋也。', a: '孔子' },
+    { t: '敏而好学，不耻下问。', a: '孔子' },
+    { t: '逝者如斯夫，不舍昼夜。', a: '孔子' },
+    { t: '朝闻道，夕死可矣。', a: '孔子' },
+    { t: '不患人之不己知，患不知人也。', a: '孔子' },
+    { t: '君子和而不同，小人同而不和。', a: '孔子' },
+    { t: '道不同，不相为谋。', a: '孔子' },
+    { t: '满招损，谦受益。', a: '《尚书》' },
+    { t: '天行健，君子以自强不息；地势坤，君子以厚德载物。', a: '《周易》' },
+    { t: '穷则变，变则通，通则久。', a: '《周易》' },
+    { t: '仁者见之谓之仁，智者见之谓之智。', a: '《周易》' },
+    { t: '祸兮福之所倚，福兮祸之所伏。', a: '老子' },
+    { t: '知人者智，自知者明。胜人者有力，自胜者强。', a: '老子' },
+    { t: '合抱之木，生于毫末；九层之台，起于累土；千里之行，始于足下。', a: '老子' },
+    { t: '大方无隅，大器晚成，大音希声，大象无形。', a: '老子' },
+    { t: '信言不美，美言不信。善者不辩，辩者不善。', a: '老子' },
+    { t: '上士闻道，勤而行之；中士闻道，若存若亡；下士闻道，大笑之。', a: '老子' },
+    { t: '大直若屈，大巧若拙，大辩若讷。', a: '老子' },
+    { t: '天网恢恢，疏而不失。', a: '老子' },
+    { t: '治大国，若烹小鲜。', a: '老子' },
+    { t: '甘其食，美其服，安其居，乐其俗。', a: '老子' },
+    { t: '邻国相望，鸡犬之声相闻，民至老死不相往来。', a: '老子' },
+    { t: '相濡以沫，不如相忘于江湖。', a: '庄子' },
+    { t: '井蛙不可以语于海者，拘于虚也；夏虫不可以语于冰者，笃于时也。', a: '庄子' },
+    { t: '人生天地之间，若白驹之过隙，忽然而已。', a: '庄子' },
+    { t: '天地与我并生，而万物与我为一。', a: '庄子' },
+    { t: '吾生也有涯，而知也无涯。以有涯随无涯，殆已！', a: '庄子' },
+    { t: '君子之交淡若水，小人之交甘若醴。', a: '庄子' },
+    { t: '泉涸，鱼相与处于陆，相呴以湿，相濡以沫，不如相忘于江湖。', a: '庄子' },
+    { t: '鹏之徙于南冥也，水击三千里，抟扶摇而上者九万里。', a: '庄子' },
+    { t: '举世誉之而不加劝，举世非之而不加沮。', a: '庄子' },
+    { t: '至人无己，神人无功，圣人无名。', a: '庄子' },
+    { t: '鲲鹏展翅九万里，翻动扶摇羊角。', a: '庄子' },
+    { t: '人生如逆旅，我亦是行人。', a: '苏轼' },
+    { t: '竹杖芒鞋轻胜马，谁怕？一蓑烟雨任平生。', a: '苏轼' },
+    { t: '回首向来萧瑟处，归去，也无风雨也无晴。', a: '苏轼' },
+    { t: '但愿人长久，千里共婵娟。', a: '苏轼' },
+    { t: '十年生死两茫茫，不思量，自难忘。', a: '苏轼' },
+    { t: '大江东去，浪淘尽，千古风流人物。', a: '苏轼' },
+    { t: '欲把西湖比西子，淡妆浓抹总相宜。', a: '苏轼' },
+    { t: '横看成岭侧成峰，远近高低各不同。不识庐山真面目，只缘身在此山中。', a: '苏轼' },
+    { t: '博观而约取，厚积而薄发。', a: '苏轼' },
+    { t: '古之立大事者，不惟有超世之才，亦必有坚忍不拔之志。', a: '苏轼' },
+    { t: '枝上柳绵吹又少，天涯何处无芳草。', a: '苏轼' },
+    { t: '人生到处知何似，应似飞鸿踏雪泥。', a: '苏轼' },
+    { t: '粗缯大布裹生涯，腹有诗书气自华。', a: '苏轼' },
+    { t: '一点浩然气，千里快哉风。', a: '苏轼' },
+    { t: '小舟从此逝，江海寄余生。', a: '苏轼' },
+    { t: '休对故人思故国，且将新火试新茶。诗酒趁年华。', a: '苏轼' },
+    { t: '万事到头都是梦，休休。明日黄花蝶也愁。', a: '苏轼' },
+    { t: '长恨此身非我有，何时忘却营营。', a: '苏轼' },
+    { t: '夜阑风静縠纹平。小舟从此逝，江海寄余生。', a: '苏轼' },
+    { t: '料峭春风吹酒醒，微冷，山头斜照却相迎。', a: '苏轼' },
+    { t: '此心安处是吾乡。', a: '苏轼' },
+    { t: '落红不是无情物，化作春泥更护花。', a: '龚自珍' },
+    { t: '我劝天公重抖擞，不拘一格降人才。', a: '龚自珍' },
+    { t: '海内存知己，天涯若比邻。', a: '王勃' },
+    { t: '落霞与孤鹜齐飞，秋水共长天一色。', a: '王勃' },
+    { t: '老当益壮，宁移白首之心？穷且益坚，不坠青云之志。', a: '王勃' },
+    { t: '东隅已逝，桑榆非晚。', a: '王勃' },
+    { t: '天生我材必有用，千金散尽还复来。', a: '李白' },
+    { t: '仰天大笑出门去，我辈岂是蓬蒿人。', a: '李白' },
+    { t: '安能摧眉折腰事权贵，使我不得开心颜。', a: '李白' },
+        { t: '抽刀断水水更流，举杯消愁愁更愁。', a: '李白' },
+    { t: '俱怀逸兴壮思飞，欲上青天揽明月。', a: '李白' },
+    { t: '长风破浪会有时，直挂云帆济沧海。', a: '李白' },
+    { t: '蜀道之难，难于上青天。', a: '李白' },
+    { t: '今人不见古时月，今月曾经照古人。', a: '李白' },
+    { t: '浮云游子意，落日故人情。', a: '李白' },
+    { t: '五花马，千金裘，呼儿将出换美酒，与尔同销万古愁。', a: '李白' },
+    { t: '凤凰台上凤凰游，凤去台空江自流。', a: '李白' },
+    { t: '天生我材必有用，千金散尽还复来。', a: '李白' },
+    { t: '人生得意须尽欢，莫使金樽空对月。', a: '李白' },
+    { t: '两岸猿声啼不住，轻舟已过万重山。', a: '李白' },
+    { t: '孤帆远影碧空尽，唯见长江天际流。', a: '李白' },
+    { t: '桃花潭水深千尺，不及汪伦送我情。', a: '李白' },
+    { t: '白发三千丈，缘愁似个长。', a: '李白' },
+    { t: '举杯邀明月，对影成三人。', a: '李白' },
+    { t: '我寄愁心与明月，随君直到夜郎西。', a: '李白' },
+    { t: '云想衣裳花想容，春风拂槛露华浓。', a: '李白' },
+    { t: '相看两不厌，只有敬亭山。', a: '李白' },
+    { t: '大鹏一日同风起，扶摇直上九万里。', a: '李白' },
+    { t: '仰天大笑出门去，我辈岂是蓬蒿人。', a: '李白' },
+    { t: '行路难，行路难，多歧路，今安在？', a: '李白' },
+    { t: '黄河之水天上来，奔流到海不复回。', a: '李白' },
+    { t: '金樽清酒斗十千，玉盘珍羞直万钱。', a: '李白' },
+    { t: '弃我去者，昨日之日不可留；乱我心者，今日之日多烦忧。', a: '李白' },
+    { t: '俱怀逸兴壮思飞，欲上青天览明月。', a: '李白' },
+    { t: '抽刀断水水更流，举杯销愁愁更愁。', a: '李白' },
+    { t: '人生在世不称意，明朝散发弄扁舟。', a: '李白' },
+    { t: '众鸟高飞尽，孤云独去闲。', a: '李白' },
+    { t: '花间一壶酒，独酌无相亲。', a: '李白' },
+    { t: '醒时同交欢，醉后各分散。', a: '李白' },
+    { t: '永结无情游，相期邈云汉。', a: '李白' },
+    { t: '安能摧眉折腰事权贵，使我不得开心颜。', a: '李白' },
+    { t: '世间行乐亦如此，古来万事东流水。', a: '李白' },
+    { t: '别君去兮何时还？且放白鹿青崖间，须行即骑访名山。', a: '李白' },
+    { t: '会当凌绝顶，一览众山小。', a: '杜甫' },
+    { t: '国破山河在，城春草木深。', a: '杜甫' },
+    { t: '烽火连三月，家书抵万金。', a: '杜甫' },
+    { t: '安得广厦千万间，大庇天下寒士俱欢颜。', a: '杜甫' },
+    { t: '随风潜入夜，润物细无声。', a: '杜甫' },
+    { t: '读书破万卷，下笔如有神。', a: '杜甫' },
+    { t: '朱门酒肉臭，路有冻死骨。', a: '杜甫' },
+    { t: '无边落木萧萧下，不尽长江滚滚来。', a: '杜甫' },
+    { t: '万里悲秋常作客，百年多病独登台。', a: '杜甫' },
+    { t: '两个黄鹂鸣翠柳，一行白鹭上青天。', a: '杜甫' },
+    { t: '窗含西岭千秋雪，门泊东吴万里船。', a: '杜甫' },
+    { t: '好雨知时节，当春乃发生。', a: '杜甫' },
+    { t: '迟日江山丽，春风花草香。', a: '杜甫' },
+    { t: '星垂平野阔，月涌大江流。', a: '杜甫' },
+    { t: '露从今夜白，月是故乡明。', a: '杜甫' },
+    { t: '为人性僻耽佳句，语不惊人死不休。', a: '杜甫' },
+    { t: '细雨鱼儿出，微风燕子斜。', a: '杜甫' },
+    { t: '尔曹身与名俱灭，不废江河万古流。', a: '杜甫' },
+    { t: '清新庾开府，俊逸鲍参军。', a: '杜甫' },
+    { t: '白也诗无敌，飘然思不群。', a: '杜甫' },
+    { t: '痛饮狂歌空度日，飞扬跋扈为谁雄。', a: '杜甫' },
+    { t: '落日照大旗，马鸣风萧萧。', a: '杜甫' },
+    { t: '射人先射马，擒贼先擒王。', a: '杜甫' },
+    { t: '出师未捷身先死，长使英雄泪满襟。', a: '杜甫' },
+    { t: '三顾频烦天下计，两朝开济老臣心。', a: '杜甫' },
+    { t: '花径不曾缘客扫，蓬门今始为君开。', a: '杜甫' },
+    { t: '肯与邻翁相对饮，隔篱呼取尽余杯。', a: '杜甫' },
+    { t: '冠盖满京华，斯人独憔悴。', a: '杜甫' },
+    { t: '千秋万岁名，寂寞身后事。', a: '杜甫' },
+    { t: '人生不相见，动如参与商。', a: '杜甫' },
+    { t: '昔别君未婚，儿女忽成行。', a: '杜甫' },
+    { t: '怡然敬父执，问我来何方。', a: '杜甫' },
+    { t: '问答乃未已，驱儿罗酒浆。', a: '杜甫' },
+    { t: '夜雨剪春韭，新炊间黄粱。', a: '杜甫' },
+    { t: '主称会面难，一举累十觞。', a: '杜甫' },
+    { t: '十觞亦不醉，感子故意长。', a: '杜甫' },
+    { t: '明日隔山岳，世事两茫茫。', a: '杜甫' },
+    { t: '大弦嘈嘈如急雨，小弦切切如私语。', a: '白居易' },
+    { t: '同是天涯沦落人，相逢何必曾相识。', a: '白居易' },
+    { t: '在天愿作比翼鸟，在地愿为连理枝。', a: '白居易' },
+    { t: '天长地久有时尽，此恨绵绵无绝期。', a: '白居易' },
+    { t: '野火烧不尽，春风吹又生。', a: '白居易' },
+    { t: '日出江花红胜火，春来江水绿如蓝。', a: '白居易' },
+    { t: '乱花渐欲迷人眼，浅草才能没马蹄。', a: '白居易' },
+    { t: '几处早莺争暖树，谁家新燕啄春泥。', a: '白居易' },
+    { t: '千呼万唤始出来，犹抱琵琶半遮面。', a: '白居易' },
+    { t: '别有幽愁暗恨生，此时无声胜有声。', a: '白居易' },
+    { t: '银瓶乍破水浆迸，铁骑突出刀枪鸣。', a: '白居易' },
+    { t: '座中泣下谁最多？江州司马青衫湿。', a: '白居易' },
+    { t: '回眸一笑百媚生，六宫粉黛无颜色。', a: '白居易' },
+    { t: '春宵苦短日高起，从此君王不早朝。', a: '白居易' },
+    { t: '后宫佳丽三千人，三千宠爱在一身。', a: '白居易' },
+    { t: '上穷碧落下黄泉，两处茫茫皆不见。', a: '白居易' },
+    { t: '忽闻海上有仙山，山在虚无缥缈间。', a: '白居易' },
+    { t: '楼阁玲珑五云起，其中绰约多仙子。', a: '白居易' },
+    { t: '玉容寂寞泪阑干，梨花一枝春带雨。', a: '白居易' },
+    { t: '临别殷勤重寄词，词中有誓两心知。', a: '白居易' },
+    { t: '七月七日长生殿，夜半无人私语时。', a: '白居易' },
+    { t: '春风桃李花开日，秋雨梧桐叶落时。', a: '白居易' },
+    { t: '西宫南内多秋草，落叶满阶红不扫。', a: '白居易' },
+    { t: '梨园弟子白发新，椒房阿监青娥老。', a: '白居易' },
+    { t: '夕殿萤飞思悄然，孤灯挑尽未成眠。', a: '白居易' },
+    { t: '迟迟钟鼓初长夜，耿耿星河欲曙天。', a: '白居易' },
+    { t: '鸳鸯瓦冷霜华重，翡翠衾寒谁与共。', a: '白居易' },
+    { t: '悠悠生死别经年，魂魄不曾来入梦。', a: '白居易' },
+    { t: '天长地久有时尽，此恨绵绵无绝期。', a: '白居易' },
+    { t: '商人重利轻别离，前月浮梁买茶去。', a: '白居易' },
+    { t: '去来江口守空船，绕船月明江水寒。', a: '白居易' },
+    { t: '夜深忽梦少年事，梦啼妆泪红阑干。', a: '白居易' },
+    { t: '我从去年辞帝京，谪居卧病浔阳城。', a: '白居易' },
+    { t: '浔阳地僻无音乐，终岁不闻丝竹声。', a: '白居易' },
+    { t: '住近湓江地低湿，黄芦苦竹绕宅生。', a: '白居易' },
+    { t: '其间旦暮闻何物？杜鹃啼血猿哀鸣。', a: '白居易' },
+    { t: '春江花朝秋月夜，往往取酒还独倾。', a: '白居易' },
+    { t: '岂无山歌与村笛？呕哑嘲哳难为听。', a: '白居易' },
+    { t: '今夜闻君琵琶语，如听仙乐耳暂明。', a: '白居易' },
+    { t: '莫辞更坐弹一曲，为君翻作《琵琶行》。', a: '白居易' },
+    { t: '感我此言良久立，却坐促弦弦转急。', a: '白居易' },
+    { t: '凄凄不似向前声，满座重闻皆掩泣。', a: '白居易' },
+    { t: '座中泣下谁最多？江州司马青衫湿。', a: '白居易' },
+    { t: '离离原上草，一岁一枯荣。', a: '白居易' },
+    { t: '野火烧不尽，春风吹又生。', a: '白居易' },
+    { t: '远芳侵古道，晴翠接荒城。', a: '白居易' },
+    { t: '又送王孙去，萋萋满别情。', a: '白居易' },
+    { t: '江南好，风景旧曾谙。', a: '白居易' },
+    { t: '日出江花红胜火，春来江水绿如蓝。能不忆江南？', a: '白居易' },
+    { t: '春蚕到死丝方尽，蜡炬成灰泪始干。', a: '李商隐' },
+    { t: '身无彩凤双飞翼，心有灵犀一点通。', a: '李商隐' },
+    { t: '此情可待成追忆，只是当时已惘然。', a: '李商隐' },
+    { t: '夕阳无限好，只是近黄昏。', a: '李商隐' },
+    { t: '相见时难别亦难，东风无力百花残。', a: '李商隐' },
+    { t: '君问归期未有期，巴山夜雨涨秋池。', a: '李商隐' },
+    { t: '何当共剪西窗烛，却话巴山夜雨时。', a: '李商隐' },
+    { t: '庄生晓梦迷蝴蝶，望帝春心托杜鹃。', a: '李商隐' },
+    { t: '沧海月明珠有泪，蓝田日暖玉生烟。', a: '李商隐' },
+    { t: '锦瑟无端五十弦，一弦一柱思华年。', a: '李商隐' },
+    { t: '嫦娥应悔偷灵药，碧海青天夜夜心。', a: '李商隐' },
+    { t: '直道相思了无益，未妨惆怅是清狂。', a: '李商隐' },
+    { t: '春心莫共花争发，一寸相思一寸灰。', a: '李商隐' },
+    { t: '深知身在情长在，怅望江头江水声。', a: '李商隐' },
+    { t: '此日六军同驻马，当时七夕笑牵牛。', a: '李商隐' },
+    { t: '如何四纪为天子，不及卢家有莫愁。', a: '李商隐' },
+    { t: '宣室求贤访逐臣，贾生才调更无伦。', a: '李商隐' },
+    { t: '可怜夜半虚前席，不问苍生问鬼神。', a: '李商隐' },
+    { t: '向晚意不适，驱车登古原。', a: '李商隐' },
+    { t: '夕阳无限好，只是近黄昏。', a: '李商隐' },
+    { t: '相见时难别亦难，东风无力百花残。', a: '李商隐' },
+    { t: '春蚕到死丝方尽，蜡炬成灰泪始干。', a: '李商隐' },
+    { t: '晓镜但愁云鬓改，夜吟应觉月光寒。', a: '李商隐' },
+    { t: '蓬山此去无多路，青鸟殷勤为探看。', a: '李商隐' },
+    { t: '昨夜星辰昨夜风，画楼西畔桂堂东。', a: '李商隐' },
+    { t: '身无彩凤双飞翼，心有灵犀一点通。', a: '李商隐' },
+    { t: '隔座送钩春酒暖，分曹射覆蜡灯红。', a: '李商隐' },
+    { t: '嗟余听鼓应官去，走马兰台类转蓬。', a: '李商隐' },
+    { t: '闻道阊门萼绿华，昔年相望抵天涯。', a: '李商隐' },
+    { t: '岂知一夜秦楼客，偷看吴王苑内花。', a: '李商隐' },
+    { t: '重帏深下莫愁堂，卧后清宵细细长。', a: '李商隐' },
+    { t: '神女生涯原是梦，小姑居处本无郎。', a: '李商隐' },
+    { t: '风波不信菱枝弱，月露谁教桂叶香。', a: '李商隐' },
+    { t: '直道相思了无益，未妨惆怅是清狂。', a: '李商隐' },
+    { t: '来是空言去绝踪，月斜楼上五更钟。', a: '李商隐' },
+    { t: '梦为远别啼难唤，书被催成墨未浓。', a: '李商隐' },
+    { t: '蜡照半笼金翡翠，麝熏微度绣芙蓉。', a: '李商隐' },
+    { t: '刘郎已恨蓬山远，更隔蓬山一万重。', a: '李商隐' },
+    { t: '飒飒东风细雨来，芙蓉塘外有轻雷。', a: '李商隐' },
+    { t: '金蟾啮锁烧香入，玉虎牵丝汲井回。', a: '李商隐' },
+    { t: '贾氏窥帘韩掾少，宓妃留枕魏王才。', a: '李商隐' },
+    { t: '春心莫共花争发，一寸相思一寸灰。', a: '李商隐' },
+    { t: '含情春晼晚，暂见夜阑干。', a: '李商隐' },
+    { t: '楼响将登怯，帘烘欲过难。', a: '李商隐' },
+    { t: '多羞钗上燕，真愧镜中鸾。', a: '李商隐' },
+    { t: '归去横塘晓，华星送宝鞍。', a: '李商隐' },
+    { t: '昨夜星辰昨夜风，画楼西畔桂堂东。', a: '李商隐' },
+    { t: '身无彩凤双飞翼，心有灵犀一点通。', a: '李商隐' },
+    { t: '隔座送钩春酒暖，分曹射覆蜡灯红。', a: '李商隐' },
+    { t: '嗟余听鼓应官去，走马兰台类转蓬。', a: '李商隐' },
+    { t: '闻道阊门萼绿华，昔年相望抵天涯。', a: '李商隐' },
+    { t: '岂知一夜秦楼客，偷看吴王苑内花。', a: '李商隐' },
+    { t: '重帏深下莫愁堂，卧后清宵细细长。', a: '李商隐' },
+    { t: '神女生涯原是梦，小姑居处本无郎。', a: '李商隐' },
+    { t: '风波不信菱枝弱，月露谁教桂叶香。', a: '李商隐' },
+    { t: '直道相思了无益，未妨惆怅是清狂。', a: '李商隐' },
+    { t: '相见时难别亦难，东风无力百花残。', a: '李商隐' },
+    { t: '春蚕到死丝方尽，蜡炬成灰泪始干。', a: '李商隐' },
+    { t: '晓镜但愁云鬓改，夜吟应觉月光寒。', a: '李商隐' },
+    { t: '蓬山此去无多路，青鸟殷勤为探看。', a: '李商隐' },
+    { t: '君问归期未有期，巴山夜雨涨秋池。', a: '李商隐' },
+    { t: '何当共剪西窗烛，却话巴山夜雨时。', a: '李商隐' },
+    { t: '夕阳无限好，只是近黄昏。', a: '李商隐' },
+    { t: '此情可待成追忆，只是当时已惘然。', a: '李商隐' },
+    { t: '庄生晓梦迷蝴蝶，望帝春心托杜鹃。', a: '李商隐' },
+    { t: '沧海月明珠有泪，蓝田日暖玉生烟。', a: '李商隐' },
+    { t: '锦瑟无端五十弦，一弦一柱思华年。', a: '李商隐' },
+    { t: '嫦娥应悔偷灵药，碧海青天夜夜心。', a: '李商隐' },
+    { t: '来是空言去绝踪，月斜楼上五更钟。', a: '李商隐' },
+    { t: '梦为远别啼难唤，书被催成墨未浓。', a: '李商隐' },
+    { t: '蜡照半笼金翡翠，麝熏微度绣芙蓉。', a: '李商隐' },
+    { t: '刘郎已恨蓬山远，更隔蓬山一万重。', a: '李商隐' },
+    { t: '飒飒东风细雨来，芙蓉塘外有轻雷。', a: '李商隐' },
+    { t: '金蟾啮锁烧香入，玉虎牵丝汲井回。', a: '李商隐' },
+    { t: '贾氏窥帘韩掾少，宓妃留枕魏王才。', a: '李商隐' },
+    { t: '春心莫共花争发，一寸相思一寸灰。', a: '李商隐' },
+    { t: '向晚意不适，驱车登古原。', a: '李商隐' },
+    { t: '夕阳无限好，只是近黄昏。', a: '李商隐' },
+    { t: '宣室求贤访逐臣，贾生才调更无伦。', a: '李商隐' },
+    { t: '可怜夜半虚前席，不问苍生问鬼神。', a: '李商隐' },
+    { t: '君问归期未有期，巴山夜雨涨秋池。', a: '李商隐' },
+    { t: '何当共剪西窗烛，却话巴山夜雨时。', a: '李商隐' },
+    { t: '相见时难别亦难，东风无力百花残。', a: '李商隐' },
+    { t: '春蚕到死丝方尽，蜡炬成灰泪始干。', a: '李商隐' },
+    { t: '晓镜但愁云鬓改，夜吟应觉月光寒。', a: '李商隐' },
+    { t: '蓬山此去无多路，青鸟殷勤为探看。', a: '李商隐' },
+    { t: '昨夜星辰昨夜风，画楼西畔桂堂东。', a: '李商隐' },
+    { t: '身无彩凤双飞翼，心有灵犀一点通。', a: '李商隐' },
+    { t: '隔座送钩春酒暖，分曹射覆蜡灯红。', a: '李商隐' },
+    { t: '嗟余听鼓应官去，走马兰台类转蓬。', a: '李商隐' },
+    { t: '闻道阊门萼绿华，昔年相望抵天涯。', a: '李商隐' },
+    { t: '岂知一夜秦楼客，偷看吴王苑内花。', a: '李商隐' },
+    { t: '重帏深下莫愁堂，卧后清宵细细长。', a: '李商隐' },
+    { t: '神女生涯原是梦，小姑居处本无郎。', a: '李商隐' },
+    { t: '风波不信菱枝弱，月露谁教桂叶香。', a: '李商隐' },
+    { t: '直道相思了无益，未妨惆怅是清狂。', a: '李商隐' },
+    { t: '此情可待成追忆，只是当时已惘然。', a: '李商隐' },
+    { t: '庄生晓梦迷蝴蝶，望帝春心托杜鹃。', a: '李商隐' },
+    { t: '沧海月明珠有泪，蓝田日暖玉生烟。', a: '李商隐' },
+    { t: '锦瑟无端五十弦，一弦一柱思华年。', a: '李商隐' },
+    { t: '嫦娥应悔偷灵药，碧海青天夜夜心。', a: '李商隐' },
+    { t: '来是空言去绝踪，月斜楼上五更钟。', a: '李商隐' },
+    { t: '梦为远别啼难唤，书被催成墨未浓。', a: '李商隐' },
+    { t: '蜡照半笼金翡翠，麝熏微度绣芙蓉。', a: '李商隐' },
+    { t: '刘郎已恨蓬山远，更隔蓬山一万重。', a: '李商隐' },
+    { t: '飒飒东风细雨来，芙蓉塘外有轻雷。', a: '李商隐' },
+    { t: '金蟾啮锁烧香入，玉虎牵丝汲井回。', a: '李商隐' },
+    { t: '贾氏窥帘韩掾少，宓妃留枕魏王才。', a: '李商隐' },
+    { t: '春心莫共花争发，一寸相思一寸灰。', a: '李商隐' },
+    { t: '向晚意不适，驱车登古原。', a: '李商隐' },
+    { t: '夕阳无限好，只是近黄昏。', a: '李商隐' },
+    { t: '宣室求贤访逐臣，贾生才调更无伦。', a: '李商隐' },
+    { t: '可怜夜半虚前席，不问苍生问鬼神。', a: '李商隐' },
+    { t: '如果冬天来了，春天还会远吗？', a: '雪莱' },
+    { t: '过去属于死神，未来属于你自己。', a: '雪莱' },
+    { t: '冬天到了，春天还会远吗？', a: '雪莱' },
+    { t: '浅水是喧哗的，深水是沉默的。', a: '雪莱' },
+    { t: '微笑，是仁爱的象征，快乐的源泉。', a: '雨果' },
+    { t: '世界上最宽阔的是海洋，比海洋更宽阔的是天空，比天空更宽阔的是人的心灵。', a: '雨果' },
+    { t: '未来将属于两种人：思想的人和劳动的人。实际上这两种人是一种人，因为思想也是劳动。', a: '雨果' },
+    { t: '谁虚度年华，青春就要褪色，生命就会抛弃他们。', a: '雨果' },
+    { t: '人有了物质才能生存，人有了理想才谈得上生活。', a: '雨果' },
+    { t: '释放无限光明的是人心，制造无边黑暗的也是人心。', a: '雨果' },
+    { t: '让自己的内心藏着一条巨龙，既是一种苦刑，也是一种乐趣。', a: '雨果' },
+    { t: '即使是最神圣的友谊里也可能潜藏着秘密。', a: '雨果' },
+    { t: '把理想运用到真实的事物上，便有了文明。', a: '雨果' },
+    { t: '人类第一种饥饿就是无知。', a: '雨果' },
+    { t: '生活中最大的幸福是坚信有人爱我们。', a: '雨果' },
+    { t: '如果你十分珍爱自己的羽毛，不使它受一点损伤，那么你将失去两只翅膀，永远不再能够凌空飞翔。', a: '雪莱' },
+    { t: '一首诗是生活的最纯洁的记录。', a: '雪莱' },
+    { t: '过去属于死神，未来属于你自己。', a: '雪莱' },
+    { t: '冬天已经到来，春天还会远吗？', a: '雪莱' },
+    { t: '浅水是喧哗的，深水是沉默的。', a: '雪莱' },
+    { t: '我们读书不能像蚂蚁，单只收集；也不能像蜘蛛，只从自己肚中抽丝；而应像蜜蜂，既采集又整理，这样才能酿出香甜的蜂蜜来。', a: '培根' },
+    { t: '顺境的美德是节制，逆境的美德是坚忍，这后一种是较为伟大的德行。', a: '培根' },
+    { t: '奇迹多是在厄运中出现的。', a: '培根' },
+    { t: '如果问在人生中最重要的才能是什么？那么回答是：第一，无所畏惧；第二，无所畏惧；第三，还是无所畏惧。', a: '培根' },
+    { t: '读史使人明智，读诗使人灵秀，数学使人周密，科学使人深刻，伦理学使人庄重，逻辑修辞之学使人善辩：凡有所学，皆成性格。', a: '培根' },
+    { t: '我活着是为了什么？是为了让别人活得更好。', a: '佚名' },
+    { t: '人类的全部尊严，就在于思想。', a: '帕斯卡' },
+    { t: '人生的本质在于运动，安谧宁静就是死亡。', a: '帕斯卡' },
+    { t: '我们要么盲目地服从，要么就自己主宰自己。', a: '帕斯卡' },
+    { t: '我们所有的欢乐，都来自别人的痛苦。', a: '帕斯卡' },
+    { t: '人生的价值不在于时间的长短，而在于你如何利用它。', a: '蒙田' },
+    { t: '认识自己的无知是认识世界的最可靠的方法。', a: '蒙田' },
+    { t: '真正有知识的人的成长过程，就像麦穗的成长过程。', a: '蒙田' },
+    { t: '认识你自己。', a: '苏格拉底' },
+    { t: '未经审视的人生是不值得过的。', a: '苏格拉底' },
+    { t: '我知道我一无所知。', a: '苏格拉底' },
+    { t: '世界上最快乐的事，莫过于为理想而奋斗。', a: '苏格拉底' },
+    { t: '教育不是灌输，而是点燃火焰。', a: '苏格拉底' },
+    { t: '想左右天下的人，须先能左右自己。', a: '苏格拉底' },
+    { t: '智慧意味着自知无知。', a: '苏格拉底' },
+    { t: '吾爱吾师，吾更爱真理。', a: '亚里士多德' },
+    { t: '人生最终的价值在于觉醒和思考的能力，而不只在于生存。', a: '亚里士多德' },
+    { t: '优秀是一种习惯。', a: '亚里士多德' },
+    { t: '幸福是灵魂的一种合乎德性的活动。', a: '亚里士多德' },
+    { t: '求知是人类的本性。', a: '亚里士多德' },
+    { t: '挚友如异体同心。', a: '亚里士多德' },
+    { t: '在科学上进步而道义上落后的人，不是前进，而是后退。', a: '亚里士多德' },
+    { t: '幽默是受过教育的标志。', a: '亚里士多德' },
+    { t: '不义而富且贵，于我如浮云。', a: '孔子' },
+    { t: '三军可夺帅也，匹夫不可夺志也。', a: '孔子' },
+    { t: '智者不惑，仁者不忧，勇者不惧。', a: '孔子' },
+    { t: '君子成人之美，不成人之恶。', a: '孔子' },
+    { t: '其身正，不令而行；其身不正，虽令不从。', a: '孔子' },
+    { t: '见贤思齐焉，见不贤而内自省也。', a: '孔子' },
+    { t: '志士仁人，无求生以害仁，有杀身以成仁。', a: '孔子' },
+    { t: '人无远虑，必有近忧。', a: '孔子' },
+    { t: '小不忍，则乱大谋。', a: '孔子' },
+    { t: '过而不改，是谓过矣。', a: '孔子' },
+    { t: '学而时习之，不亦说乎？有朋自远方来，不亦乐乎？人不知而不愠，不亦君子乎？', a: '孔子' },
+    { t: '吾十有五而志于学，三十而立，四十而不惑，五十而知天命，六十而耳顺，七十而从心所欲，不逾矩。', a: '孔子' },
+    { t: '温故而知新，可以为师矣。', a: '孔子' },
+    { t: '学而不思则罔，思而不学则殆。', a: '孔子' },
+    { t: '由，诲女知之乎！知之为知之，不知为不知，是知也。', a: '孔子' },
+    { t: '人而无信，不知其可也。', a: '孔子' },
+    { t: '朝闻道，夕死可矣。', a: '孔子' },
+    { t: '君子喻于义，小人喻于利。', a: '孔子' },
+    { t: '见贤思齐焉，见不贤而内自省也。', a: '孔子' },
+    { t: '父母在，不远游，游必有方。', a: '孔子' },
+    { t: '三年无改于父之道，可谓孝矣。', a: '孔子' },
+    { t: '不患人之不己知，患不知人也。', a: '孔子' },
+    { t: '吾与回言终日，不违，如愚。退而省其私，亦足以发，回也不愚。', a: '孔子' },
+    { t: '视其所以，观其所由，察其所安。人焉廋哉？人焉廋哉？', a: '孔子' },
+    { t: '温故而知新，可以为师矣。', a: '孔子' },
+    { t: '君子不器。', a: '孔子' },
+        { t: '先行其言而后从之。', a: '孔子' },
+    { t: '君子周而不比，小人比而不周。', a: '孔子' },
+    { t: '学而不思则罔，思而不学则殆。', a: '孔子' },
+    { t: '知之为知之，不知为不知，是知也。', a: '孔子' },
+    { t: '多闻阙疑，慎言其余，则寡尤；多见阙殆，慎行其余，则寡悔。', a: '孔子' },
+    { t: '举直错诸枉，则民服；举枉错诸直，则民不服。', a: '孔子' },
+    { t: '临之以庄，则敬；孝慈，则忠；举善而教不能，则劝。', a: '孔子' },
+    { t: '人而无信，不知其可也。大车无輗，小车无軏，其何以行之哉？', a: '孔子' },
+    { t: '殷因于夏礼，所损益，可知也；周因于殷礼，所损益，可知也。', a: '孔子' },
+    { t: '非其鬼而祭之，谄也。见义不为，无勇也。', a: '孔子' },
+    { t: '人而不仁，如礼何？人而不仁，如乐何？', a: '孔子' },
+    { t: '君子无所争，必也射乎！揖让而升，下而饮，其争也君子。', a: '孔子' },
+    { t: '巧笑倩兮，美目盼兮，素以为绚兮。', a: '《诗经》' },
+    { t: '礼后乎？', a: '孔子' },
+    { t: '夏礼，吾能言之，杞不足征也；殷礼，吾能言之，宋不足征也。', a: '孔子' },
+    { t: '祭如在，祭神如神在。', a: '孔子' },
+    { t: '获罪于天，无所祷也。', a: '孔子' },
+    { t: '与其媚于奥，宁媚于灶。', a: '孔子' },
+    { t: '周监于二代，郁郁乎文哉！吾从周。', a: '孔子' },
+    { t: '子入太庙，每事问。', a: '孔子' },
+    { t: '射不主皮，为力不同科，古之道也。', a: '孔子' },
+    { t: '尔爱其羊，我爱其礼。', a: '孔子' },
+    { t: '事君尽礼，人以为谄也。', a: '孔子' },
+    { t: '君使臣以礼，臣事君以忠。', a: '孔子' },
+    { t: '关雎，乐而不淫，哀而不伤。', a: '孔子' },
+    { t: '成事不说，遂事不谏，既往不咎。', a: '孔子' },
+    { t: '管仲之器小哉！', a: '孔子' },
+    { t: '管氏而知礼，孰不知礼？', a: '孔子' },
+    { t: '乐其可知也：始作，翕如也；从之，纯如也，皦如也，绎如也，以成。', a: '孔子' },
+    { t: '仪封人请见，曰：“君子之至于斯也，吾未尝不得见也。”从者见之。出曰：“二三子何患于丧乎？天下之无道也久矣，天将以夫子为木铎。”', a: '孔子' },
+    { t: '尽美矣，又尽善也。', a: '孔子' },
+    { t: '居上不宽，为礼不敬，临丧不哀，吾何以观之哉？', a: '孔子' },
+    { t: '里仁为美。择不处仁，焉得知？', a: '孔子' },
+    { t: '不仁者不可以久处约，不可以长处乐。仁者安仁，知者利仁。', a: '孔子' },
+    { t: '唯仁者能好人，能恶人。', a: '孔子' },
+    { t: '苟志于仁矣，无恶也。', a: '孔子' },
+    { t: '富与贵，是人之所欲也；不以其道得之，不处也。', a: '孔子' },
+    { t: '贫与贱，是人之所恶也；不以其道得之，不去也。', a: '孔子' },
+    { t: '君子去仁，恶乎成名？', a: '孔子' },
+    { t: '君子无终食之间违仁，造次必于是，颠沛必于是。', a: '孔子' },
+    { t: '我未见好仁者，恶不仁者。', a: '孔子' },
+    { t: '好仁者，无以尚之；恶不仁者，其为仁矣，不使不仁者加乎其身。', a: '孔子' },
+    { t: '有能一日用其力于仁矣乎？我未见力不足者。', a: '孔子' },
+    { t: '盖有之矣，我未之见也。', a: '孔子' },
+    { t: '人之过也，各于其党。观过，斯知仁矣。', a: '孔子' },
+    { t: '朝闻道，夕死可矣。', a: '孔子' },
+    { t: '士志于道，而耻恶衣恶食者，未足与议也。', a: '孔子' },
+    { t: '君子之于天下也，无适也，无莫也，义之与比。', a: '孔子' },
+    { t: '君子怀德，小人怀土；君子怀刑，小人怀惠。', a: '孔子' },
+    { t: '放于利而行，多怨。', a: '孔子' },
+    { t: '能以礼让为国乎？何有？不能以礼让为国，如礼何？', a: '孔子' },
+    { t: '不患无位，患所以立；不患莫己知，求为可知也。', a: '孔子' },
+    { t: '吾道一以贯之。', a: '孔子' },
+    { t: '夫子之道，忠恕而已矣。', a: '曾子' },
+    { t: '君子喻于义，小人喻于利。', a: '孔子' },
+    { t: '见贤思齐焉，见不贤而内自省也。', a: '孔子' },
+    { t: '事父母几谏，见志不从，又敬不违，劳而不怨。', a: '孔子' },
+    { t: '父母在，不远游，游必有方。', a: '孔子' },
+    { t: '三年无改于父之道，可谓孝矣。', a: '孔子' },
+    { t: '父母之年，不可不知也。一则以喜，一则以惧。', a: '孔子' },
+    { t: '古者言之不出，耻躬之不逮也。', a: '孔子' },
+    { t: '以约失之者鲜矣。', a: '孔子' },
+    { t: '君子欲讷于言而敏于行。', a: '孔子' },
+    { t: '德不孤，必有邻。', a: '孔子' },
+    { t: '事君数，斯辱矣；朋友数，斯疏矣。', a: '孔子' },
+    { t: '朽木不可雕也，粪土之墙不可圬也！', a: '孔子' },
+    { t: '始吾于人也，听其言而信其行；今吾于人也，听其言而观其行。', a: '孔子' },
+    { t: '敏而好学，不耻下问，是以谓之文也。', a: '孔子' },
+    { t: '有君子之道四焉：其行己也恭，其事上也敬，其养民也惠，其使民也义。', a: '孔子' },
+    { t: '晏平仲善与人交，久而敬之。', a: '孔子' },
+    { t: '臧文仲居蔡，山节藻棁，何如其知也？', a: '孔子' },
+    { t: '令尹子文三仕为令尹，无喜色；三已之，无愠色。', a: '孔子' },
+    { t: '崔子弑齐君，陈文子有马十乘，弃而违之。', a: '孔子' },
+    { t: '清矣。', a: '孔子' },
+    { t: '仁矣乎？', a: '孔子' },
+    { t: '未知，焉得仁？', a: '孔子' },
+    { t: '季文子三思而后行。子闻之，曰：“再，斯可矣。”', a: '孔子' },
+    { t: '宁武子，邦有道则知，邦无道则愚。其知可及也，其愚不可及也。', a: '孔子' },
+    { t: '伯夷、叔齐不念旧恶，怨是用希。', a: '孔子' },
+    { t: '孰谓微生高直？或乞醯焉，乞诸其邻而与之。', a: '孔子' },
+    { t: '巧言、令色、足恭，左丘明耻之，丘亦耻之。', a: '孔子' },
+    { t: '匿怨而友其人，左丘明耻之，丘亦耻之。', a: '孔子' },
+    { t: '盍各言尔志？', a: '孔子' },
+    { t: '愿车马衣轻裘与朋友共，敝之而无憾。', a: '子路' },
+    { t: '愿无伐善，无施劳。', a: '颜渊' },
+    { t: '老者安之，朋友信之，少者怀之。', a: '孔子' },
+    { t: '已矣乎！吾未见能见其过而内自讼者也。', a: '孔子' },
+    { t: '十室之邑，必有忠信如丘者焉，不如丘之好学也。', a: '孔子' },
+    { t: '雍也可使南面。', a: '孔子' },
+    { t: '居敬而行简，以临其民，不亦可乎？', a: '孔子' },
+    { t: '居简而行简，无乃大简乎？', a: '孔子' },
+    { t: '哀公问：“弟子孰为好学？”孔子对曰：“有颜回者好学，不迁怒，不贰过。不幸短命死矣，今也则亡，未闻好学者也。”', a: '孔子' },
+    { t: '回也，其心三月不违仁，其余则日月至焉而已矣。', a: '孔子' },
+    { t: '由也，千乘之国，可使治其赋也，不知其仁也。', a: '孔子' },
+    { t: '求也，千室之邑，百乘之家，可使为之宰也，不知其仁也。', a: '孔子' },
+    { t: '赤也，束带立于朝，可使与宾客言也，不知其仁也。', a: '孔子' },
+    { t: '赐也何敢望回？回也闻一以知十，赐也闻一以知二。', a: '子贡' },
+    { t: '弗如也，吾与女弗如也。', a: '孔子' },
+    { t: '宰予昼寝。子曰：“朽木不可雕也，粪土之墙不可圬也！于予与何诛？”', a: '孔子' },
+    { t: '始吾于人也，听其言而信其行；今吾于人也，听其言而观其行。于予与改是。', a: '孔子' },
+    { t: '吾未见刚者。', a: '孔子' },
+    { t: '枨也欲，焉得刚？', a: '孔子' },
+    { t: '我不欲人之加诸我也，吾亦欲无加诸人。', a: '子贡' },
+    { t: '赐也，非尔所及也。', a: '孔子' },
+    { t: '夫子之文章，可得而闻也；夫子之言性与天道，不可得而闻也。', a: '子贡' },
+    { t: '敏而好学，不耻下问，是以谓之文也。', a: '孔子' },
+    { t: '有君子之道四焉：其行己也恭，其事上也敬，其养民也惠，其使民也义。', a: '孔子' },
+    { t: '晏平仲善与人交，久而敬之。', a: '孔子' },
+    { t: '臧文仲居蔡，山节藻棁，何如其知也？', a: '孔子' },
+    { t: '令尹子文三仕为令尹，无喜色；三已之，无愠色。', a: '孔子' },
+    { t: '崔子弑齐君，陈文子有马十乘，弃而违之。', a: '孔子' },
+    { t: '清矣。', a: '孔子' },
+    { t: '仁矣乎？', a: '孔子' },
+    { t: '未知，焉得仁？', a: '孔子' },
+    { t: '季文子三思而后行。子闻之，曰：“再，斯可矣。”', a: '孔子' },
+    { t: '宁武子，邦有道则知，邦无道则愚。其知可及也，其愚不可及也。', a: '孔子' },
+    { t: '伯夷、叔齐不念旧恶，怨是用希。', a: '孔子' },
+    { t: '孰谓微生高直？或乞醯焉，乞诸其邻而与之。', a: '孔子' },
+    { t: '巧言、令色、足恭，左丘明耻之，丘亦耻之。', a: '孔子' },
+    { t: '匿怨而友其人，左丘明耻之，丘亦耻之。', a: '孔子' },
+    { t: '盍各言尔志？', a: '孔子' },
+    { t: '愿车马衣轻裘与朋友共，敝之而无憾。', a: '子路' },
+    { t: '愿无伐善，无施劳。', a: '颜渊' },
+    { t: '老者安之，朋友信之，少者怀之。', a: '孔子' },
+    { t: '已矣乎！吾未见能见其过而内自讼者也。', a: '孔子' },
+    { t: '十室之邑，必有忠信如丘者焉，不如丘之好学也。', a: '孔子' },
+    { t: '雍也可使南面。', a: '孔子' },
+    { t: '居敬而行简，以临其民，不亦可乎？', a: '孔子' },
+    { t: '居简而行简，无乃大简乎？', a: '孔子' },
+    { t: '哀公问：“弟子孰为好学？”孔子对曰：“有颜回者好学，不迁怒，不贰过。不幸短命死矣，今也则亡，未闻好学者也。”', a: '孔子' },
+    { t: '回也，其心三月不违仁，其余则日月至焉而已矣。', a: '孔子' },
+    { t: '由也，千乘之国，可使治其赋也，不知其仁也。', a: '孔子' },
+    { t: '求也，千室之邑，百乘之家，可使为之宰也，不知其仁也。', a: '孔子' },
+    { t: '赤也，束带立于朝，可使与宾客言也，不知其仁也。', a: '孔子' },
+    { t: '赐也何敢望回？回也闻一以知十，赐也闻一以知二。', a: '子贡' },
+    { t: '弗如也，吾与女弗如也。', a: '孔子' },
+    { t: '宰予昼寝。子曰：“朽木不可雕也，粪土之墙不可圬也！于予与何诛？”', a: '孔子' },
+    { t: '始吾于人也，听其言而信其行；今吾于人也，听其言而观其行。于予与改是。', a: '孔子' },
+    { t: '吾未见刚者。', a: '孔子' },
+    { t: '枨也欲，焉得刚？', a: '孔子' },
+    { t: '我不欲人之加诸我也，吾亦欲无加诸人。', a: '子贡' },
+    { t: '赐也，非尔所及也。', a: '孔子' },
+    { t: '夫子之文章，可得而闻也；夫子之言性与天道，不可得而闻也。', a: '子贡' },
+    { t: '学如不及，犹恐失之。', a: '孔子' },
+    { t: '巍巍乎，舜、禹之有天下也，而不与焉！', a: '孔子' },
+    { t: '大哉，尧之为君也！巍巍乎，唯天为大，唯尧则之。', a: '孔子' },
+    { t: '荡荡乎，民无能名焉。巍巍乎，其有成功也。焕乎，其有文章。', a: '孔子' },
+    { t: '舜有臣五人而天下治。', a: '孔子' },
+    { t: '武王曰：“予有乱臣十人。”', a: '孔子' },
+    { t: '才难，不其然乎？唐、虞之际，于斯为盛。', a: '孔子' },
+    { t: '三分天下有其二，以服事殷。周之德，其可谓至德也已矣。', a: '孔子' },
+    { t: '禹，吾无间然矣。菲饮食而致孝乎鬼神，恶衣服而致美乎黻冕，卑宫室而尽力乎沟洫。禹，吾无间然矣。', a: '孔子' },
+    { t: '子在川上曰：“逝者如斯夫，不舍昼夜。”', a: '孔子' },
+    { t: '吾未见好德如好色者也。', a: '孔子' },
+    { t: '譬如为山，未成一篑，止，吾止也。譬如平地，虽覆一篑，进，吾往也。', a: '孔子' },
+    { t: '语之而不惰者，其回也与！', a: '孔子' },
+    { t: '苗而不秀者有矣夫！秀而不实者有矣夫！', a: '孔子' },
+    { t: '后生可畏，焉知来者之不如今也？', a: '孔子' },
+    { t: '四十五十而无闻焉，斯亦不足畏也已。', a: '孔子' },
+    { t: '法语之言，能无从乎？改之为贵。', a: '孔子' },
+    { t: '巽与之言，能无说乎？绎之为贵。', a: '孔子' },
+    { t: '说而不绎，从而不改，吾末如之何也已矣。', a: '孔子' },
+    { t: '主忠信，毋友不如己者，过则勿惮改。', a: '孔子' },
+    { t: '三军可夺帅也，匹夫不可夺志也。', a: '孔子' },
+    { t: '衣敝缊袍，与衣狐貉者立，而不耻者，其由也与！', a: '孔子' },
+    { t: '不忮不求，何用不臧？', a: '《诗经》' },
+    { t: '是道也，何足以臧？', a: '孔子' },
+    { t: '岁寒，然后知松柏之后凋也。', a: '孔子' },
+    { t: '知者不惑，仁者不忧，勇者不惧。', a: '孔子' },
+    { t: '可与共学，未可与适道；可与适道，未可与立；可与立，未可与权。', a: '孔子' },
+    { t: '唐棣之华，偏其反而。岂不尔思？室是远而。', a: '《诗经》' },
+    { t: '未之思也，夫何远之有？', a: '孔子' }
   ];
   let lastQuote = -1;
   function showQuote() {
@@ -1466,7 +2482,18 @@
   // ================= 电子木鱼 =================
   const muyu = $('#muyu');
   const meritText = $('#meritText');
+  
+  // 随机祝福语词库
+  const meritWords = [
+    '功德+1', '烦恼-1', '暴富+1', '脱单+1', '发量+1', 'Bug-1', 
+    '好运+1', '霉运-1', '开心+1', '焦虑-1', '逢考必过', '一夜暴富', 
+    '水逆退散', '顺风顺水', '马上有钱', '元气+1'
+  ];
+  // 随机颜色（粉、金、青、紫、绿）
+  const meritColors = ['#ffb6c1', '#ffd700', '#00ffff', '#dda0dd', '#98fb98'];
+
   muyu.addEventListener('click', () => {
+    // 1. 播放声音
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const oscillator = audioCtx.createOscillator();
@@ -1481,9 +2508,18 @@
       oscillator.start();
       oscillator.stop(audioCtx.currentTime + 0.1);
     } catch(e) {}
+
+    // 2. 随机抽词和颜色
+    const randomWord = meritWords[Math.floor(Math.random() * meritWords.length)];
+    const randomColor = meritColors[Math.floor(Math.random() * meritColors.length)];
+    
+    meritText.textContent = randomWord;
+    meritText.style.color = randomColor;
+    
+    // 3. 触发飘字动画
     meritText.style.animation = 'none';
-    meritText.offsetHeight;
-    meritText.style.animation = 'floatUpFade 0.8s ease-out forwards';
+    meritText.offsetHeight; // 强制重绘
+    meritText.style.animation = 'floatUpFade 1s ease-out forwards';
   });
 
   // ================= 日历（农历使用 lunar-javascript） =================
@@ -1750,60 +2786,94 @@
   notepadBtns.forEach(btn => {
     btn.addEventListener('mousedown', (e) => {
       e.preventDefault();
-      const cmd = btn.dataset.cmd;
+            const cmd = btn.dataset.cmd;
       document.execCommand(cmd, false, null);
       btn.classList.toggle('active', document.queryCommandState(cmd));
       notepadEditor.focus();
     });
   });
 
-  // ================= 组件配置与状态管理 =================
+  // ================= 组件配置与状态管理（绝对定位自由布局） =================
   const grid = document.getElementById('draggableGrid');
-  
+
   const defaultConfig = {
-    weather: { size: 12, visible: true, order: 1, name: '天气详情' },
-    timer: { size: 4, visible: true, order: 2, name: '计时' },
-    todo: { size: 8, visible: true, order: 3, name: '待办事项' },
-    shortcuts: { size: 6, visible: true, order: 4, name: '快捷访问' },
-    quote: { size: 6, visible: true, order: 5, name: '每日格言' },
-    calendar: { size: 4, visible: true, order: 6, name: '日历' },
-    holiday: { size: 4, visible: true, order: 7, name: '节日倒计时' },
-    worldclock: { size: 4, visible: true, order: 8, name: '世界时钟' },
-    progress: { size: 4, visible: true, order: 9, name: '进度条' },
-    fishing: { size: 4, visible: true, order: 10, name: '打工倒计时' },
-    notepad: { size: 6, visible: true, order: 11, name: '迷你记事本' }
+    weather:    { x: 0,    y: 0,    w: 1150, h: 320, visible: true, order: 1,  name: '天气详情' },
+    timer:      { x: 0,    y: 340,  w: 360,  h: 280, visible: true, order: 2,  name: '计时' },
+    todo:       { x: 380,  y: 340,  w: 770,  h: 280, visible: true, order: 3,  name: '待办事项' },
+    shortcuts:  { x: 0,    y: 640,  w: 560,  h: 280, visible: true, order: 4,  name: '快捷访问' },
+    quote:      { x: 580,  y: 640,  w: 570,  h: 280, visible: true, order: 5,  name: '每日格言' },
+    calendar:   { x: 0,    y: 940,  w: 380,  h: 320, visible: true, order: 6,  name: '日历' },
+    holiday:    { x: 400,  y: 940,  w: 380,  h: 320, visible: true, order: 7,  name: '节日倒计时' },
+    worldclock: { x: 800,  y: 940,  w: 350,  h: 320, visible: true, order: 8,  name: '世界时钟' },
+    progress:   { x: 0,    y: 1280, w: 360,  h: 260, visible: true, order: 9,  name: '进度条' },
+    fishing:    { x: 380,  y: 1280, w: 360,  h: 260, visible: true, order: 10, name: '打工倒计时' },
+    notepad:    { x: 760,  y: 1280, w: 390,  h: 300, visible: true, order: 11, name: '迷你记事本' }
   };
-  
-  let widgetConfig = store.get('nt_widgetConfig', defaultConfig);
+
+  let widgetConfig = store.get('nt_widgetConfig', null);
+  // 旧版 12 列栅格配置迁移到绝对定位
+  const isOldConfig = widgetConfig && widgetConfig.weather && widgetConfig.weather.size !== undefined;
+  if (!widgetConfig || isOldConfig) {
+    widgetConfig = JSON.parse(JSON.stringify(defaultConfig));
+    store.set('nt_widgetConfig', widgetConfig);
+  }
+  // 补齐缺失字段
   Object.keys(defaultConfig).forEach(k => {
-    if (!widgetConfig[k]) widgetConfig[k] = defaultConfig[k];
-    if (!widgetConfig[k].name) widgetConfig[k].name = defaultConfig[k].name;
+    if (!widgetConfig[k]) widgetConfig[k] = JSON.parse(JSON.stringify(defaultConfig[k]));
+    else {
+      if (widgetConfig[k].x === undefined) widgetConfig[k].x = defaultConfig[k].x;
+      if (widgetConfig[k].y === undefined) widgetConfig[k].y = defaultConfig[k].y;
+      if (widgetConfig[k].w === undefined) widgetConfig[k].w = defaultConfig[k].w;
+      if (widgetConfig[k].h === undefined) widgetConfig[k].h = defaultConfig[k].h;
+      if (widgetConfig[k].visible === undefined) widgetConfig[k].visible = true;
+      if (widgetConfig[k].name === undefined) widgetConfig[k].name = defaultConfig[k].name;
+      if (widgetConfig[k].order === undefined) widgetConfig[k].order = defaultConfig[k].order;
+    }
   });
 
   function saveConfig() {
     store.set('nt_widgetConfig', widgetConfig);
   }
 
+  function updateGridHeight() {
+    let maxBottom = 0;
+    Object.values(widgetConfig).forEach(c => {
+      if (c.visible) maxBottom = Math.max(maxBottom, c.y + c.h);
+    });
+    grid.style.minHeight = (maxBottom + 40) + 'px';
+  }
+
   function applyWidgetState() {
     const widgets = Array.from(grid.querySelectorAll('.widget'));
-    widgets.sort((a, b) => widgetConfig[a.dataset.id].order - widgetConfig[b.dataset.id].order);
-    
     widgets.forEach(w => {
-      grid.appendChild(w);
       const conf = widgetConfig[w.dataset.id];
-      
-      if (conf.visible) {
-        w.classList.remove('hidden-widget');
-      } else {
-        w.classList.add('hidden-widget');
+      if (!conf) return;
+      if (!conf.visible) {
+        w.style.display = 'none';
+        return;
       }
-      
-      w.className = w.className.replace(/col-\d+/g, '');
-      w.classList.add(`col-${conf.size}`);
+      w.style.display = 'flex';
+      w.style.left   = conf.x + 'px';
+      w.style.top    = conf.y + 'px';
+      w.style.width  = conf.w + 'px';
+      w.style.height = conf.h + 'px';
     });
+    updateGridHeight();
   }
 
   applyWidgetState();
+  window.addEventListener('resize', () => {
+    // 窗口变窄时，把超出右边界的 widget 拉回来
+    const gridW = grid.offsetWidth;
+    let changed = false;
+    Object.values(widgetConfig).forEach(c => {
+      if (c.visible && c.x + c.w > gridW) {
+        c.x = Math.max(0, gridW - c.w);
+        changed = true;
+      }
+    });
+    if (changed) { saveConfig(); applyWidgetState(); }
+  });
 
   // ================= 菜单渲染 =================
   const addWidgetBtn = $('#addWidgetBtn');
@@ -1855,109 +2925,196 @@
     }
   });
 
-  // ================= 组件拖拽排序 =================
-  let draggedItem = null;
+  // ================= 一键整理 =================
+  function tidyLayout() {
+    const gridW = grid.offsetWidth;
+    const gap = 16;
+    const minW = 300;
+
+    // 按 order 排序可见组件
+    const items = Object.keys(widgetConfig)
+      .map(id => ({ id, conf: widgetConfig[id] }))
+      .filter(it => it.conf.visible)
+      .sort((a, b) => (a.conf.y - b.conf.y) || (a.conf.x - b.conf.x));
+
+    // 按“理想宽度”把组件分成若干行：尽量每行铺满
+    // 简单策略：每行最多 3 列（窄屏 1 列、中屏 2 列、宽屏 3 列）
+    let cols = 3;
+    if (gridW < 760) cols = 1;
+    else if (gridW < 1100) cols = 2;
+    if (items.length < cols) cols = items.length;
+
+    const colW = Math.floor((gridW - gap * (cols - 1)) / cols);
+
+    let x = 0, y = 0, col = 0, rowMaxH = 0;
+    items.forEach((it) => {
+      const c = it.conf;
+
+      // 宽度至少 minW；如果原本很宽（比如天气卡），让它占满整行
+      let w = Math.min(colW, Math.max(minW, c.w));
+      let spanCols = 1;
+      if (c.w > colW * 1.4) {
+        spanCols = cols;
+        w = gridW;
+      }
+
+      // 剩余列数不够放这个组件 → 换到下一行
+      if (col + spanCols > cols) {
+        x = 0;
+        y += rowMaxH + gap;
+        col = 0;
+        rowMaxH = 0;
+      }
+
+      c.x = x;
+      c.y = y;
+      c.w = w;
+      c.h = Math.max(160, c.h);
+
+      rowMaxH = Math.max(rowMaxH, c.h);
+
+      // 累加 x 与 col
+      x += (spanCols === cols ? gridW : colW) + gap;
+      col += spanCols;
+
+      // 放满一行后，下一轮自然由开头的判断换行，这里不需要再换一次
+      if (col >= cols) {
+        x = 0;
+        y += rowMaxH + gap;
+        col = 0;
+        rowMaxH = 0;
+      }
+    });
+
+    saveConfig();
+    applyWidgetState();
+    toast('已整理 ✨');
+  }
+  const tidyBtn = $('#tidyBtn');
+  if (tidyBtn) {
+    tidyBtn.addEventListener('click', () => {
+      tidyLayout();
+    });
+  }
+  // ================= 组件自由拖动（改 x/y） =================
+  let draggingWidget = null;
+  let dragOffsetX = 0, dragOffsetY = 0;
+  let dragMoved = false;
+  let dragStartX = 0, dragStartY = 0;
 
   document.querySelectorAll('.widget-header').forEach(header => {
     header.addEventListener('mousedown', (e) => {
-      const widget = header.closest('.widget');
       if (e.target.closest('button')) return;
-      widget.setAttribute('draggable', 'true');
-    });
-
-    header.addEventListener('mouseup', (e) => {
-      const widget = header.closest('.widget');
-      widget.setAttribute('draggable', 'false');
-    });
-  });
-
-  grid.addEventListener('dragstart', (e) => {
-    const widget = e.target.closest('.widget');
-    if (!widget || widget.getAttribute('draggable') !== 'true') {
+      if (window.innerWidth <= 860) return;
       e.preventDefault();
-      return;
-    }
-    
-    draggedItem = widget;
-    setTimeout(() => widget.classList.add('dragging'), 0);
-    e.dataTransfer.effectAllowed = 'move';
-  });
 
-  grid.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    if (!draggedItem) return;
-    
-    const target = e.target.closest('.widget');
-    if (!target || target === draggedItem || target.classList.contains('hidden-widget')) return;
-	const rect = target.getBoundingClientRect();
-    const midpoint = rect.top + rect.height / 2;
-    
-    if (e.clientY < midpoint) {
-      grid.insertBefore(draggedItem, target);
-    } else {
-      grid.insertBefore(draggedItem, target.nextSibling);
-    }
-    
-    const currentOrder = Array.from(grid.children).map(c => c.dataset.id);
-    currentOrder.forEach((id, index) => {
-      if(widgetConfig[id]) widgetConfig[id].order = index;
+      const w = header.closest('.widget');
+      const conf = widgetConfig[w.dataset.id];
+      draggingWidget = w;
+      dragOffsetX = e.clientX - conf.x;
+      dragOffsetY = e.clientY - conf.y;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      dragMoved = false;
+      w.classList.add('dragging');
+      w.style.zIndex = 999;
+
+      const onMove = (ev) => {
+        if (!draggingWidget) return;
+        if (Math.hypot(ev.clientX - dragStartX, ev.clientY - dragStartY) > 4) dragMoved = true;
+        if (!dragMoved) return;
+        let nx = ev.clientX - dragOffsetX;
+        let ny = ev.clientY - dragOffsetY;
+        // 边界限制
+        nx = Math.max(0, Math.min(nx, grid.offsetWidth - conf.w));
+        ny = Math.max(0, ny);
+        conf.x = nx;
+        conf.y = ny;
+        w.style.left = nx + 'px';
+        w.style.top  = ny + 'px';
+      };
+
+      const onUp = () => {
+        if (!draggingWidget) return;
+        draggingWidget.classList.remove('dragging');
+        draggingWidget.style.zIndex = '';
+        draggingWidget = null;
+        if (dragMoved) {
+          saveConfig();
+          updateGridHeight();
+        }
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      };
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
     });
-    saveConfig();
   });
 
-  grid.addEventListener('dragend', () => {
-    if (draggedItem) {
-      draggedItem.classList.remove('dragging');
-      draggedItem.setAttribute('draggable', 'false');
-    }
-    draggedItem = null;
-  });
-
-  // ================= 组件缩放 =================
-  let resizingItem = null;
-  let startX = 0;
-  let startSize = 0;
+  // ================= 组件 8 方向自由缩放 =================
+  const MIN_W = 240, MIN_H = 160;
 
   document.querySelectorAll('.resize-handle').forEach(handle => {
     handle.addEventListener('mousedown', (e) => {
+      if (window.innerWidth <= 860) return;
       e.preventDefault();
       e.stopPropagation();
-      resizingItem = e.target.closest('.widget');
-      startX = e.clientX;
-      startSize = widgetConfig[resizingItem.dataset.id].size;
-      
-      document.body.style.cursor = 'se-resize';
-      document.body.style.userSelect = 'none';
+
+      const w = handle.closest('.widget');
+      const conf = widgetConfig[w.dataset.id];
+      const dirClass = [...handle.classList].find(c =>
+        ['resize-n','resize-s','resize-w','resize-e','resize-nw','resize-ne','resize-sw','resize-se'].includes(c)
+      );
+      if (!dirClass) return;
+
+      const startX = e.clientX, startY = e.clientY;
+      const startConf = { x: conf.x, y: conf.y, w: conf.w, h: conf.h };
+      const gridW = grid.offsetWidth;
+
+      const onMove = (ev) => {
+        const dx = ev.clientX - startX;
+        const dy = ev.clientY - startY;
+        let { x, y, w: cw, h: ch } = startConf;
+
+        if (dirClass.includes('-e') || dirClass === 'resize-e') cw = Math.max(MIN_W, startConf.w + dx);
+        if (dirClass.includes('-s') || dirClass === 'resize-s') ch = Math.max(MIN_H, startConf.h + dy);
+        if (dirClass.includes('-w') || dirClass === 'resize-w') {
+          const newW = Math.max(MIN_W, startConf.w - dx);
+          x = startConf.x + (startConf.w - newW);
+          cw = newW;
+        }
+        if (dirClass.includes('-n') || dirClass === 'resize-n') {
+          const newH = Math.max(MIN_H, startConf.h - dy);
+          y = startConf.y + (startConf.h - newH);
+          ch = newH;
+        }
+
+        // 左/上边界
+        if (x < 0) { cw += x; x = 0; if (cw < MIN_W) cw = MIN_W; }
+        if (y < 0) { ch += y; y = 0; if (ch < MIN_H) ch = MIN_H; }
+        // 右边界
+        if (x + cw > gridW) cw = gridW - x;
+        if (cw < MIN_W) cw = MIN_W;
+        if (ch < MIN_H) ch = MIN_H;
+
+        conf.x = x; conf.y = y; conf.w = cw; conf.h = ch;
+        w.style.left   = x  + 'px';
+        w.style.top    = y  + 'px';
+        w.style.width  = cw + 'px';
+        w.style.height = ch + 'px';
+      };
+
+      const onUp = () => {
+        saveConfig();
+        updateGridHeight();
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      };
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
     });
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (!resizingItem) return;
-    
-    const deltaX = e.clientX - startX;
-    const colWidth = grid.offsetWidth / 12;
-    const deltaCols = Math.round(deltaX / colWidth);
-    
-    let newSize = startSize + deltaCols;
-    
-    if (newSize < 1) newSize = 1;
-    if (newSize > 12) newSize = 12;
-
-    if (widgetConfig[resizingItem.dataset.id].size !== newSize) {
-      widgetConfig[resizingItem.dataset.id].size = newSize;
-      
-      resizingItem.className = resizingItem.className.replace(/col-\d+/g, '');
-      resizingItem.classList.add(`col-${newSize}`);
-    }
-  });
-
-  document.addEventListener('mouseup', () => {
-    if (resizingItem) {
-      saveConfig();
-      resizingItem = null;
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    }
   });
 
 })();
