@@ -302,6 +302,7 @@
     transition: background .2s; flex-shrink: 0;
     touch-action: none;
     user-select: none;
+    -webkit-user-drag: none; /* 👈 核心修复：禁止原生拖拽 */
   }
   .sc:hover { background:var(--hover); color:var(--text); }
   .sc.dragging { opacity:.25; border-color:var(--accent); background:var(--accent-soft); cursor:grabbing; }
@@ -1399,6 +1400,7 @@
       a.target = '_blank';
       a.title = sc.url;
       a.dataset.idx = idx;
+      a.draggable = false; // 👈 核心修复：防止 a 标签被原生拖拽
 
       const safeName = escapeHtml(sc.name || '?');
       const iconUrl = escapeHtml(iconUrlOf(sc));
