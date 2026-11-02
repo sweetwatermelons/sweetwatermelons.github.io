@@ -25,6 +25,10 @@
     --hover: rgba(0, 0, 0, 0.04);
     --divider: rgba(0, 0, 0, 0.08);
     --scrollbar: rgba(0, 0, 0, 0.2);
+    --ctx-bg: rgba(255, 255, 255, 0.95);
+    --ctx-border: rgba(0, 0, 0, 0.12);
+    --ctx-hover: rgba(0, 0, 0, 0.06);
+    --ctx-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   }
   html[data-theme="dark"] {
     --bg: #202020;
@@ -44,10 +48,14 @@
     --hover: rgba(255, 255, 255, 0.06);
     --divider: rgba(255, 255, 255, 0.1);
     --scrollbar: rgba(255, 255, 255, 0.3);
+    --ctx-bg: rgba(35, 35, 35, 0.95);
+    --ctx-border: rgba(255, 255, 255, 0.12);
+    --ctx-hover: rgba(255, 255, 255, 0.10);
+    --ctx-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   }
 
   * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
-  html, body { height:100%; }
+  html, body { height:100%; width: 100%; overflow-x: hidden !important; }
 
   /* 待办事项输入框抖动动画 */
   @keyframes shake {
@@ -79,7 +87,7 @@
   .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
   .hello-block h1 { font-size:28px; font-weight:600; letter-spacing:-0.02em; line-height:1.25; }
   .hello-block p { font-size:13.5px; color:var(--text-soft); margin-top:6px; }
-  .top-right { display:flex; align-items:center; gap:14px; position: relative; z-index: 100; }
+  .top-right { display:flex; align-items:center; gap:14px; position: relative; z-index: 99999; }
 
   .pill {
     display:flex; align-items:center; gap:18px;
@@ -141,7 +149,7 @@
   .theme-btn:hover { transform:translateY(-2px); color:var(--accent); }
 
   /* 搜索 */
-  .search-wrap { position:relative; width:100%; z-index: 10; margin-bottom: 10px;}
+  .search-wrap { position:relative; width:100%; z-index: 9999; margin-bottom: 10px;}
   .search-box {
     display:flex; align-items:center;
     background:var(--card); backdrop-filter:blur(30px) saturate(150%);
@@ -171,6 +179,51 @@
   .sug-item .sug-text { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .sug-item .sug-hint { font-size:11px; color:var(--text-mute); }
 
+    /* 搜索引擎设置面板 */
+  .engine-setting-btn {
+    position: absolute;
+    right: -32px; /* 放在搜索框右侧 */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px; height: 32px;
+    background: transparent; border: none;
+    color: var(--text-mute); font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.2s, transform 0.2s;
+    z-index: 12;
+  }
+  .engine-setting-btn:hover { color: var(--accent); transform: translateY(-50%) rotate(45deg); }
+  
+  .engine-panel {
+    position: absolute; top: calc(100% + 10px); right: -32px;
+    width: 300px; background: var(--card); backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid var(--card-border); border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2); padding: 16px;
+    display: none; flex-direction: column; gap: 12px;
+    z-index: 999999; /* 👈 核心修复：层级拉满，永远在最上 */
+    text-align: left;
+  }
+  .engine-panel.show { display: flex; }
+  .engine-panel h4 { font-size: 13px; color: var(--text-soft); font-weight: 600; margin: 0; }
+  .engine-panel select { 
+    width: 100%; padding: 8px 10px; border-radius: 6px; 
+    background: var(--input-bg); border: 1px solid var(--divider); 
+    color: var(--text); outline: none; font-size: 13.5px; 
+  }
+  .engine-divider { height: 1px; background: var(--divider); margin: 4px 0; }
+  .engine-add-form { display: flex; flex-direction: column; gap: 8px; }
+  .engine-add-form input {
+    width: 100%; padding: 8px 10px; border-radius: 6px;
+    background: var(--input-bg); border: 1px solid var(--divider);
+    color: var(--text); outline: none; font-size: 13px;
+  }
+  .engine-add-form button {
+    padding: 8px; border-radius: 6px; background: var(--accent); 
+    color: #fff; border: none; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .engine-add-form button:hover { filter: brightness(1.1); }
+  .engine-tip { font-size: 11px; color: var(--text-mute); line-height: 1.4; }
+  
   /* ======= 自由布局容器 ======= */
   .grid-container {
     position: relative;
@@ -207,7 +260,7 @@
   .widget-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
   .widget-title .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
 
-  .widget.dragging { opacity: 0.6; border-color: var(--accent); z-index: 1000 !important; }
+  .widget.dragging { opacity: 0.6; border-color: var(--accent); }
   .widget.hidden-widget { display: none !important; }
 
   /* ======= 8 方向缩放手柄 ======= */
@@ -238,7 +291,7 @@
   .resize-se:hover::after { opacity: 1; border-color: var(--accent); }
 
   /* ======= 组件详情样式（保持不变） ======= */
-  .weather-expanded { display: flex; flex-direction: column; gap: 20px; height: 100%;}
+  .weather-expanded { display: flex; flex-direction: column; gap: 20px; flex: 1; min-height: 0; overflow-y: auto; }
   .we-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
   .we-main { display: flex; align-items: center; gap: 20px; }
   .we-main .emoji { width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; font-size: 64px; line-height: 1; }
@@ -426,6 +479,38 @@
     cursor: text;
   }
 
+  /* ======= 右键菜单 ======= */
+  .widget-ctxmenu {
+    position: fixed;
+    z-index: 99999;
+    min-width: 160px;
+    background: var(--ctx-bg);
+    backdrop-filter: blur(30px) saturate(150%);
+    border: 1px solid var(--ctx-border);
+    border-radius: 10px;
+    box-shadow: var(--ctx-shadow);
+    padding: 6px;
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 13.5px;
+    color: var(--text);
+    user-select: none;
+  }
+  .widget-ctxmenu.show { display: flex; }
+  .widget-ctxmenu .ctx-item {
+    padding: 9px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.12s;
+  }
+  .widget-ctxmenu .ctx-item:hover { background: var(--ctx-hover); }
+  .widget-ctxmenu .ctx-item .ctx-icon { font-size: 14px; width: 16px; text-align: center; opacity: .8; }
+  .widget-ctxmenu .ctx-sep { height: 1px; background: var(--divider); margin: 4px 6px; }
+
   /* 悬浮按钮 & 菜单 */
   .add-widget-btn {
     position: fixed; bottom: 40px; left: 40px;
@@ -578,7 +663,7 @@
     position: fixed; 
     bottom: 30px; 
     right: 40px; 
-    z-index: 999; 
+    z-index: 99999; /* 👈 木鱼永远在最上层 */
     display: flex; 
     flex-direction: column; 
     align-items: center; 
@@ -596,10 +681,13 @@
     transform-origin: center bottom;
   }
   
-  /* 敲击时的回弹动画 */
+  /* 敲击时的回弹动画（排除点击按钮组的情况） */
   .muyu-container:active .muyu-img { 
-    /* 缩放稍微减小，下沉高度减半 */
     transform: scale(0.92, 0.88) translateY(4px); 
+  }
+  /* 如果点击的是导出/导入按钮，强制取消木鱼的回弹 */
+  .muyu-container:has(.data-action-group button:active) .muyu-img {
+    transform: none !important;
   }
   .merit-text { 
     position: absolute; 
@@ -659,6 +747,37 @@
 	    .tidy-btn { bottom: 20px; left: 76px; width: 46px; height: 46px; font-size: 20px; }
     .widget-menu { bottom: 80px; left: 20px; }
   }
+  /* ======= 导入导出按钮 (基于木鱼容器定位) ======= */
+  .data-action-group {
+    display: flex;
+    flex-direction: column; /* 竖向排列 */
+    gap: 6px;
+    margin-bottom: 12px; /* 距离下方木鱼的距离 */
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+  /* 鼠标悬停木鱼区域时按钮变清晰 */
+  .muyu-container:hover .data-action-group {
+    opacity: 1;
+  }
+  .data-action-group button {
+    background: var(--card); 
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(20px) saturate(150%);
+    color: var(--text); 
+    padding: 6px 12px; 
+    border-radius: 8px;
+    font-size: 12px; 
+    font-weight: 600; 
+    cursor: pointer;
+    box-shadow: var(--shadow); 
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .data-action-group button:hover {
+    color: var(--accent); 
+    transform: translateY(-2px);
+  }
 </style>
 </head>
 <body>
@@ -698,6 +817,23 @@
       <span class="icon">🔍</span>
       <input id="searchInput" type="text" placeholder="搜索或输入网址…" autocomplete="off" spellcheck="false">
       <button id="searchBtn">搜索</button>
+    </div>
+    <!-- 新增：默认引擎设置按钮及面板 -->
+    <button class="engine-setting-btn" id="engineSettingBtn" title="自定义搜索引擎">⚙️</button>
+    <div class="engine-panel" id="enginePanel">
+      <h4>默认搜索引擎</h4>
+      <select id="defaultEngineSelect"></select>
+      <div class="engine-divider"></div>
+      <h4>添加自定义引擎</h4>
+      <div class="engine-add-form">
+        <input type="text" id="newEngineName" placeholder="名称 (如: 必应)">
+        <input type="text" id="newEngineUrl" placeholder="搜索链接 (需包含 q=)">
+        <div style="display: flex; gap: 8px;">
+          <button id="addEngineBtn" style="flex: 1;">添加 / 保存</button>
+          <button id="delEngineBtn" style="flex: 1; background: var(--danger);">删除当前</button>
+        </div>
+      </div>
+      <div class="engine-tip">注意：URL 中请用 <strong>%s</strong> 或 <strong>q=</strong> 结尾来接收搜索词</div>
     </div>
     <div class="suggestions" id="suggestions"></div>
   </div>
@@ -1049,6 +1185,12 @@
 <div class="tidy-btn" id="tidyBtn" title="一键整理">🧹</div>
 
 <div class="muyu-container" id="muyu">
+  <!-- 导入导出按钮组，放在木鱼上方 -->
+  <div class="data-action-group">
+    <button id="exportBtn" title="导出所有配置（支持加密）">📤 导出</button>
+    <button id="importBtn" title="导入配置文件">📥 导入</button>
+  </div>
+  
   <div class="merit-text" id="meritText">敲我</div>
   <img class="muyu-img" src="https://cdn.luogu.com.cn/upload/image_hosting/st18pvxc.webp" alt="木鱼" draggable="false">
 </div>
@@ -1074,7 +1216,14 @@
     </div>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
+
+<!-- 组件右键菜单 -->
+<div class="widget-ctxmenu" id="widgetCtxMenu">
+  <div class="ctx-item" data-action="top"><span class="ctx-icon">⬆️</span>置于顶层</div>
+  <div class="ctx-item" data-action="bottom"><span class="ctx-icon">⬇️</span>置于底层</div>
+</div>
 
 <script>
 (function(){
@@ -1287,13 +1436,142 @@
 
   // ================= 搜索 =================
   const searchInput = $('#searchInput'), searchBtn = $('#searchBtn'), suggestions = $('#suggestions');
-  const engines = [
+  
+  // 默认的引擎库
+  const defaultEngines = [
+    { name: '百度',   url: 'https://www.baidu.com/s?wd=', icon: '🌐' },
     { name: 'Google', url: 'https://www.google.com/search?q=', icon: '🌐' },
-    { name: 'Bing',   url: 'https://www.bing.com/search?q=', icon: '🔎' },
-    { name: '百度',   url: 'https://www.baidu.com/s?wd=', icon: '🔍' },
-    { name: 'GitHub', url: 'https://github.com/search?q=', icon: '🐙' },
+    { name: 'Bing',   url: 'https://www.bing.com/search?q=', icon: '🌐' },
+    { name: 'GitHub', url: 'https://github.com/search?q=', icon: '🌐' },
   ];
-  let engineIdx = store.get('nt_engine', 0);
+
+  // 读取本地保存的引擎库和默认引擎名
+  let engines = store.get('nt_engines_list', defaultEngines);
+  let defaultEngineName = store.get('nt_default_engine', '百度');
+  
+  // 清洗旧数据：统一把图标替换为 🌐，彻底消灭问号
+  engines.forEach(e => { e.icon = '🌐'; });
+  store.set('nt_engines_list', engines);
+  
+  // 确保引擎库里一定包含“百度”，防止以前的老版本缓存导致找不到
+  if (!engines.find(e => e.name === '百度')) {
+    engines.unshift(defaultEngines[0]);
+    store.set('nt_engines_list', engines);
+  }
+
+  // 渲染下拉框
+  function renderEngineSelect() {
+    const select = $('#defaultEngineSelect');
+    select.innerHTML = '';
+    engines.forEach(eng => {
+      const opt = document.createElement('option');
+      opt.value = eng.name;
+      opt.textContent = eng.name;
+      if (eng.name === defaultEngineName) opt.selected = true;
+      select.appendChild(opt);
+    });
+  }
+  renderEngineSelect();
+
+  // 绑定添加 / 保存 / 删除 自定义引擎
+   // 绑定添加 / 保存 / 删除 自定义引擎
+  $('#addEngineBtn').addEventListener('click', () => {
+    const name = $('#newEngineName').value.trim();
+    let url = $('#newEngineUrl').value.trim();
+    
+    // 1. 空值校验
+    if (!name || !url) { toast('请填写完整名称和链接'); return; }
+
+    // 2. 自动补全协议 (如果没有 http 或 https，自动加上)
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+
+    // 3. 核心校验：必须包含至少一个点，且不能有空格
+    if (!url.includes('.') || url.includes(' ')) {
+      toast('❌ 搜索链接格式不正确，请检查！');
+      return;
+    }
+
+    // 4. 自动补全搜索参数符号 (如果末尾没有 = 也没有 %s，自动补一个 =)
+    if (!url.includes('=') && !url.includes('%s')) {
+      url += '=';
+    }
+
+    const existingIdx = engines.findIndex(e => e.name === name);
+
+    if (existingIdx !== -1) {
+      // 如果名称已存在，直接更新它的 URL
+      engines[existingIdx].url = url;
+      toast(`已更新：${name}`);
+    } else {
+      // 如果不存在，添加新引擎
+      engines.push({ name, url, icon: '🌐' });
+      toast(`已添加：${name}`);
+    }
+    
+    // 保存并更新界面
+    store.set('nt_engines_list', engines);
+    defaultEngineName = name; // 保存后自动设为默认
+    store.set('nt_default_engine', name);
+    
+    renderEngineSelect();
+    $('#newEngineName').value = '';
+    $('#newEngineUrl').value = '';
+  });
+
+  // 👈 核心补丁：补上被弄丢的“删除”逻辑
+  $('#delEngineBtn').addEventListener('click', () => {
+    if (engines.length <= 1) { 
+      toast('必须保留至少一个引擎'); 
+      return; 
+    }
+    
+    const delName = defaultEngineName;
+    // 过滤掉当前选中的引擎
+    engines = engines.filter(e => e.name !== delName);
+    // 默认选中剩下的第一个
+    defaultEngineName = engines[0].name;
+    
+    store.set('nt_engines_list', engines);
+    store.set('nt_default_engine', defaultEngineName);
+    
+    renderEngineSelect();
+    $('#newEngineName').value = '';
+    $('#newEngineUrl').value = '';
+    toast(`已删除：${delName}`);
+  });
+
+  // 下拉框切换时，自动填充名称和URL到输入框（方便编辑/删除）
+  $('#defaultEngineSelect').addEventListener('change', (e) => {
+    defaultEngineName = e.target.value;
+    store.set('nt_default_engine', defaultEngineName);
+    
+    const curEng = engines.find(en => en.name === defaultEngineName);
+    if (curEng) {
+      $('#newEngineName').value = curEng.name;
+      $('#newEngineUrl').value = curEng.url;
+    }
+    toast(`默认搜索引擎已切换为 ${defaultEngineName}`);
+  });
+
+  // 面板开关控制
+  const engineSettingBtn = $('#engineSettingBtn');
+  const enginePanel = $('#enginePanel');
+  engineSettingBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    enginePanel.classList.toggle('show');
+  });
+  document.addEventListener('click', (e) => {
+    if (!enginePanel.contains(e.target) && e.target !== engineSettingBtn) {
+      enginePanel.classList.remove('show');
+    }
+  });
+
+  // 获取当前默认引擎对象
+  function getDefaultEngine() {
+    return engines.find(e => e.name === defaultEngineName) || engines[0];
+  }
 
   function detectUrl(q) {
     const t = q.trim();
@@ -1302,12 +1580,25 @@
     if (/^[\w-]+(\.[\w-]+)+([/?#].*)?$/.test(t) && !t.includes(' ')) return 'https://' + t;
     return null;
   }
+
+  // 触发搜索（回车或点按钮）
   function doSearch() {
     const q = searchInput.value.trim();
     if (!q) return;
     const direct = detectUrl(q);
-    if (direct) window.open(direct, '_blank');
-    else window.open(engines[engineIdx].url + encodeURIComponent(q), '_blank');
+    if (direct) {
+      window.open(direct, '_blank');
+    } else {
+      const defEng = getDefaultEngine();
+      // 兼容处理 URL，如果自定义是 %s 就替换，是普通参数就拼接
+      let finalUrl = defEng.url;
+      if (finalUrl.includes('%s')) {
+        finalUrl = finalUrl.replace(/%s/g, encodeURIComponent(q));
+      } else {
+        finalUrl = finalUrl + encodeURIComponent(q);
+      }
+      window.open(finalUrl, '_blank');
+    }
     suggestions.classList.remove('show');
     searchInput.value = '';
   }
@@ -1336,8 +1627,19 @@
     engines.forEach(eng => {
       const div = document.createElement('div');
       div.className = 'sug-item';
-      div.innerHTML = `<span class="sug-icon">${eng.icon}</span><span class="sug-text">${escapeHtml(q)}</span><span class="sug-hint">在 ${eng.name} 搜索</span>`;
-      div.addEventListener('click', () => { window.open(eng.url + encodeURIComponent(q), '_blank'); suggestions.classList.remove('show'); searchInput.value = ''; });
+      // 如果是默认引擎，加一个特殊标记
+      const isDefault = eng.name === defaultEngineName;
+      const hint = isDefault ? `<span style="color:var(--accent); font-weight:600;">默认 · ${eng.name}</span>` : `在 ${eng.name} 搜索`;
+      
+      div.innerHTML = `<span class="sug-icon">${eng.icon}</span><span class="sug-text">${escapeHtml(q)}</span><span class="sug-hint">${hint}</span>`;
+      div.addEventListener('click', () => { 
+        let finalUrl = eng.url;
+        if (finalUrl.includes('%s')) finalUrl = finalUrl.replace(/%s/g, encodeURIComponent(q));
+        else finalUrl = finalUrl + encodeURIComponent(q);
+        window.open(finalUrl, '_blank'); 
+        suggestions.classList.remove('show'); 
+        searchInput.value = ''; 
+      });
       suggestions.appendChild(div);
     });
     suggestions.classList.add('show');
@@ -1442,6 +1744,11 @@
       if (!card) return;
       if (e.pointerType === 'mouse' && e.button !== 0) return;
 
+      // 只在触屏/笔时阻止默认行为；鼠标模式下不阻止，避免影响父级 mousedown 拖动
+      if (e.pointerType !== 'mouse') {
+        e.preventDefault();
+      }
+
       const rect = card.getBoundingClientRect();
       drag = {
         el: card,
@@ -1477,6 +1784,8 @@
 
     function onMove(e){
       if (!drag) return;
+      // 拖拽中阻止默认滚动（触屏/触控板）
+      if (drag.moved) e.preventDefault();
       const dx = e.clientX - drag.startX;
       const dy = e.clientY - drag.startY;
       if (!drag.moved){
@@ -1527,10 +1836,10 @@
 
     const moveEvent = ('onpointerrawupdate' in window) ? 'pointerrawupdate' : 'pointermove';
     grid.addEventListener('pointerdown', onDown);
-    grid.addEventListener(moveEvent, onMove, { passive: true });
-    grid.addEventListener('pointerup', endDrag);
-    grid.addEventListener('pointercancel', endDrag);
-    window.addEventListener('pointerup', e => { if (drag) endDrag(e); });
+    // 把 move/up 挂到 window，避免子元素事件冒泡失败或被上层遮挡
+    window.addEventListener(moveEvent, onMove, { passive: false });
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
   })();
 
   renderShortcuts();
@@ -2580,7 +2889,10 @@
   // 随机颜色（粉、金、青、紫、绿）
   const meritColors = ['#ffb6c1', '#ffd700', '#00ffff', '#dda0dd', '#98fb98'];
 
-  muyu.addEventListener('click', () => {
+  muyu.addEventListener('click', (e) => {
+    // 如果点的是按钮区域，直接返回，不敲木鱼
+    if (e.target.closest('.data-action-group')) return;
+    
     // 1. 播放声音
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -2951,6 +3263,9 @@
     notepad:    { x: 760,  y: 1280, w: 390,  h: 300, visible: true, order: 11, name: '迷你记事本' }
   };
 
+  // 为所有组件默认 z-index = 1
+  Object.keys(defaultConfig).forEach(k => { if (defaultConfig[k].z === undefined) defaultConfig[k].z = 1; });
+
   let widgetConfig = store.get('nt_widgetConfig', null);
   // 旧版 12 列栅格配置迁移到绝对定位
   const isOldConfig = widgetConfig && widgetConfig.weather && widgetConfig.weather.size !== undefined;
@@ -2969,6 +3284,7 @@
       if (widgetConfig[k].visible === undefined) widgetConfig[k].visible = true;
       if (widgetConfig[k].name === undefined) widgetConfig[k].name = defaultConfig[k].name;
       if (widgetConfig[k].order === undefined) widgetConfig[k].order = defaultConfig[k].order;
+      if (widgetConfig[k].z === undefined) widgetConfig[k].z = defaultConfig[k].z;
     }
   });
 
@@ -2998,6 +3314,8 @@
       w.style.top    = conf.y + 'px';
       w.style.width  = conf.w + 'px';
       w.style.height = conf.h + 'px';
+      // 应用自定义层级，默认 1
+      w.style.zIndex = (conf.z !== undefined ? conf.z : 1);
     });
     updateGridHeight();
   }
@@ -3140,6 +3458,84 @@
       tidyLayout();
     });
   }
+  // ================= 右键菜单：置于顶层 / 置于底层 =================
+  const ctxMenu = document.getElementById('widgetCtxMenu');
+  let ctxTargetWidget = null;
+  let zCounter = 10;
+
+  // 初始化 zCounter 为现有最大 z + 100，保证“置于顶层”一定比现有都大
+  Object.values(widgetConfig).forEach(c => {
+    if (typeof c.z === 'number') zCounter = Math.max(zCounter, c.z + 100);
+  });
+
+  // 显示右键菜单
+  grid.addEventListener('contextmenu', (e) => {
+    const w = e.target.closest('.widget');
+    if (!w) return;
+    e.preventDefault();
+    ctxTargetWidget = w;
+    const id = w.dataset.id;
+    const conf = widgetConfig[id];
+    if (!conf) return;
+
+    // 定位菜单（防止超出屏幕）
+    const menuW = 170, menuH = 90;
+    let px = e.clientX, py = e.clientY;
+    if (px + menuW > window.innerWidth) px = window.innerWidth - menuW - 8;
+    if (py + menuH > window.innerHeight) py = window.innerHeight - menuH - 8;
+    ctxMenu.style.left = px + 'px';
+    ctxMenu.style.top  = py + 'px';
+    ctxMenu.classList.add('show');
+  });
+
+  // 点击菜单项
+  ctxMenu.addEventListener('click', (e) => {
+    const item = e.target.closest('.ctx-item');
+    if (!item || !ctxTargetWidget) return;
+    const action = item.dataset.action;
+    const id = ctxTargetWidget.dataset.id;
+    const conf = widgetConfig[id];
+    if (!conf) return;
+
+    if (action === 'top') {
+      zCounter += 1;
+      conf.z = zCounter;
+      ctxTargetWidget.style.zIndex = conf.z;
+    } else if (action === 'bottom') {
+      // 收集其它可见卡片的 z（排除自己）
+      const othersZ = [];
+      Object.entries(widgetConfig).forEach(([k, c]) => {
+        if (k !== id && c.visible && typeof c.z === 'number') othersZ.push(c.z);
+      });
+      const minOther = othersZ.length ? Math.min(...othersZ) : 1;
+      // 目标：比所有其它卡片都小，但避免出现负数导致被 grid 背景遮住
+      let target = Math.min(minOther - 1, 1);
+      // 如果目标 <= 0，把所有卡片整体 +100 拉开空间（含自己）
+      if (target <= 0) {
+        const shift = 100 - target;
+        Object.values(widgetConfig).forEach(c => {
+          if (typeof c.z === 'number') c.z += shift;
+        });
+        target += shift;
+      }
+      conf.z = target;
+      // 重新应用所有卡片的 z-index（因为可能整体 shift 了）
+      applyWidgetState();
+    }
+    saveConfig();
+    ctxMenu.classList.remove('show');
+    ctxTargetWidget = null;
+  });
+
+  // 点击空白处 / 滚动 / 缩放时关闭菜单
+  document.addEventListener('click', (e) => {
+    if (!ctxMenu.contains(e.target)) ctxMenu.classList.remove('show');
+  });
+  document.addEventListener('scroll', () => ctxMenu.classList.remove('show'), true);
+  window.addEventListener('resize', () => ctxMenu.classList.remove('show'));
+  // 阻止菜单本身的右键默认行为
+  ctxMenu.addEventListener('contextmenu', e => e.preventDefault());
+
   // ================= 组件自由拖动（改 x/y） =================
   let draggingWidget = null;
   let dragOffsetX = 0, dragOffsetY = 0;
@@ -3154,6 +3550,10 @@
 
       const w = header.closest('.widget');
       const conf = widgetConfig[w.dataset.id];
+      if (!conf) return;
+      // 兜底：如果 x/y 是 undefined 或 NaN，初始化成当前实际位置
+      if (typeof conf.x !== 'number' || isNaN(conf.x)) conf.x = parseInt(w.style.left) || 0;
+      if (typeof conf.y !== 'number' || isNaN(conf.y)) conf.y = parseInt(w.style.top) || 0;
       draggingWidget = w;
       dragOffsetX = e.clientX - conf.x;
       dragOffsetY = e.clientY - conf.y;
@@ -3161,7 +3561,7 @@
       dragStartY = e.clientY;
       dragMoved = false;
       w.classList.add('dragging');
-      w.style.zIndex = 999;
+      w.style.zIndex = 99998;  // 高于普通卡片，低于右键菜单(99999)
 
       let rafId = null;
       const onMove = (ev) => {
@@ -3188,8 +3588,10 @@
 
       const onUp = () => {
         if (!draggingWidget) return;
+        const wid = draggingWidget.dataset.id;
         draggingWidget.classList.remove('dragging');
-        draggingWidget.style.zIndex = '';
+        // 恢复配置中的层级，而不是清空
+        draggingWidget.style.zIndex = (widgetConfig[wid] && widgetConfig[wid].z !== undefined) ? widgetConfig[wid].z : 1;
         draggingWidget = null;
         if (dragMoved) {
           saveConfig();
@@ -3267,6 +3669,158 @@
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
     });
+  });
+
+  // ================= 导入 / 导出 配置功能 =================
+  
+  // 高强度混淆加密算法
+  function encryptData(text, pwd) {
+    const encoder = new TextEncoder();
+    const textBytes = encoder.encode(text);
+    const pwdBytes = encoder.encode(pwd);
+    
+    const encrypted = new Uint8Array(textBytes.length);
+    for (let i = 0; i < textBytes.length; i++) {
+      // 将数据与密码进行异或运算，并加上一定偏移量，产生乱码
+      encrypted[i] = textBytes[i] ^ pwdBytes[i % pwdBytes.length] ^ (i % 256);
+    }
+    
+    // 转成 Base64 字符串输出
+    let binary = '';
+    for (let i = 0; i < encrypted.length; i++) {
+      binary += String.fromCharCode(encrypted[i]);
+    }
+    return btoa(binary);
+  }
+
+  // 高强度解密算法
+  function decryptData(base64Str, pwd) {
+    try {
+      const binary = atob(base64Str);
+      const encryptedBytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        encryptedBytes[i] = binary.charCodeAt(i);
+      }
+      
+      const pwdBytes = new TextEncoder().encode(pwd);
+      const decrypted = new Uint8Array(encryptedBytes.length);
+      
+      for (let i = 0; i < encryptedBytes.length; i++) {
+        decrypted[i] = encryptedBytes[i] ^ pwdBytes[i % pwdBytes.length] ^ (i % 256);
+      }
+      
+      const decoder = new TextDecoder();
+      return decoder.decode(decrypted);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // 导出配置
+  $('#exportBtn').addEventListener('click', (e) => {
+    e.stopPropagation(); // 阻止点击冒泡触发木鱼
+    const pwd = prompt('请设置一个加密密码（推荐设置，不设密码文件将无隐私，设置密码后请妥善保管密码！！！）：');
+    if (pwd === null) return; // 点了取消
+
+    const data = {
+      config: widgetConfig,
+      shortcuts: shortcuts,
+      todos: todos,
+      notepad: notepadEditor.innerHTML,
+      theme: document.documentElement.getAttribute('data-theme'),
+      engines: engines,
+      defaultEngine: defaultEngineName,
+      city: currentCity,
+      workStart: workStartTime,
+      workEnd: workEndTime,
+      workDays: workDays
+    };
+
+    let fileContent = JSON.stringify(data);
+
+    if (pwd.trim() !== '') {
+      // 使用新算法加密，因为已经加密过了，所以不需要加 LOCK: 前缀暴露密码
+      fileContent = "🔒LOCKED_DATA🔒" + encryptData(fileContent, pwd);
+    }
+
+    const blob = new Blob([fileContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '配置.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    toast('✅ 配置已高强度加密导出');
+  });
+
+  // 导入配置
+  $('#importBtn').addEventListener('click', (e) => {
+    e.stopPropagation(); // 阻止点击冒泡触发木鱼
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.txt';
+    
+    input.onchange = (ev) => {
+      const file = ev.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        let content = event.target.result.trim();
+        if (!content) { toast('❌ 文件是空的'); return; }
+
+        // 判断是不是高强度加密的文件
+        if (content.startsWith('🔒LOCKED_DATA🔒')) {
+          const pwd = prompt('🔒 该配置文件已加密，请输入解密密码：');
+          if (!pwd) { toast('❌ 密码不能为空'); return; }
+          
+          const encryptedPayload = content.replace('🔒LOCKED_DATA🔒', '');
+          const decrypted = decryptData(encryptedPayload, pwd);
+          
+          if (!decrypted) {
+            toast('❌ 密码错误或文件已损坏！');
+            return;
+          }
+          content = decrypted;
+        }
+
+        try {
+          const data = JSON.parse(content);
+          
+          if (!confirm('⚠️ 导入配置将覆盖当前所有数据，确定继续吗？')) return;
+
+          if (data.config) { widgetConfig = data.config; saveConfig(); applyWidgetState(); }
+          if (data.shortcuts) { shortcuts = data.shortcuts; store.set('nt_shortcuts', shortcuts); renderShortcuts(); renderInlineLayout(); }
+          if (data.todos) { todos = data.todos; store.set('nt_todos', todos); renderTodos(); }
+          if (data.notepad !== undefined) { store.set('nt_notepad', data.notepad); notepadEditor.innerHTML = data.notepad; }
+          if (data.theme) { applyTheme(data.theme); }
+          if (data.engines) { engines = data.engines; store.set('nt_engines_list', engines); }
+          if (data.defaultEngine) { defaultEngineName = data.defaultEngine; store.set('nt_default_engine', defaultEngineName); }
+          if (typeof renderEngineSelect === 'function') renderEngineSelect();
+          if (data.city) { currentCity = data.city; store.set('nt_city', currentCity); fetchAllWeather(currentCity.id); }
+          if (data.workStart) { workStartTime = data.workStart; store.set('nt_workStart', workStartTime); $('#workStart').value = workStartTime; }
+          if (data.workEnd) { workEndTime = data.workEnd; store.set('nt_workEnd', workEndTime); $('#workEnd').value = workEndTime; }
+          if (data.workDays) { 
+            workDays = data.workDays; 
+            store.set('nt_workDays', workDays);
+            document.querySelectorAll('.work-day').forEach(cb => {
+              cb.checked = workDays[parseInt(cb.value)] !== false;
+            });
+          }
+          if (typeof updateWorkTime === 'function') updateWorkTime();
+
+          toast('✨ 配置导入成功！页面即将刷新...');
+          setTimeout(() => location.reload(), 1500);
+
+        } catch (err) {
+          console.error(err);
+          toast('❌ 解析失败，文件可能已损坏');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
   });
 
 })();
