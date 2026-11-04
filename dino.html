@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>像素风谷歌小恐龙</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; padding: 0;
+    background-color: #f7f7f7;
+    color: #535353;
+    font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    overflow-x: hidden;
+  }
+  .header {
+    margin-top: 30px;
+    font-size: 13px;
+    color: #888;
+    text-align: center;
+    line-height: 2;
+  }
+  kbd {
+    display: inline-block; background: #fff; border: 1px solid #ccc;
+    border-bottom-width: 2px; border-radius: 4px; padding: 0 6px;
+    font-size: 12px; font-family: inherit; color: #333;
+  }
+  
+  .control-panel {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: #535353;
+    background: #fff;
+    padding: 10px 20px;
+    border-radius: 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 200px;
+    background: transparent;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 18px; width: 18px;
+    border-radius: 50%;
+    background: #535353;
+    cursor: pointer;
+    margin-top: -7px;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    width: 100%; height: 4px;
+    cursor: pointer;
+    background: #ddd;
+    border-radius: 2px;
+  }
+
+  #game-container {
+    width: 100%;
+    max-width: 600px;
+    height: 150px;
+    position: relative;
+    margin-top: 20px;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  按 <kbd>空格</kbd> 或 <kbd>↑</kbd> 开始 / 跳跃 &nbsp;·&nbsp; 
+  跳跃中按 <kbd>↓</kbd> 快速下落 &nbsp;·&nbsp; 
+  撞到后按 <kbd>空格</kbd> 重新开始
+</div>
+
+<div class="control-panel">
+  <span>基准速度:</span>
+  <input type="range" id="speed-slider" min="3" max="15" value="6" step="0.1">
+  <span id="speed-display" style="width: 40px; font-weight: bold; text-align: right;">6.0x</span>
+</div>
+
+<div id="game-container">
+  <canvas id="game-canvas"></canvas>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  var canvas = document.getElementById('game-canvas');
+  var ctx = canvas.getContext('2d');
+  var W = 600;
+  var H = 150;
+
+  function resize() {
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.parentNode.getBoundingClientRect();
+    W = rect.width;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.scale(dpr, dpr);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ================= 核心配置 =================
+  var GROUND_Y = 128;
+  var TREX_X = 50;
+  var TREX_W = 44;
+  var TREX_H = 47;
+  var PTERO_MIN_SCORE = 450;
+
+  // 绝对物理常量
+  var GRAVITY = 0.6;
+  var JUMP_VELOCITY = -10;
+
+  // ================= 状态 =================
+  var state = {
+    running: false,
+    crashed: false,
+    baseSpeed: 6,
+    currentSpeed: 6,
+    score: 0,
+    highScore: 0,
+    groundOffset: 0,
+    yPos: 0,
+    yVel: 0,
+    isJumping: false,
+    isDucking: false,
+    obstacles: [],
+    nextObstacleDistance: 0,
+    animTimer: 0,
+    frame: 0,
+    runningTime: 0
+  };
+
+  // ================= 滑块 =================
+  var slider = document.getElementById('speed-slider');
+  var speedDisplay = document.getElementById('speed-display');
+
+  slider.addEventListener('input', function(e) {
+    var val = parseFloat(e.target.value);
+    state.baseSpeed = val;
+    speedDisplay.textContent = val.toFixed(1) + 'x';
+    state.currentSpeed = val; 
+  });
+
+  function reset() {
+    state.running = true;
+    state.crashed = false;
+    state.currentSpeed = state.baseSpeed;
+    state.score = 0;
+    state.groundOffset = 0;
+    state.yPos = 0;
+    state.yVel = 0;
+    state.isJumping = false;
+    state.isDucking = false;
+    state.obstacles = [];
+    state.nextObstacleDistance = 400;
+    state.animTimer = 0;
+    state.frame = 0;
+    state.runningTime = 0;
+  }
+
+  // ================= 输入 =================
+  function onJumpStart() {
+    if (!state.running || state.crashed) {
+      if (state.crashed) reset();
+      return;
+    }
+    if (!state.isJumping) {
+      state.isJumping = true;
+      state.isDucking = false;
+      state.yVel = JUMP_VELOCITY;
+    }
+  }
+
+  function onJumpEnd() {
+    if (state.isJumping && state.yVel < -4) {
+      state.yVel = -4;
+    }
+  }
+
+  function onDuckStart() {
+    if (state.crashed) return;
+    if (state.isJumping) {
+      state.yVel = 12; 
+    } else {
+      state.isDucking = true;
+    }
+  }
+
+  function onDuckEnd() {
+    state.isDucking = false;
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (['Space', 'ArrowUp', 'ArrowDown', 'Enter'].indexOf(e.code) > -1) e.preventDefault();
+    if (e.code === 'Space' || e.code === 'ArrowUp') onJumpStart();
+    if (e.code === 'ArrowDown') onDuckStart();
+    if (e.code === 'Enter' && state.crashed) reset();
+  });
+
+  document.addEventListener('keyup', function(e) {
+    if (e.code === 'Space' || e.code === 'ArrowUp') onJumpEnd();
+    if (e.code === 'ArrowDown') onDuckEnd();
+  });
+
+  canvas.addEventListener('mousedown', function(e) { e.preventDefault(); onJumpStart(); });
+  document.addEventListener('mouseup', onJumpEnd);
+  canvas.addEventListener('touchstart', function(e) { e.preventDefault(); onJumpStart(); }, {passive: false});
+  document.addEventListener('touchend', onJumpEnd);
+
+  // ================= 逻辑更新 =================
+  function update(dt) {
+    if (state.crashed) return;
+    var timeScale = dt / 16.66;
+
+    // 1. 跳跃物理（锁定不变）
+    if (state.isJumping) {
+      state.yPos += state.yVel * timeScale;
+      state.yVel += GRAVITY * timeScale;
+      
+      if (state.yPos > 0) {
+        state.yPos = 0;
+        state.isJumping = false;
+        state.yVel = 0;
+      }
+    }
+
+    // 2. 动态提速
+    state.runningTime += dt;
+    if (state.runningTime > 2000) {
+      var targetSpeed = Math.min(state.baseSpeed + 4, state.currentSpeed + 0.002 * timeScale);
+      state.currentSpeed = targetSpeed;
+    }
+
+    // 3. 画面滚动
+    var moveSpeed = state.currentSpeed * timeScale;
+    state.groundOffset = (state.groundOffset + moveSpeed) % 80;
+
+    // 4. 计分
+    state.animTimer += dt;
+    if (state.animTimer >= 100) {
+      state.score += 1;
+      state.animTimer -= 100;
+      state.frame = (state.frame + 1) % 2; 
+    }
+
+    // 5. 障碍物生成（核心修复：间距随速度动态放大！）
+    state.nextObstacleDistance -= moveSpeed;
+    if (state.nextObstacleDistance <= 0) {
+      if (state.score > PTERO_MIN_SCORE && Math.random() < 0.25) {
+        spawnPterodactyl();
+      } else {
+        spawnCactus();
+      }
+      
+      // 【关键修复】速度越快，需要的安全像素间距越大！
+      // 基础 250 像素 + 每倍速增加 25 像素的额外间距
+      var baseGap = 250;
+      var speedBonus = state.currentSpeed * 25; 
+      var randomBonus = Math.random() * 200;
+      
+      state.nextObstacleDistance = baseGap + speedBonus + randomBonus;
+    }
+
+    // 6. 碰撞检测
+    var tH = state.isDucking ? 26 : TREX_H;
+    var tY = GROUND_Y - tH + state.yPos;
+    // 进一步缩小恐龙碰撞箱，提升容错
+    var tLeft = TREX_X + 8;  
+    var tRight = TREX_X + TREX_W - 8; 
+
+    for (var i = state.obstacles.length - 1; i >= 0; i--) {
+      var obs = state.obstacles[i];
+      obs.x -= moveSpeed;
+      
+      if (obs.x + obs.w < 0) {
+        state.obstacles.splice(i, 1);
+        continue;
+      }
+
+      var oY = obs.type === 'bird' ? obs.y : GROUND_Y - obs.h;
+      var oH = obs.type === 'bird' ? obs.h : obs.h;
+      var oLeft = obs.x + 4;
+      var oRight = obs.x + obs.w - 4;
+      var oTop = oY + 4;
+      var oBottom = oY + oH - 4;
+
+      if (tLeft < oRight && tRight > oLeft && tY < oBottom && tY + tH > oTop) {
+        gameOver();
+      }
+    }
+  }
+
+  function spawnCactus() {
+    var baseW = 17, baseH = 35;
+    // 速度越快，越可能只生成单棵；速度越慢，才可能出现连排
+    var maxCount = state.currentSpeed > 10 ? 1 : Math.min(3, Math.floor(state.currentSpeed / 3));
+    var count = Math.floor(Math.random() * maxCount) + 1;
+    var spacing = 6; // 连排间距
+
+    for (var i = 0; i < count; i++) {
+      state.obstacles.push({
+        type: 'cactus',
+        x: W + 20 + (i * (baseW + spacing)), 
+        w: baseW,
+        h: baseH
+      });
+    }
+  }
+
+  function spawnPterodactyl() {
+    var heights = [GROUND_Y - 80, GROUND_Y - 50, GROUND_Y - 25];
+    var yPos = heights[Math.floor(Math.random() * heights.length)];
+    state.obstacles.push({
+      type: 'bird',
+      x: W + 20,
+      y: yPos,
+      w: 46,
+      h: 40
+    });
+  }
+
+  function gameOver() {
+    if (state.crashed) return;
+    state.crashed = true;
+    if (state.score > state.highScore) {
+      state.highScore = state.score;
+    }
+  }
+
+  // ================= 渲染 =================
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    drawCloud(W * 0.3, 30);
+    drawCloud(W * 0.7, 50);
+
+    ctx.strokeStyle = '#535353';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, GROUND_Y + 2);
+    ctx.lineTo(W, GROUND_Y + 2);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#535353';
+    for (var i = -80; i < W + 80; i += 40) {
+      ctx.fillRect(i + state.groundOffset, GROUND_Y + 4, 15, 2);
+    }
+
+    for (var j = 0; j < state.obstacles.length; j++) {
+      var o = state.obstacles[j];
+      if (o.type === 'cactus') {
+        ctx.fillStyle = '#535353';
+        ctx.fillRect(o.x, GROUND_Y - o.h, o.w, o.h);
+        ctx.fillRect(o.x - 4, GROUND_Y - o.h + 8, 4, 6);
+        ctx.fillRect(o.x + o.w, GROUND_Y - o.h + 14, 4, 6);
+      } else if (o.type === 'bird') {
+        drawPterodactyl(o.x, o.y);
+      }
+    }
+
+    drawTrex();
+
+    ctx.fillStyle = '#535353';
+    ctx.font = 'bold 14px monospace';
+    ctx.textAlign = 'right';
+    var scoreStr = String(Math.floor(state.score)).padStart(5, '0');
+    var hiStr = String(state.highScore).padStart(5, '0');
+    ctx.fillText('HI ' + hiStr + '  ' + scoreStr, W - 16, 28);
+    ctx.textAlign = 'left';
+
+    if (state.crashed) {
+      ctx.fillStyle = 'rgba(247,247,247,0.85)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#535353';
+      ctx.font = 'bold 18px "Microsoft YaHei", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('G A M E   O V E R', W / 2, H / 2 - 10);
+      ctx.font = '14px "Microsoft YaHei", sans-serif';
+      ctx.fillText('按空格或点击屏幕重新开始', W / 2, H / 2 + 20);
+      ctx.textAlign = 'left';
+    }
+  }
+
+  function drawPterodactyl(x, y) {
+    ctx.fillStyle = '#535353';
+    var wingUp = (state.frame === 0);
+    ctx.fillRect(x + 15, y + 15, 20, 10);
+    ctx.fillRect(x + 30, y + 10, 15, 10);
+    ctx.fillRect(x + 45, y + 13, 8, 4);
+    
+    ctx.fillStyle = '#f7f7f7';
+    ctx.fillRect(x + 36, y + 13, 3, 3);
+    ctx.fillStyle = '#535353';
+    
+    if (wingUp) {
+      ctx.beginPath();
+      ctx.moveTo(x + 15, y + 15);
+      ctx.lineTo(x + 30, y - 5);
+      ctx.lineTo(x + 40, y + 10);
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(x + 15, y + 20);
+      ctx.lineTo(x + 10, y + 40);
+      ctx.lineTo(x + 30, y + 25);
+      ctx.fill();
+    }
+  }
+
+  function drawCloud(x, y) {
+    ctx.fillStyle = '#d0d0d0';
+    ctx.beginPath();
+    ctx.arc(x, y, 10, 0, Math.PI * 2);
+    ctx.arc(x + 15, y - 5, 12, 0, Math.PI * 2);
+    ctx.arc(x + 30, y, 10, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawTrex() {
+    var tY = GROUND_Y - TREX_H + state.yPos;
+    ctx.fillStyle = '#535353';
+    
+    if (state.isDucking) {
+      ctx.fillRect(TREX_X + 5, tY + 25, 30, 20);
+      ctx.fillRect(TREX_X + 25, tY + 15, 22, 15);
+      ctx.fillStyle = '#f7f7f7';
+      ctx.fillRect(TREX_X + 38, tY + 20, 4, 4);
+      ctx.fillStyle = '#535353';
+      ctx.fillRect(TREX_X + 10, tY + 40, 8, 6);
+      ctx.fillRect(TREX_X + 25, tY + 40, 8, 6);
+    } else {
+      ctx.fillRect(TREX_X + 10, tY + 10, 20, 26);
+      ctx.fillRect(TREX_X + 22, tY, 22, 18);
+      ctx.fillRect(TREX_X, tY + 14, 10, 8);
+      
+      ctx.fillStyle = '#f7f7f7';
+      ctx.fillRect(TREX_X + 36, tY + 6, 4, 4);
+      ctx.fillStyle = '#535353';
+      ctx.fillRect(TREX_X + 26, tY + 20, 6, 2);
+      
+      if (state.isJumping) {
+        ctx.fillRect(TREX_X + 12, tY + 36, 6, 11);
+        ctx.fillRect(TREX_X + 22, tY + 36, 6, 11);
+      } else {
+        if (state.frame === 0) {
+          ctx.fillRect(TREX_X + 12, tY + 36, 6, 11);
+          ctx.fillRect(TREX_X + 22, tY + 36, 6, 6);
+        } else {
+          ctx.fillRect(TREX_X + 12, tY + 36, 6, 6);
+          ctx.fillRect(TREX_X + 22, tY + 36, 6, 11);
+        }
+      }
+    }
+  }
+
+  // ================= 主循环 =================
+  var lastTime = 0;
+  function loop(time) {
+    requestAnimationFrame(loop);
+    if (!lastTime) lastTime = time;
+    var dt = Math.min(time - lastTime, 50);
+    lastTime = time;
+
+    if (state.running) update(dt);
+    draw();
+  }
+
+  draw();
+  
+  function startOnce(e) {
+    if (e.type === 'keydown' && ['Space', 'ArrowUp', 'Enter'].indexOf(e.code) === -1) return;
+    document.removeEventListener('keydown', startOnce);
+    canvas.removeEventListener('mousedown', startOnce);
+    canvas.removeEventListener('touchstart', startOnce);
+    reset();
+    requestAnimationFrame(loop);
+  }
+  
+  document.addEventListener('keydown', startOnce);
+  canvas.addEventListener('mousedown', startOnce);
+  canvas.addEventListener('touchstart', startOnce, {passive: false});
+  
+})();
+</script>
+</body>
+</html>
