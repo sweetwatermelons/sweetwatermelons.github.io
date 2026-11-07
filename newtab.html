@@ -1138,33 +1138,55 @@
       <!-- 这里是小提示按钮及气泡 -->
       <div class="footer-tip-wrap">
         <div class="footer-tip-btn">?</div>
-        <div class="footer-tip-popup">
-          <h5>💡 使用小贴士</h5>
-                    <ul>
-            <li>
-              <strong>🖐 拖动窗口：</strong><br>
-              鼠标按住卡片最上方的<strong>标题栏</strong>（带有小圆点和文字的地方），按住不放即可将卡片拖动到屏幕任意位置。
+        <div class="footer-tip-popup" style="width: 320px; padding: 16px 18px; border-radius: 14px;">
+          <h5 style="font-size: 14px; margin-bottom: 10px;">💡 功能使用指南</h5>
+          <ul style="display: flex; flex-direction: column; gap: 12px;">
+            
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">拖动布局</span>
+              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">按住卡片顶部的<strong>标题栏</strong>（带小圆点处）可随意拖动位置。</span>
             </li>
-            <li>
-              <strong>↔️ 自由缩放：</strong><br>
-              将鼠标移动到卡片的<strong>边缘或四个角</strong>。当鼠标变成“双向箭头”时，按住拖拽即可自由调整卡片的长宽尺寸。
+            
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">缩放大小</span>
+              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">鼠标移到卡片<strong>边缘或四角</strong>变成双向箭头时，按住拖拽调整尺寸。</span>
             </li>
-            <li>
-              <strong>🧹 一键整理：</strong><br>
-              卡片拖得太乱？点击左下角的扫把。它会根据你的视觉位置，自动把卡片吸附、紧凑地排列整齐。
+            
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">层级调整</span>
+              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">在卡片空白处右键，可将其置于<strong>最顶层 / 最底层</strong>，防止遮挡。</span>
             </li>
-            <li>
-              <strong>➕ 显示与隐藏：</strong><br>
-              点击左下角的加号，会弹出组件列表。你可以直接点击名称来隐藏不需要的卡片，或者随时把它们召唤回来。
+
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">一键整理</span>
+              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">点击左下角<strong>扫把</strong>图标，自动紧凑排版卡片。</span>
             </li>
-            <li>
-              <strong>🌤 天气与城市：</strong><br>
-              点击右上角卡片上的“天气区域”，输入城市拼音（如：beijing）或中文，即可查询并切换你关注的城市。
+            
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">组件显示</span>
+              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">点击左下角<strong>加号（+）</strong>，可选择隐藏或显示特定功能卡片。</span>
             </li>
-            <li>
-              <strong>📝 其他小功能：</strong><br>
-              支持计时器、待办打卡、日历、快捷网页、在线记事本，甚至还可以敲电子木鱼。
+            
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">搜索引擎</span>
+              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">搜索框右侧齿轮⚙️可增删引擎；搜索框内可直接输入网址跳转。</span>
             </li>
+            
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">天气切换</span>
+              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">点击右上角天气区域，输入<strong>中文或拼音</strong>即可切换城市。</span>
+            </li>
+            
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">数据备份</span>
+              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">右下角木鱼上方有 <strong>📤 导出 / 📥 导入</strong>，可将所有配置加密保存。</span>
+            </li>
+
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">轻松一下</span>
+              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">点右下角<strong>电子木鱼</strong>，功德+1，烦恼-1。</span>
+            </li>
+
           </ul>
         </div>
       </div>
@@ -3722,14 +3744,19 @@
     const pwd = prompt('请设置一个加密密码（推荐设置，不设密码文件将无隐私，设置密码后请妥善保管密码！！！）：');
     if (pwd === null) return; // 点了取消
 
+    // 修复：防错处理，确保在 DOM 树中能准确取到值
+    const currentEngines = window.engines || engines || [];
+    const currentDefEngine = window.defaultEngineName || defaultEngineName || '百度';
+    const editorEl = document.getElementById('notepadEditor');
+
     const data = {
       config: widgetConfig,
       shortcuts: shortcuts,
       todos: todos,
-      notepad: notepadEditor.innerHTML,
+      notepad: editorEl ? editorEl.innerHTML : '',
       theme: document.documentElement.getAttribute('data-theme'),
-      engines: engines,
-      defaultEngine: defaultEngineName,
+      engines: currentEngines,
+      defaultEngine: currentDefEngine,
       city: currentCity,
       workStart: workStartTime,
       workEnd: workEndTime,
@@ -3795,8 +3822,14 @@
           if (data.todos) { todos = data.todos; store.set('nt_todos', todos); renderTodos(); }
           if (data.notepad !== undefined) { store.set('nt_notepad', data.notepad); notepadEditor.innerHTML = data.notepad; }
           if (data.theme) { applyTheme(data.theme); }
-          if (data.engines) { engines = data.engines; store.set('nt_engines_list', engines); }
-          if (data.defaultEngine) { defaultEngineName = data.defaultEngine; store.set('nt_default_engine', defaultEngineName); }
+          if (data.engines && Array.isArray(data.engines)) { 
+            engines = data.engines; 
+            store.set('nt_engines_list', engines); 
+          }
+          if (data.defaultEngine) { 
+            defaultEngineName = data.defaultEngine; 
+            store.set('nt_default_engine', defaultEngineName); 
+          }
           if (typeof renderEngineSelect === 'function') renderEngineSelect();
           if (data.city) { currentCity = data.city; store.set('nt_city', currentCity); fetchAllWeather(currentCity.id); }
           if (data.workStart) { workStartTime = data.workStart; store.set('nt_workStart', workStartTime); $('#workStart').value = workStartTime; }
