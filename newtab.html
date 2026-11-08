@@ -681,8 +681,8 @@
     transform-origin: center bottom;
   }
   
-  /* 敲击时的回弹动画（排除点击按钮组的情况） */
-  .muyu-container:active .muyu-img { 
+  /* 敲击时的回弹动画（排除点击按钮组、背景设置面板等情况） */
+  .muyu-container:active:not(:has(.data-action-group *:active)):not(:has(.bg-panel *:active)) .muyu-img { 
     transform: scale(0.92, 0.88) translateY(4px); 
   }
   /* 如果点击的是导出/导入按钮，强制取消木鱼的回弹 */
