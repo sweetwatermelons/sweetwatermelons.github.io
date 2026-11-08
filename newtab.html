@@ -1368,17 +1368,19 @@
       
       <div class="footer-tip-wrap">
         <div class="footer-tip-btn">?</div>
-        <div class="footer-tip-popup">
+                <div class="footer-tip-popup">
           <h5 style="font-size: 15px; margin-bottom: 14px; font-weight: 600;">💡 功能使用指南</h5>
           <ul style="display: flex; flex-direction: column; gap: 14px; margin: 0; padding: 0; list-style: none;">
 
             <li style="display: flex; align-items: flex-start; gap: 10px;">
               <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">布局调整</span>
               <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
-                <strong>① 拖动卡片：</strong>按住卡片顶部<strong>标题栏</strong>（带彩色小圆点那一行）即可拖动整张卡片，拖动中卡片会半透明并高亮边框，松开鼠标自动保存位置。<br>
+                <strong>① 拖动卡片：</strong>按住卡片顶部<strong>标题栏</strong>（带彩色小圆点那一行）即可拖动整张卡片，拖动中卡片半透明并高亮边框，松开鼠标自动保存位置。<br>
                 <strong>② 缩放卡片：</strong>鼠标移到卡片<strong>四条边或四个角</strong>，光标变成双向箭头，按住拖动即可自由调整宽高；最小宽 240px、最小高 160px。<br>
                 <strong>③ 调整层级：</strong>在卡片上<strong>点击右键</strong>弹出菜单，可选「⬆️ 置于顶层」或「⬇️ 置于底层」，解决卡片互相遮挡。<br>
-                <strong>④ 自动限位：</strong>拖动/缩放时卡片被限制在容器内，不会跑出页面；窗口缩小后超出右边缘的卡片会被自动拉回可视区。
+                <strong>④ 自动限位：</strong>拖动/缩放时卡片被限制在容器内，不会跑出页面；窗口缩小后超出右边缘的卡片会被自动拉回可视区。<br>
+                <strong>⑤ 一键整理：</strong>点击左下角<strong>扫把（🧹）</strong>，自动把所有可见卡片按行紧凑排列——宽屏 3 列、中屏 2 列、窄屏 1 列，特别宽的卡片（如天气卡）自动占满整行，完成后提示「已整理 ✨」。<br>
+                <strong>⑥ 移动端：</strong>屏幕宽度 ≤ 860px 时卡片自动改为纵向流式排列，拖动/缩放手柄自动禁用，保证手机正常浏览。
               </span>
             </li>
 
@@ -1386,8 +1388,8 @@
               <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">组件管理</span>
               <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
                 <strong>① 显示/隐藏：</strong>点击左下角<strong>加号（＋）</strong>弹出组件清单，每项右侧显示「显示中 / 已隐藏」，<strong>点一下即可切换</strong>，菜单不关闭，方便连续开关多个卡片。<br>
-                <strong>② 一键整理：</strong>点击加号旁的<strong>扫把（🧹）</strong>，自动把所有可见卡片按行紧凑排列——宽屏 3 列、中屏 2 列、窄屏 1 列，特别宽的卡片（如天气卡）自动占满整行，完成后提示「已整理 ✨」。<br>
-                <strong>③ 移动端：</strong>屏幕宽度 ≤ 860px 时卡片自动改为纵向流式排列，拖动/缩放手柄自动禁用，保证手机正常浏览。
+                <strong>② 组件清单：</strong>天气详情、计时、待办事项、快捷访问、每日格言、日历、节日倒计时、世界时钟、进度条、打工倒计时、汇率换算、单位换算、时间戳转换、二维码生成、摸鱼笑话、迷你记事本、音乐播放器，共 17 个组件。<br>
+                <strong>③ 布局持久化：</strong>所有卡片的位置、大小、显隐、层级都会自动保存到本地，刷新页面后恢复。
               </span>
             </li>
 
@@ -1414,7 +1416,7 @@
               <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
                 <strong>① 添加：</strong>点「＋ 添加」，填写名称、网址（图标 URL 可留空，留空则自动抓取网站 favicon），确定即添加。<br>
                 <strong>② 拖拽排序：</strong>直接<strong>按住图标拖动</strong>即可跟手排序，松手自动保存顺序；拖动时有浮动幽灵元素和插入占位效果。<br>
-                <strong>③ 删除：</strong>鼠标悬停图标，右上角出现 ×，点击删除。<br>
+                <strong>③ 删除：</strong>鼠标悬停图标，右上角出现 ×，点击删除，支持「撤销」恢复。<br>
                 <strong>④ 图标兜底：</strong>若 favicon 加载失败，会自动用网站名首字/首两字母生成彩色渐变图标，不会出现裂图。
               </span>
             </li>
@@ -1433,7 +1435,30 @@
               <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">打工倒计时</span>
               <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
                 <strong>① 设置：</strong>点卡片右上角<strong>齿轮⚙️</strong>展开设置，可修改上班/下班时间，并勾选一周中哪些天上班（默认周一至周五）。<br>
-                <strong>② 智能状态：</strong>未上班时显示「距离上班还有」倒计时；上班中显示「摸鱼中，距离下班还有」；已下班且明天上班则显示「距离明天上班还有」；休息日显示「🎉 休息日」。所有设置本地保存。
+                <strong>② 昼夜班：</strong>点标题栏<strong>☀️ 白班 / 🌙 夜班</strong>按钮切换；夜班时若下班时间早于上班时间，自动按跨天处理。<br>
+                <strong>③ 智能状态：</strong>未上班时显示「距离上班还有」倒计时；上班中显示「摸鱼中，距离下班还有」；已下班且明天上班则显示「距离明天上班还有」；休息日显示「🎉 休息日」。所有设置本地保存。
+              </span>
+            </li>
+
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">换算工具</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                <strong>① 汇率换算：</strong>选择源币种和目标币种、输入金额即可实时换算；点 ⇅ 交换币种，点 ↻ 强制刷新汇率。数据来自公开汇率接口，会显示数据日期。<br>
+                <strong>② 单位换算：</strong>支持长度、重量、温度、面积、体积、时间、数据 7 大类；温度按公式换算，其余按倍率换算，结果自动调整精度并显示「1 单位 = 多少」的关系式。<br>
+                <strong>③ 时间戳转换：</strong>输入 10 位秒级或 13 位毫秒级时间戳可转北京时间/ISO；输入日期字符串可反查秒级和毫秒级时间戳；点「当前时间」一键填入。
+              </span>
+            </li>
+
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">二维码生成</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                输入文本或网址，停顿 800ms 后自动生成二维码图片，可直接截图使用。<br>
+              </span>
+            </li>
+			<li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">摸鱼笑话</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                自动加载一条笑话并缓存到本地；点「换一个」重新获取。若接口异常会提示「网络开小差了」，可稍后重试。
               </span>
             </li>
 
@@ -1441,9 +1466,10 @@
               <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">迷你记事本</span>
               <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
                 <strong>① 富文本：</strong>支持<strong>加粗 B、斜体 I、下划线 U、删除线 S</strong>；选中文字后可切换字体（微软雅黑/宋体/楷体/黑体/仿宋/华文行楷等 13 种）、放大 A+、缩小 A-、重置 Aa。<br>
-                <strong>② 导出：</strong>📥 导出为 <strong>Word（.doc）</strong>，📄 导出为 <strong>TXT</strong>，文件名自动带日期。<br>
-                <strong>③ 导入：</strong>📂 从本地导入 TXT，会询问「追加到末尾」还是「覆盖现有内容」。<br>
-                <strong>④ 自动保存：</strong>输入停顿 500ms 后自动存入本地；粘贴时自动转纯文本，避免外部样式污染。空内容导出会提示「记事本还是空的」。
+                <strong>② 撤销重做：</strong>↩️ 撤销、↪️ 重做，也支持 Ctrl+Z / Ctrl+Y。<br>
+                <strong>③ 导出：</strong>📥 导出为 <strong>Word（.doc）</strong>，📄 导出为 <strong>TXT</strong>，文件名自动带日期。<br>
+                <strong>④ 导入：</strong>📂 从本地导入 TXT 或 .docx，会询问「追加到末尾」还是「覆盖现有内容」。<br>
+                <strong>⑤ 自动保存：</strong>输入停顿 500ms 后自动存入本地；粘贴时自动转纯文本，避免外部样式污染。空内容导出会提示「记事本还是空的」。
               </span>
             </li>
 
@@ -1475,7 +1501,7 @@
             </li>
 
             <li style="display: flex; align-items: flex-start; gap: 10px;">
-              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">轻松一下</span>
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">电子木鱼</span>
               <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
                 累了就点一下右下角的<strong>电子木鱼</strong>吧——每敲一下会播放木鱼音效，并随机飘出「功德+1 / 烦恼-1 / 暴富+1 / Bug-1 / 逢考必过 / 水逆退散」等祝福语，颜色随机变化，功德无量 🙏。
               </span>
