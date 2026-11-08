@@ -360,6 +360,52 @@
   .work-config input { background: var(--input-bg); border: 1px solid var(--divider); border-radius: 6px; padding: 6px; font-size: 12px; color: var(--text); outline: none; width: 70px; text-align: center; }
   .work-config input:focus { border-color: var(--accent); }
 
+  /* 汇率换算 */
+  .exchange-wrap { display: flex; flex-direction: column; gap: 10px; flex: 1; justify-content: center; }
+  .exchange-row { display: flex; align-items: center; gap: 10px; }
+  .exchange-input { flex: 1; background: var(--input-bg); border: 1px solid var(--divider); border-radius: 8px; padding: 10px 14px; font-size: 18px; font-weight: 600; color: var(--text); outline: none; min-width: 0; }
+  .exchange-input:focus { border-color: var(--accent); }
+  .exchange-select { background: var(--input-bg); border: 1px solid var(--divider); border-radius: 8px; padding: 10px 8px; font-size: 14px; color: var(--text); outline: none; cursor: pointer; width: 110px; flex-shrink: 0; }
+  .exchange-select:focus { border-color: var(--accent); }
+  .exchange-swap-row { display: flex; justify-content: center; }
+  .exchange-swap-btn { background: var(--input-bg); border: 1px solid var(--divider); border-radius: 50%; width: 32px; height: 32px; display: grid; place-items: center; cursor: pointer; color: var(--text-soft); font-size: 16px; transition: 0.2s; }
+  .exchange-swap-btn:hover { background: var(--hover); color: var(--accent); }
+  .exchange-result { flex: 1; background: var(--input-bg); border: 1px solid var(--divider); border-radius: 8px; padding: 10px 14px; font-size: 18px; font-weight: 600; color: var(--accent); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .exchange-meta { font-size: 11px; color: var(--text-mute); text-align: center; margin-top: 2px; }
+
+  /* 单位换算 */
+  .unitconv-wrap { display: flex; flex-direction: column; gap: 10px; flex: 1; justify-content: center; }
+  .unitconv-cat { display: flex; gap: 6px; flex-wrap: wrap; }
+  .unitconv-cat-btn { background: var(--input-bg); border: 1px solid var(--divider); border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 600; color: var(--text-soft); cursor: pointer; transition: 0.2s; }
+  .unitconv-cat-btn:hover { background: var(--hover); color: var(--text); }
+  .unitconv-cat-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .unitconv-row { display: flex; align-items: center; gap: 10px; }
+  .unitconv-input { flex: 1; background: var(--input-bg); border: 1px solid var(--divider); border-radius: 8px; padding: 10px 14px; font-size: 18px; font-weight: 600; color: var(--text); outline: none; min-width: 0; }
+  .unitconv-input:focus { border-color: var(--accent); }
+  .unitconv-select { background: var(--input-bg); border: 1px solid var(--divider); border-radius: 8px; padding: 10px 8px; font-size: 14px; color: var(--text); outline: none; cursor: pointer; width: 120px; flex-shrink: 0; }
+  .unitconv-select:focus { border-color: var(--accent); }
+  .unitconv-result { flex: 1; background: var(--input-bg); border: 1px solid var(--divider); border-radius: 8px; padding: 10px 14px; font-size: 18px; font-weight: 600; color: var(--accent); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .unitconv-meta { font-size: 11px; color: var(--text-mute); text-align: center; }
+
+  /* 时间戳 & 二维码通用 */
+  .tb-row { display: flex; align-items: center; gap: 8px; }
+  .tb-input { width: 100%; background: var(--input-bg); border: 1px solid var(--divider); border-radius: 8px; padding: 10px 12px; font-size: 14px; color: var(--text); outline: none; min-width: 0; font-family: inherit; }
+  .tb-input:focus { border-color: var(--accent); }
+  .tb-btn { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+  .tb-btn:hover { filter: brightness(1.1); }
+  .tb-result { background: var(--input-bg); border: 1px solid var(--divider); border-radius: 8px; padding: 10px 12px; font-size: 13px; font-weight: 500; color: var(--text-soft); }
+  
+  /* 独立的卡片容器 */
+  .timestamp-wrap { display: flex; flex-direction: column; gap: 10px; flex: 1; height: 100%; }
+  .qrcode-wrap { display: flex; flex-direction: column; gap: 12px; flex: 1; height: 100%; }
+
+  /* 摸鱼笑话 */
+  .joke-wrap { display: flex; flex-direction: column; gap: 8px; flex: 1; overflow-y: auto; padding-right: 4px; }
+  .joke-wrap::-webkit-scrollbar { width: 4px; }
+  .joke-wrap::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
+  .joke-text { font-size: 14px; line-height: 1.8; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+  .joke-meta { font-size: 11px; color: var(--text-mute); text-align: right; margin-top: auto; padding-top: 8px; flex-shrink: 0; }
+
   .notepad-container { display: flex; flex-direction: column; height: 100%; gap: 10px; }
   .notepad-btn { background: transparent; border: none; border-radius: 6px; width: 32px; height: 32px; display: grid; place-items: center; cursor: pointer; color: var(--text); font-size: 15px; transition: 0.2s; }
   .notepad-btn:hover { background: var(--hover); color: var(--accent); }
@@ -1027,6 +1073,130 @@
             </div>
           </div>
         </div>
+      </div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
+    </div>
+
+    <!-- 汇率换算 -->
+    <div class="widget" data-id="exchange">
+      <div class="widget-header">
+        <div class="widget-title"><span class="dot"></span> 汇率换算</div>
+        <button class="timer-btn" id="exchangeRefreshBtn" title="刷新汇率">↻</button>
+      </div>
+      <div class="exchange-wrap">
+        <div class="exchange-row">
+          <input type="number" id="exchangeAmount" class="exchange-input" value="100" min="0" step="any">
+          <select id="exchangeFrom" class="exchange-select"></select>
+        </div>
+        <div class="exchange-swap-row">
+          <button class="exchange-swap-btn" id="exchangeSwapBtn" title="交换">⇅</button>
+        </div>
+        <div class="exchange-row">
+          <div class="exchange-result" id="exchangeResult">--</div>
+          <select id="exchangeTo" class="exchange-select"></select>
+        </div>
+        <div class="exchange-meta" id="exchangeMeta">加载中…</div>
+      </div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
+    </div>
+
+    <!-- 单位换算 -->
+    <div class="widget" data-id="unitconv">
+      <div class="widget-header">
+        <div class="widget-title"><span class="dot"></span> 单位换算</div>
+        <button class="timer-btn" id="unitconvSwapBtn" title="交换">⇅</button>
+      </div>
+      <div class="unitconv-wrap">
+        <div class="unitconv-cat" id="unitconvCat"></div>
+        <div class="unitconv-row">
+          <input type="number" id="unitconvInput" class="unitconv-input" value="1" step="any">
+          <select id="unitconvFrom" class="unitconv-select"></select>
+        </div>
+        <div class="unitconv-row">
+          <div class="unitconv-result" id="unitconvResult">--</div>
+          <select id="unitconvTo" class="unitconv-select"></select>
+        </div>
+        <div class="unitconv-meta" id="unitconvMeta"></div>
+      </div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
+    </div>
+
+    <!-- 时间戳转换 -->
+    <div class="widget" data-id="timestamp">
+      <div class="widget-header">
+        <div class="widget-title"><span class="dot"></span> 时间戳转换</div>
+        <button class="timer-btn" id="tsNowBtn">当前时间</button>
+      </div>
+      <div class="timestamp-wrap">
+        <div class="tb-row">
+          <input type="text" class="tb-input" id="tsInput" placeholder="输入时间戳或日期字符串">
+        </div>
+        <div class="tb-row">
+          <button class="tb-btn" id="tsConvBtn" style="width: 100%;">转 换</button>
+        </div>
+        <div class="tb-result" id="tsResult" style="font-size: 13px; text-align: left; padding: 12px; white-space: pre-wrap; line-height: 1.6; flex: 1; display: flex; align-items: center; justify-content: center; overflow-y: auto;">等待输入...</div>
+      </div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
+    </div>
+
+    <!-- 二维码生成 -->
+    <div class="widget" data-id="qrcode">
+      <div class="widget-header">
+        <div class="widget-title"><span class="dot"></span> 二维码生成</div>
+      </div>
+      <div class="qrcode-wrap">
+        <input type="text" class="tb-input" id="qrInput" placeholder="输入文本或网址..." value="">
+        <div id="qrResult" style="background: #fff; padding: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: center; width: 100%; flex: 1; min-height: 120px;">
+          <span style="color: #999; font-size: 12px;">生成中...</span>
+        </div>
+      </div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
+    </div>
+
+    <!-- 摸鱼笑话 -->
+    <div class="widget" data-id="joke">
+      <div class="widget-header">
+        <div class="widget-title"><span class="dot"></span> 摸鱼笑话</div>
+        <button class="timer-btn" id="jokeRefreshBtn" title="换一个">换一个</button>
+      </div>
+      <div class="joke-wrap">
+        <div class="joke-text" id="jokeText">加载中...</div>
+        <div class="joke-meta" id="jokeMeta"></div>
       </div>
       <div class="resize-handle resize-n"></div>
       <div class="resize-handle resize-s"></div>
@@ -2569,6 +2739,528 @@
   updateWorkTime();
   setInterval(updateWorkTime, 1000);
 
+  // ================= 汇率换算 =================
+  const exchangeAmount = $('#exchangeAmount');
+  const exchangeFrom = $('#exchangeFrom');
+  const exchangeTo = $('#exchangeTo');
+  const exchangeResult = $('#exchangeResult');
+  const exchangeMeta = $('#exchangeMeta');
+  const exchangeRefreshBtn = $('#exchangeRefreshBtn');
+  const exchangeSwapBtn = $('#exchangeSwapBtn');
+
+  // 50 种常见币种（fawazahmed0 用小写代码）
+  const CURRENCY_LIST = [
+    { code: 'cny', name: '人民币 CNY' },
+    { code: 'usd', name: '美元 USD' },
+    { code: 'eur', name: '欧元 EUR' },
+    { code: 'jpy', name: '日元 JPY' },
+    { code: 'gbp', name: '英镑 GBP' },
+    { code: 'hkd', name: '港币 HKD' },
+    { code: 'krw', name: '韩元 KRW' },
+    { code: 'aud', name: '澳元 AUD' },
+    { code: 'cad', name: '加元 CAD' },
+    { code: 'sgd', name: '新加坡元 SGD' },
+    { code: 'twd', name: '新台币 TWD' },
+    { code: 'mop', name: '澳门元 MOP' },
+    { code: 'thb', name: '泰铢 THB' },
+    { code: 'myr', name: '马来西亚林吉特 MYR' },
+    { code: 'idr', name: '印尼盾 IDR' },
+    { code: 'php', name: '菲律宾比索 PHP' },
+    { code: 'vnd', name: '越南盾 VND' },
+    { code: 'inr', name: '印度卢比 INR' },
+    { code: 'pkr', name: '巴基斯坦卢比 PKR' },
+    { code: 'bdt', name: '孟加拉塔卡 BDT' },
+    { code: 'lkr', name: '斯里兰卡卢比 LKR' },
+    { code: 'aed', name: '阿联酋迪拉姆 AED' },
+    { code: 'sar', name: '沙特里亚尔 SAR' },
+    { code: 'qar', name: '卡塔尔里亚尔 QAR' },
+    { code: 'kwd', name: '科威特第纳尔 KWD' },
+    { code: 'ils', name: '以色列谢克尔 ILS' },
+    { code: 'try', name: '土耳其里拉 TRY' },
+    { code: 'rub', name: '俄罗斯卢布 RUB' },
+    { code: 'uah', name: '乌克兰格里夫纳 UAH' },
+    { code: 'chf', name: '瑞士法郎 CHF' },
+    { code: 'sek', name: '瑞典克朗 SEK' },
+    { code: 'nok', name: '挪威克朗 NOK' },
+    { code: 'dkk', name: '丹麦克朗 DKK' },
+    { code: 'pln', name: '波兰兹罗提 PLN' },
+    { code: 'czk', name: '捷克克朗 CZK' },
+    { code: 'huf', name: '匈牙利福林 HUF' },
+    { code: 'ron', name: '罗马尼亚列伊 RON' },
+    { code: 'bgn', name: '保加利亚列弗 BGN' },
+    { code: 'nzd', name: '新西兰元 NZD' },
+    { code: 'zar', name: '南非兰特 ZAR' },
+    { code: 'egp', name: '埃及镑 EGP' },
+    { code: 'ngn', name: '尼日利亚奈拉 NGN' },
+    { code: 'kes', name: '肯尼亚先令 KES' },
+    { code: 'brl', name: '巴西雷亚尔 BRL' },
+    { code: 'ars', name: '阿根廷比索 ARS' },
+    { code: 'clp', name: '智利比索 CLP' },
+    { code: 'cop', name: '哥伦比亚比索 COP' },
+    { code: 'mxn', name: '墨西哥比索 MXN' },
+    { code: 'pen', name: '秘鲁索尔 PEN' },
+    { code: 'btc', name: '比特币 BTC' },
+    { code: 'eth', name: '以太坊 ETH' },
+  ];
+
+  let exchangeRatesCache = null;   // { base: 'usd', data: {...}, date: '...' }
+  let exchangeLoading = false;
+  let exchangeAbortCtrl = null;
+
+  function fillExchangeSelects() {
+    const savedFrom = store.get('nt_exchange_from', 'usd');
+    const savedTo = store.get('nt_exchange_to', 'cny');
+    [exchangeFrom, exchangeTo].forEach(sel => {
+      sel.innerHTML = '';
+      CURRENCY_LIST.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.code;
+        opt.textContent = c.name;
+        sel.appendChild(opt);
+      });
+    });
+    exchangeFrom.value = savedFrom;
+    exchangeTo.value = savedTo;
+  }
+
+  function renderExchangeResult() {
+    if (!exchangeRatesCache) return;
+    const amount = parseFloat(exchangeAmount.value) || 0;
+    const from = exchangeFrom.value;
+    const to = exchangeTo.value;
+    const data = exchangeRatesCache.data;
+
+    // 数据格式：json[base][target]
+    let rate = null;
+    if (from === exchangeRatesCache.base) {
+      rate = data[to];
+    } else if (to === exchangeRatesCache.base) {
+      rate = 1 / data[from];
+    } else {
+      // 通过基准货币交叉换算
+      const rFrom = data[from];   // 1 base = rFrom from
+      const rTo = data[to];       // 1 base = rTo to
+      if (rFrom && rTo) rate = rTo / rFrom;
+    }
+
+    if (rate === null || !isFinite(rate)) {
+      exchangeResult.textContent = '--';
+      exchangeMeta.textContent = '该货币对暂不支持';
+      return;
+    }
+
+    const converted = amount * rate;
+    exchangeResult.textContent = converted.toLocaleString('zh-CN', { maximumFractionDigits: 6 });
+    exchangeMeta.textContent = `1 ${from.toUpperCase()} ≈ ${rate.toLocaleString('zh-CN', { maximumFractionDigits: 6 })} ${to.toUpperCase()} · 数据日期 ${exchangeRatesCache.date}`;
+  }
+
+  async function fetchExchangeRates(force = false) {
+    // force=true 时允许打断上一次请求
+    if (exchangeLoading && !force) return;
+    if (exchangeAbortCtrl) {
+      try { exchangeAbortCtrl.abort(); } catch(e) {}
+      exchangeAbortCtrl = null;
+    }
+    exchangeLoading = true;
+    exchangeMeta.textContent = '正在获取汇率…';
+
+    const base = 'usd';
+    const mirrors = [
+      `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${base}.min.json`,
+      `https://latest.currency-api.pages.dev/v1/currencies/${base}.min.json`,
+    ];
+
+    let json = null;
+    for (const url of mirrors) {
+      try {
+        exchangeAbortCtrl = new AbortController();
+        const timer = setTimeout(() => exchangeAbortCtrl && exchangeAbortCtrl.abort(), 8000);
+        const res = await fetch(url, { signal: exchangeAbortCtrl.signal });
+        clearTimeout(timer);
+        if (!res.ok) { console.warn('exchange fetch fail:', url, res.status); continue; }
+        json = await res.json();
+        break;
+      } catch (e) {
+        console.warn('exchange fetch error:', url, e.message);
+      }
+    }
+    exchangeAbortCtrl = null;
+
+    if (!json || !json[base]) {
+      exchangeMeta.textContent = '汇率获取失败，请稍后重试';
+      exchangeLoading = false;
+      return;
+    }
+
+    exchangeRatesCache = {
+      base: base,
+      data: json[base],
+      date: json.date || '未知',
+    };
+    exchangeLoading = false;
+    renderExchangeResult();
+  }
+
+  // 事件绑定
+  exchangeAmount.addEventListener('input', renderExchangeResult);
+  exchangeFrom.addEventListener('change', () => {
+    store.set('nt_exchange_from', exchangeFrom.value);
+    renderExchangeResult();
+  });
+  exchangeTo.addEventListener('change', () => {
+    store.set('nt_exchange_to', exchangeTo.value);
+    renderExchangeResult();
+  });
+  exchangeRefreshBtn.addEventListener('click', () => {
+    exchangeRefreshBtn.style.transition = 'transform .5s';
+    exchangeRefreshBtn.style.transform = 'rotate(360deg)';
+    setTimeout(() => {
+      exchangeRefreshBtn.style.transition = '';
+      exchangeRefreshBtn.style.transform = '';
+    }, 500);
+    exchangeMeta.textContent = '正在获取汇率…';
+    fetchExchangeRates(true);
+  });
+  exchangeSwapBtn.addEventListener('click', () => {
+    const tmp = exchangeFrom.value;
+    exchangeFrom.value = exchangeTo.value;
+    exchangeTo.value = tmp;
+    store.set('nt_exchange_from', exchangeFrom.value);
+    store.set('nt_exchange_to', exchangeTo.value);
+    renderExchangeResult();
+  });
+
+  fillExchangeSelects();
+  fetchExchangeRates();
+
+  // ================= 单位换算 =================
+  // 每个类别：base 为基准单位，units 里 factor 表示"1 该单位 = factor 个 base 单位"
+  // 温度单独用公式处理（非线性）
+  const UNIT_DATA = {
+    length: {
+      name: '长度',
+      base: 'm',
+      units: [
+        { code: 'mm',  name: '毫米',   factor: 0.001 },
+        { code: 'cm',  name: '厘米',   factor: 0.01 },
+        { code: 'm',   name: '米',     factor: 1 },
+        { code: 'km',  name: '千米',   factor: 1000 },
+        { code: 'in',  name: '英寸',   factor: 0.0254 },
+        { code: 'ft',  name: '英尺',   factor: 0.3048 },
+        { code: 'yd',  name: '码',     factor: 0.9144 },
+        { code: 'mi',  name: '英里',   factor: 1609.344 },
+        { code: 'li',  name: '里',     factor: 500 },
+        { code: 'nmi', name: '海里',   factor: 1852 },
+      ],
+    },
+    weight: {
+      name: '重量',
+      base: 'kg',
+      units: [
+        { code: 'mg',  name: '毫克',   factor: 0.000001 },
+        { code: 'g',   name: '克',     factor: 0.001 },
+        { code: 'kg',  name: '千克',   factor: 1 },
+        { code: 't',   name: '吨',     factor: 1000 },
+        { code: 'jin', name: '斤',     factor: 0.5 },
+        { code: 'liang', name: '两',   factor: 0.05 },
+        { code: 'lb',  name: '磅',     factor: 0.45359237 },
+        { code: 'oz',  name: '盎司',   factor: 0.028349523125 },
+      ],
+    },
+    temperature: {
+      name: '温度',
+      base: 'c',
+      units: [
+        { code: 'c', name: '摄氏度 ℃' },
+        { code: 'f', name: '华氏度 ℉' },
+        { code: 'k', name: '开尔文 K' },
+      ],
+    },
+    area: {
+      name: '面积',
+      base: 'm2',
+      units: [
+        { code: 'm2',    name: '平方米',  factor: 1 },
+        { code: 'km2',   name: '平方千米', factor: 1000000 },
+        { code: 'cm2',   name: '平方厘米', factor: 0.0001 },
+        { code: 'mu',    name: '亩',      factor: 666.6666667 },
+        { code: 'ha',    name: '公顷',    factor: 10000 },
+        { code: 'ping',  name: '坪',      factor: 3.305785 },
+        { code: 'ft2',   name: '平方英尺', factor: 0.09290304 },
+        { code: 'acre',  name: '英亩',    factor: 4046.8564224 },
+      ],
+    },
+    volume: {
+      name: '体积',
+      base: 'l',
+      units: [
+        { code: 'ml',  name: '毫升',   factor: 0.001 },
+        { code: 'l',   name: '升',     factor: 1 },
+        { code: 'm3',  name: '立方米', factor: 1000 },
+        { code: 'cm3', name: '立方厘米', factor: 0.001 },
+        { code: 'gal', name: '美制加仑', factor: 3.785411784 },
+        { code: 'qt',  name: '美制夸脱', factor: 0.946352946 },
+        { code: 'pt',  name: '美制品脱', factor: 0.473176473 },
+        { code: 'cup', name: '杯',     factor: 0.2365882365 },
+      ],
+    },
+    time: {
+      name: '时间',
+      base: 's',
+      units: [
+        { code: 'ms',  name: '毫秒',  factor: 0.001 },
+        { code: 's',   name: '秒',    factor: 1 },
+        { code: 'min', name: '分钟',  factor: 60 },
+        { code: 'h',   name: '小时',  factor: 3600 },
+        { code: 'd',   name: '天',    factor: 86400 },
+        { code: 'wk',  name: '周',    factor: 604800 },
+        { code: 'mo',  name: '月(30天)', factor: 2592000 },
+        { code: 'yr',  name: '年(365天)', factor: 31536000 },
+      ],
+    },
+    data: {
+      name: '数据',
+      base: 'b',
+      units: [
+        { code: 'b',   name: '字节 B',  factor: 1 },
+        { code: 'kb',  name: 'KB',     factor: 1024 },
+        { code: 'mb',  name: 'MB',     factor: 1048576 },
+        { code: 'gb',  name: 'GB',     factor: 1073741824 },
+        { code: 'tb',  name: 'TB',     factor: 1099511627776 },
+        { code: 'bit', name: '比特 bit', factor: 0.125 },
+      ],
+    },
+  };
+
+  let unitconvCategory = store.get('nt_unitconv_cat', 'length');
+  const unitconvCatEl = $('#unitconvCat');
+  const unitconvInput = $('#unitconvInput');
+  const unitconvFrom = $('#unitconvFrom');
+  const unitconvTo = $('#unitconvTo');
+  const unitconvResult = $('#unitconvResult');
+  const unitconvMeta = $('#unitconvMeta');
+  const unitconvSwapBtn = $('#unitconvSwapBtn');
+
+  function renderUnitconvCategories() {
+    unitconvCatEl.innerHTML = '';
+    Object.keys(UNIT_DATA).forEach(key => {
+      const btn = document.createElement('button');
+      btn.className = 'unitconv-cat-btn' + (key === unitconvCategory ? ' active' : '');
+      btn.textContent = UNIT_DATA[key].name;
+      btn.addEventListener('click', () => {
+        unitconvCategory = key;
+        store.set('nt_unitconv_cat', key);
+        renderUnitconvCategories();
+        renderUnitconvUnits(true);
+        renderUnitconvResult();
+      });
+      unitconvCatEl.appendChild(btn);
+    });
+  }
+
+  function renderUnitconvUnits(resetSelection) {
+    const data = UNIT_DATA[unitconvCategory];
+    const savedFrom = store.get('nt_unitconv_from_' + unitconvCategory, data.units[0].code);
+    const savedTo = store.get('nt_unitconv_to_' + unitconvCategory, data.units[1] ? data.units[1].code : data.units[0].code);
+    [unitconvFrom, unitconvTo].forEach((sel, idx) => {
+      sel.innerHTML = '';
+      data.units.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.code;
+        opt.textContent = u.name;
+        sel.appendChild(opt);
+      });
+    });
+    const codes = data.units.map(u => u.code);
+    unitconvFrom.value = codes.includes(savedFrom) ? savedFrom : codes[0];
+    unitconvTo.value = codes.includes(savedTo) ? savedTo : (codes[1] || codes[0]);
+  }
+
+  function convertUnit(catKey, val, fromCode, toCode) {
+    const data = UNIT_DATA[catKey];
+    if (catKey === 'temperature') {
+      // 摄氏度为中间量
+      let c;
+      if (fromCode === 'c') c = val;
+      else if (fromCode === 'f') c = (val - 32) * 5 / 9;
+      else if (fromCode === 'k') c = val - 273.15;
+      else return NaN;
+      if (toCode === 'c') return c;
+      if (toCode === 'f') return c * 9 / 5 + 32;
+      if (toCode === 'k') return c + 273.15;
+      return NaN;
+    }
+    const fromUnit = data.units.find(u => u.code === fromCode);
+    const toUnit = data.units.find(u => u.code === toCode);
+    if (!fromUnit || !toUnit) return NaN;
+    const baseVal = val * fromUnit.factor;
+    return baseVal / toUnit.factor;
+  }
+
+  function renderUnitconvResult() {
+    const val = parseFloat(unitconvInput.value);
+    const data = UNIT_DATA[unitconvCategory];
+    const fromUnit = data.units.find(u => u.code === unitconvFrom.value);
+    const toUnit = data.units.find(u => u.code === unitconvTo.value);
+    if (!fromUnit || !toUnit || isNaN(val)) {
+      unitconvResult.textContent = '--';
+      unitconvMeta.textContent = '';
+      return;
+    }
+    const out = convertUnit(unitconvCategory, val, fromUnit.code, toUnit.code);
+    if (!isFinite(out)) {
+      unitconvResult.textContent = '--';
+      unitconvMeta.textContent = '无法换算';
+      return;
+    }
+    // 自动调整精度，避免过长小数
+    let display;
+    const abs = Math.abs(out);
+    if (abs === 0) display = '0';
+    else if (abs >= 1e9) display = out.toExponential(4);
+    else if (abs >= 1) display = out.toLocaleString('zh-CN', { maximumFractionDigits: 6 });
+    else display = out.toLocaleString('zh-CN', { maximumFractionDigits: 10 });
+    unitconvResult.textContent = display;
+    if (unitconvCategory === 'temperature') {
+      // 温度显示换算式，避免误导
+      const f = fromUnit.code, t = toUnit.code;
+      const map = {
+        'c-f': '℉ = ℃ × 1.8 + 32',
+        'f-c': '℃ = (℉ - 32) ÷ 1.8',
+        'c-k': 'K = ℃ + 273.15',
+        'k-c': '℃ = K - 273.15',
+        'f-k': 'K = (℉ - 32) ÷ 1.8 + 273.15',
+        'k-f': '℉ = (K - 273.15) × 1.8 + 32'
+      };
+      unitconvMeta.textContent = map[f + '-' + t] || `${fromUnit.name} 与 ${toUnit.name} 的换算`;
+    } else {
+      // 其他常规单位正常显示 1:rate 的关系
+      const rate = convertUnit(unitconvCategory, 1, fromUnit.code, toUnit.code);
+      unitconvMeta.textContent = `1 ${fromUnit.name} = ${rate.toLocaleString('zh-CN', { maximumFractionDigits: 6 })} ${toUnit.name}`;
+    }
+  }
+
+  unitconvInput.addEventListener('input', renderUnitconvResult);
+  unitconvFrom.addEventListener('change', () => {
+    store.set('nt_unitconv_from_' + unitconvCategory, unitconvFrom.value);
+    renderUnitconvResult();
+  });
+  unitconvTo.addEventListener('change', () => {
+    store.set('nt_unitconv_to_' + unitconvCategory, unitconvTo.value);
+    renderUnitconvResult();
+  });
+  unitconvSwapBtn.addEventListener('click', () => {
+    const tmp = unitconvFrom.value;
+    unitconvFrom.value = unitconvTo.value;
+    unitconvTo.value = tmp;
+    store.set('nt_unitconv_from_' + unitconvCategory, unitconvFrom.value);
+    store.set('nt_unitconv_to_' + unitconvCategory, unitconvTo.value);
+    renderUnitconvResult();
+  });
+
+  renderUnitconvCategories();
+  renderUnitconvUnits(true);
+  renderUnitconvResult();
+
+  // ================= 时间戳转换 =================
+  const tsInput = $('#tsInput'), tsResult = $('#tsResult');
+  $('#tsNowBtn').addEventListener('click', () => {
+    tsInput.value = Math.floor(Date.now() / 1000);
+    tsResult.textContent = new Date().toLocaleString('zh-CN');
+  });
+  $('#tsConvBtn').addEventListener('click', () => {
+    let val = tsInput.value.trim();
+    if (!val) return;
+    // 尝试当作时间戳解析（10位秒，13位毫秒）
+    if (/^\d+$/.test(val)) {
+      let ts = parseInt(val);
+      if (val.length <= 10) ts *= 1000;
+      const d = new Date(ts);
+      if (!isNaN(d.getTime())) {
+        tsResult.textContent = `北京时间: ${d.toLocaleString('zh-CN')}\nISO格式: ${d.toISOString()}`;
+        return;
+      }
+    }
+    // 尝试当作日期字符串解析
+    const d = new Date(val);
+    if (!isNaN(d.getTime())) {
+      tsResult.textContent = `秒级时间戳: ${Math.floor(d.getTime() / 1000)}\n毫秒级时间戳: ${d.getTime()}`;
+    } else {
+      tsResult.textContent = '格式无法识别';
+    }
+  });
+  // 初始化一次当前时间
+  $('#tsNowBtn').click();
+
+  // ================= 二维码生成 =================
+  const qrInput = $('#qrInput'), qrResult = $('#qrResult');
+  function generateQRCode() {
+    if (!qrInput.value.trim()) { qrResult.innerHTML = '<span style="color:#999;font-size:12px;">请输入内容</span>'; return; }
+    qrResult.innerHTML = '生成中...';
+    const img = new Image();
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrInput.value)}`;
+    img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'contain'; img.style.maxHeight = '160px';
+    img.onload = () => { qrResult.innerHTML = ''; qrResult.appendChild(img); };
+    img.onerror = () => { qrResult.innerHTML = '<span style="color:#d93025;font-size:12px;">生成失败</span>'; };
+  }
+  qrInput.addEventListener('input', () => {
+    clearTimeout(qrInput._timer);
+    qrInput._timer = setTimeout(generateQRCode, 800);
+  });
+  
+  // 初始化一次
+  if (qrInput.value.trim()) {
+    generateQRCode();
+  } else {
+    qrResult.innerHTML = '<span style="color: #999; font-size: 12px;">等待输入...</span>';
+  }
+
+  // ================= 摸鱼笑话 =================
+  const jokeText = $('#jokeText'), jokeMeta = $('#jokeMeta'), jokeRefreshBtn = $('#jokeRefreshBtn');
+  let jokeLoading = false;
+
+  // 首次加载先读取缓存
+  const cachedJoke = store.get('nt_joke_cache', null);
+  if (cachedJoke && cachedJoke.content) {
+    jokeText.textContent = cachedJoke.content;
+    jokeMeta.textContent = cachedJoke.type ? `【${cachedJoke.type}】` : '';
+  }
+
+  async function fetchJoke() {
+    if (jokeLoading) return;
+    jokeLoading = true;
+    jokeRefreshBtn.textContent = '获取中…';
+    jokeRefreshBtn.disabled = true;
+
+    try {
+      const res = await fetch('https://api.timelessq.com/joke');
+      const json = await res.json();
+      if (json.errno === 0 && json.data && json.data.content) {
+        const d = json.data;
+        jokeText.textContent = d.content;
+        jokeMeta.textContent = d.type ? `【${d.type}】` : '';
+        store.set('nt_joke_cache', d);
+      } else {
+        jokeText.textContent = '没找到笑话，稍后再试吧 😢';
+        jokeMeta.textContent = '';
+      }
+    } catch (e) {
+      console.warn('joke fetch error', e);
+      if (!jokeText.textContent || jokeText.textContent === '加载中...') {
+        jokeText.textContent = '网络开小差了，请点「换一个」重试 🔄';
+      }
+    } finally {
+      jokeLoading = false;
+      jokeRefreshBtn.textContent = '换一个';
+      jokeRefreshBtn.disabled = false;
+    }
+  }
+
+  jokeRefreshBtn.addEventListener('click', fetchJoke);
+
+  // 如果缓存为空，页面加载时主动拉取一次
+  if (!cachedJoke) fetchJoke();
+
   // ================= 迷你记事本 =================
   const notepadEditor = $('#notepadEditor');
   notepadEditor.innerHTML = store.get('nt_notepad', '');
@@ -2714,8 +3406,13 @@
     worldclock: { x: 820,  y: 1240, w: 330,  h: 380, visible: true, order: 8,  name: '世界时钟' },
     progress:   { x: 0,    y: 1640, w: 380,  h: 300, visible: true, order: 9,  name: '进度条' },
     fishing:    { x: 400,  y: 1640, w: 360,  h: 300, visible: true, order: 10, name: '打工倒计时' },
-    notepad:    { x: 780,  y: 1640, w: 370,  h: 360, visible: true, order: 11, name: '迷你记事本' },
- musicplayer:{ x: 0,    y: 2060, w: 620,  h: 650, visible: true, order: 12, name: '音乐播放器' }
+    exchange:   { x: 780,  y: 1640, w: 370,  h: 280, visible: true, order: 11, name: '汇率换算' },
+    unitconv:   { x: 780,  y: 1940, w: 370,  h: 320, visible: true, order: 12, name: '单位换算' },
+    timestamp:  { x: 0,    y: 2280, w: 370,  h: 320, visible: true, order: 13, name: '时间戳转换' },
+    qrcode:     { x: 390,  y: 2280, w: 370,  h: 320, visible: true, order: 14, name: '二维码生成' },
+    joke:       { x: 780,  y: 2280, w: 370,  h: 320, visible: true, order: 15, name: '摸鱼笑话' },
+    notepad:    { x: 0,    y: 2680, w: 370,  h: 380, visible: true, order: 16, name: '迷你记事本' },
+ musicplayer:{ x: 400,  y: 2680, w: 620,  h: 650, visible: true, order: 17, name: '音乐播放器' }
   };
   Object.keys(defaultConfig).forEach(k => { if (defaultConfig[k].z === undefined) defaultConfig[k].z = 1; });
   let widgetConfig = store.get('nt_widgetConfig', null);
