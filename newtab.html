@@ -458,7 +458,7 @@
   .work-config input:focus { border-color: var(--accent); }
 
   .notepad-container { display: flex; flex-direction: column; height: 100%; gap: 10px; }
-  .notepad-toolbar { display: flex; gap: 4px; padding-bottom: 10px; border-bottom: 1px solid var(--divider); }
+
   .notepad-btn { 
     background: transparent; border: none; border-radius: 6px; 
     width: 32px; height: 32px; display: grid; place-items: center; 
@@ -778,6 +778,68 @@
     color: var(--accent); 
     transform: translateY(-2px);
   }
+  /* ===== 移植：记事本字体/字号/导出按钮 ===== */
+  .font-menu-btn {
+    background: transparent; border: none; border-radius: 6px;
+    padding: 0 8px; height: 28px; display: grid; place-items: center;
+    cursor: pointer; color: var(--text); font-size: 13px; font-weight: bold; transition: 0.2s;
+  }
+  .font-menu-btn:hover { background: var(--hover); color: var(--accent); }
+  .font-dropdown {
+    position: absolute; top: calc(100% + 4px); right: 8px; margin-top: 0;
+    background: var(--card); backdrop-filter: blur(40px) saturate(150%);
+    border: 1px solid var(--card-border); border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 8px;
+    display: none; flex-direction: column; gap: 2px;
+    z-index: 9999; width: 180px; max-height: 220px; overflow-y: auto;
+  }
+  .font-dropdown::-webkit-scrollbar { width: 4px; }
+  .font-dropdown::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
+  .font-dropdown.show { display: flex; }
+  .font-item {
+    padding: 8px 12px; font-size: 14px; color: var(--text);
+    cursor: pointer; border-radius: 4px; text-align: left;
+    transition: 0.15s; white-space: nowrap;
+  }
+  .font-item:hover { background: var(--hover); color: var(--accent); }
+  .font-size-btn {
+    background: transparent; border: none; border-radius: 6px;
+    min-width: 24px; height: 24px; display: grid; place-items: center;
+    cursor: pointer; color: var(--text); font-size: 12px; font-weight: bold; transition: 0.2s;
+    padding: 0 2px;
+  }
+  .font-size-btn:hover { background: var(--hover); color: var(--accent); }
+  .font-size-btn.reset-size { font-size: 11px; padding: 0 4px; }
+
+  /* ===== 移植：背景设置面板 ===== */
+  .bg-panel {
+    position: absolute; bottom: 100%; right: 0; margin-bottom: 10px;
+    background: var(--card); backdrop-filter: blur(30px) saturate(150%);
+    border: 1px solid var(--card-border); border-radius: 12px;
+    box-shadow: var(--shadow); padding: 12px;
+    display: flex; flex-direction: column; gap: 8px; width: 140px;
+    opacity: 0; visibility: hidden; transform: translateY(10px);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 99999;
+  }
+  .bg-panel.show { opacity: 1; visibility: visible; transform: translateY(0); }
+  .bg-panel-title { font-size: 12px; font-weight: 600; color: var(--text-mute); margin-bottom: 4px; text-align: center; }
+  .bg-panel button {
+    background: var(--input-bg); border: 1px solid var(--divider); border-radius: 6px;
+    padding: 6px; font-size: 12px; font-weight: 600; color: var(--text);
+    cursor: pointer; transition: 0.2s;
+  }
+  .bg-panel button:hover { background: var(--hover); border-color: var(--accent); color: var(--accent); }
+  .bg-color-picker-wrap {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--input-bg); border: 1px solid var(--divider);
+    border-radius: 6px; padding: 4px 8px; font-size: 12px; font-weight: 600; color: var(--text);
+  }
+  .bg-color-picker-wrap input[type="color"] {
+    border: none; width: 24px; height: 24px; padding: 0; background: transparent; cursor: pointer;
+  }
+  .bg-color-picker-wrap input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+  .bg-color-picker-wrap input[type="color"]::-webkit-color-swatch { border: 1px solid var(--divider); border-radius: 4px; }
 </style>
 </head>
 <body>
@@ -1111,6 +1173,29 @@
           <button class="notepad-btn" data-cmd="italic" title="斜体" style="font-style: italic;">I</button>
           <button class="notepad-btn" data-cmd="underline" title="下划线" style="text-decoration: underline;">U</button>
           <button class="notepad-btn" data-cmd="strikeThrough" title="删除线" style="text-decoration: line-through;">S</button>
+
+          <button class="font-size-btn reset-size" id="fontSizeReset" title="重置字号">Aa</button>
+          <button class="font-size-btn" id="fontSizeMinus" title="缩小字号">A-</button>
+          <button class="font-size-btn" id="fontSizePlus" title="放大字号">A+</button>
+          <button class="font-menu-btn" id="fontMenuBtn" title="切换选中文字的字体" style="margin-left: 4px; margin-right: 8px;">字体▼</button>
+          <button class="font-size-btn" id="exportWordBtn" title="导出为 Word 文档" style="font-size: 14px;">📥</button>
+          <button class="font-size-btn" id="exportTxtBtn" title="导出为 TXT 纯文本" style="font-size: 14px;">📄</button>
+          <button class="font-size-btn" id="importTxtBtn" title="导入 TXT 纯文本" style="font-size: 14px;">📂</button>
+          <div class="font-dropdown" id="fontDropdown">
+            <div class="font-item" data-font="Microsoft YaHei" style="font-family: 'Microsoft YaHei', sans-serif;">微软雅黑</div>
+            <div class="font-item" data-font="SimSun" style="font-family: 'SimSun', serif;">宋体</div>
+            <div class="font-item" data-font="KaiTi" style="font-family: 'KaiTi', serif;">楷体</div>
+            <div class="font-item" data-font="SimHei" style="font-family: 'SimHei', sans-serif;">黑体</div>
+            <div class="font-item" data-font="FangSong" style="font-family: 'FangSong', serif;">仿宋</div>
+            <div class="font-item" data-font="STXingkai" style="font-family: 'STXingkai', cursive;">华文行楷</div>
+            <div class="font-item" data-font="STKaiti" style="font-family: 'STKaiti', serif;">华文楷体</div>
+            <div class="font-item" data-font="Arial" style="font-family: Arial, sans-serif;">Arial</div>
+            <div class="font-item" data-font="Georgia" style="font-family: Georgia, serif;">Georgia</div>
+            <div class="font-item" data-font="Times New Roman" style="font-family: 'Times New Roman', serif;">Times</div>
+            <div class="font-item" data-font="Courier New" style="font-family: 'Courier New', monospace;">Courier</div>
+            <div class="font-item" data-font="Verdana" style="font-family: Verdana, sans-serif;">Verdana</div>
+            <div class="font-item" data-font="Comic Sans MS" style="font-family: 'Comic Sans MS', cursive;">Comic</div>
+          </div>
         </div>
         <div class="notepad-editor" id="notepadEditor" contenteditable="true" placeholder="在这里记录你的灵感..."></div>
       </div>
@@ -1208,14 +1293,28 @@
 
 <div class="muyu-container" id="muyu">
   <!-- 导入导出按钮组，放在木鱼上方 -->
-  <div class="data-action-group">
+  <div class="data-action-group" style="position: relative;">
     <button id="exportBtn" title="导出所有配置（支持加密）">📤 导出</button>
     <button id="importBtn" title="导入配置文件">📥 导入</button>
+    <button id="bgBtn" title="自定义背景设置">🖼️ 背景设置</button>
+
+    <div class="bg-panel" id="bgPanel">
+      <div class="bg-panel-title">背景设置</div>
+      <button id="bgUploadBtn">📁 上传图片</button>
+      <div class="bg-color-picker-wrap">
+        <label for="bgColorPicker">🎨 纯色</label>
+        <input type="color" id="bgColorPicker" value="#f3f3f3">
+      </div>
+      <button id="bgResetBtn" style="color: var(--danger); margin-top: 4px;">🔄 恢复默认</button>
+    </div>
   </div>
   
   <div class="merit-text" id="meritText">敲我</div>
   <img class="muyu-img" src="https://cdn.luogu.com.cn/upload/image_hosting/st18pvxc.webp" alt="木鱼" draggable="false">
 </div>
+
+<!-- 隐藏的背景图文件选择框 -->
+<input type="file" id="bgUpload" accept="image/*" style="display:none;">
 
 <div class="modal-mask" id="modalMask">
   <div class="modal">
@@ -3261,11 +3360,152 @@
   notepadBtns.forEach(btn => {
     btn.addEventListener('mousedown', (e) => {
       e.preventDefault();
-            const cmd = btn.dataset.cmd;
+      const cmd = btn.dataset.cmd;
       document.execCommand(cmd, false, null);
       btn.classList.toggle('active', document.queryCommandState(cmd));
       notepadEditor.focus();
     });
+  });
+
+  // ===== 移植：记事本字体/字号/导入导出 =====
+  const fontMenuBtn = $('#fontMenuBtn');
+  const fontDropdown = $('#fontDropdown');
+  fontMenuBtn.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    fontDropdown.classList.toggle('show');
+  });
+  document.addEventListener('click', (e) => {
+    if (!fontDropdown.contains(e.target) && e.target !== fontMenuBtn) {
+      fontDropdown.classList.remove('show');
+    }
+  });
+  $$('.font-item').forEach(item => {
+    item.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const font = item.dataset.font;
+      notepadEditor.focus();
+      document.execCommand('fontName', false, font);
+      store.set('nt_notepad', notepadEditor.innerHTML);
+      fontDropdown.classList.remove('show');
+      toast(`✨ 已应用字体：${item.textContent}`);
+    });
+  });
+
+  function changeFontSize(delta) {
+    notepadEditor.focus();
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    const range = selection.getRangeAt(0);
+    if (range.collapsed) return;
+    const span = document.createElement('span');
+    let currentSize = 14;
+    const parentEl = range.startContainer.nodeType === 1
+      ? range.startContainer
+      : range.startContainer.parentElement;
+    if (parentEl) {
+      const parentStyle = window.getComputedStyle(parentEl);
+      if (parentStyle.fontSize) currentSize = parseFloat(parentStyle.fontSize);
+    }
+    let newSize = Math.max(10, Math.min(100, currentSize + delta));
+    span.style.fontSize = newSize + 'px';
+    span.appendChild(range.extractContents());
+    range.insertNode(span);
+    selection.removeAllRanges();
+    const newRange = document.createRange();
+    newRange.selectNodeContents(span);
+    selection.addRange(newRange);
+    store.set('nt_notepad', notepadEditor.innerHTML);
+  }
+  $('#fontSizePlus').addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); changeFontSize(2); });
+  $('#fontSizeMinus').addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); changeFontSize(-2); });
+  $('#fontSizeReset').addEventListener('mousedown', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    notepadEditor.focus();
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    const range = selection.getRangeAt(0);
+    if (range.collapsed) return;
+    const span = document.createElement('span');
+    span.style.fontSize = '14px';
+    span.appendChild(range.extractContents());
+    range.insertNode(span);
+    selection.removeAllRanges();
+    const newRange = document.createRange();
+    newRange.selectNodeContents(span);
+    selection.addRange(newRange);
+    store.set('nt_notepad', notepadEditor.innerHTML);
+  });
+
+  $('#exportWordBtn').addEventListener('click', () => {
+    const htmlContent = notepadEditor.innerHTML;
+    if (!htmlContent.trim()) { toast('❌ 记事本还是空的，没有内容可以导出哦'); return; }
+    const header = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office'
+            xmlns:w='urn:schemas-microsoft-com:office:word'
+            xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset="utf-8">
+        <title>我的记事本</title>
+        <style>
+          body { font-family: 'Microsoft YaHei', sans-serif; font-size: 14px; line-height: 1.6; }
+        </style>
+      </head>
+      <body>`;
+    const footer = "</body></html>";
+    const sourceHTML = header + htmlContent + footer;
+    const blob = new Blob(['\ufeff', sourceHTML], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.download = `记事本导出_${dateStr}.doc`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('✅ 已成功导出为 Word 文档！');
+  });
+
+  $('#exportTxtBtn').addEventListener('click', () => {
+    const textContent = notepadEditor.innerText;
+    if (!textContent.trim()) { toast('❌ 记事本还是空的，没有内容可以导出哦'); return; }
+    const blob = new Blob(['\ufeff', textContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.download = `记事本导出_${dateStr}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('✅ 已成功导出为 TXT 文档！');
+  });
+
+  $('#importTxtBtn').addEventListener('click', () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.txt,text/plain';
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target.result;
+        const isAppend = confirm('📂 文件读取成功！\n\n点击【确定】：追加到现有内容末尾\n点击【取消】：覆盖现有内容');
+        if (isAppend) {
+          notepadEditor.innerHTML += '<br><br>' + content.replace(/\n/g, '<br>');
+        } else {
+          notepadEditor.innerHTML = content.replace(/\n/g, '<br>');
+        }
+        notepadEditor.dispatchEvent(new Event('input'));
+        toast('✨ 导入成功！');
+      };
+      reader.readAsText(file, 'UTF-8');
+    });
+    fileInput.click();
   });
 
   // ================= 组件配置与状态管理（绝对定位自由布局） =================
@@ -3695,44 +3935,76 @@
 
   // ================= 导入 / 导出 配置功能 =================
   
-  // 高强度混淆加密算法
+  // 高强度混淆加密算法（5 轮）
+  const ENC_ROUNDS = 5;
+  // 由密码派生一个整数种子，保证每轮密钥不同
+  function deriveSeed(pwd) {
+    let h = 2166136261;
+    for (let i = 0; i < pwd.length; i++) {
+      h ^= pwd.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+  // 生成第 round 轮的密钥字节流（与密码长度无关，固定 32 字节）
+  function roundKey(pwd, round) {
+    const seed = deriveSeed(pwd + '|' + round);
+    const key = new Uint8Array(32);
+    let x = seed;
+    for (let i = 0; i < 32; i++) {
+      x ^= x << 13; x >>>= 0;
+      x ^= x >>> 17;
+      x ^= x << 5;  x >>>= 0;
+      key[i] = x & 0xff;
+    }
+    return key;
+  }
+
   function encryptData(text, pwd) {
     const encoder = new TextEncoder();
-    const textBytes = encoder.encode(text);
-    const pwdBytes = encoder.encode(pwd);
-    
-    const encrypted = new Uint8Array(textBytes.length);
-    for (let i = 0; i < textBytes.length; i++) {
-      // 将数据与密码进行异或运算，并加上一定偏移量，产生乱码
-      encrypted[i] = textBytes[i] ^ pwdBytes[i % pwdBytes.length] ^ (i % 256);
+    let bytes = encoder.encode(text);
+
+    // 5 轮：每轮异或不同密钥 + 位置偏移
+    for (let r = 0; r < ENC_ROUNDS; r++) {
+      const key = roundKey(pwd, r);
+      const out = new Uint8Array(bytes.length);
+      for (let i = 0; i < bytes.length; i++) {
+        // 位置偏移随轮次变化，增加混淆
+        const pos = (i * (r + 1) + r * 7) & 0xff;
+        out[i] = bytes[i] ^ key[i % 32] ^ pos;
+      }
+      bytes = out;
     }
-    
-    // 转成 Base64 字符串输出
+
+    // 最后统一 Base64 一次
     let binary = '';
-    for (let i = 0; i < encrypted.length; i++) {
-      binary += String.fromCharCode(encrypted[i]);
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
     }
     return btoa(binary);
   }
 
-  // 高强度解密算法
   function decryptData(base64Str, pwd) {
     try {
       const binary = atob(base64Str);
-      const encryptedBytes = new Uint8Array(binary.length);
+      let bytes = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) {
-        encryptedBytes[i] = binary.charCodeAt(i);
+        bytes[i] = binary.charCodeAt(i);
       }
-      
-      const pwdBytes = new TextEncoder().encode(pwd);
-      const decrypted = new Uint8Array(encryptedBytes.length);
-      
-      for (let i = 0; i < encryptedBytes.length; i++) {
-        decrypted[i] = encryptedBytes[i] ^ pwdBytes[i % pwdBytes.length] ^ (i % 256);
+
+      // 反着解 5 轮
+      for (let r = ENC_ROUNDS - 1; r >= 0; r--) {
+        const key = roundKey(pwd, r);
+        const out = new Uint8Array(bytes.length);
+        for (let i = 0; i < bytes.length; i++) {
+          const pos = (i * (r + 1) + r * 7) & 0xff;
+          out[i] = bytes[i] ^ key[i % 32] ^ pos;
+        }
+        bytes = out;
       }
-      
+
       const decoder = new TextDecoder();
-      return decoder.decode(decrypted);
+      return decoder.decode(bytes);
     } catch (e) {
       return null;
     }
@@ -3760,7 +4032,10 @@
       city: currentCity,
       workStart: workStartTime,
       workEnd: workEndTime,
-      workDays: workDays
+      workDays: workDays,
+      customBg: store.get('nt_custom_bg', ''),
+      bgType: store.get('nt_bg_type', 'default'),
+      bgValue: store.get('nt_bg_value', '')
     };
 
     let fileContent = JSON.stringify(data);
@@ -3779,6 +4054,147 @@
     URL.revokeObjectURL(url);
     
     toast('✅ 配置已高强度加密导出');
+  });
+
+  // ===== 移植：自定义背景功能 =====
+  const bgUpload = $('#bgUpload');
+  const bgBtn = $('#bgBtn');
+  const bgPanel = $('#bgPanel');
+  const bgColorPicker = $('#bgColorPicker');
+
+  function applyCustomBg() {
+    const bgType = store.get('nt_bg_type', 'default');
+    const bgValue = store.get('nt_bg_value', '');
+    const customBg = store.get('nt_custom_bg', '');
+
+    if (customBg && bgType === 'default') {
+      store.set('nt_bg_type', 'image');
+      store.set('nt_bg_value', customBg);
+      return applyCustomBg();
+    }
+
+    document.body.classList.remove('has-custom-bg');
+
+    if (bgType === 'image' && bgValue) {
+      document.body.style.backgroundImage = `url(${bgValue})`;
+      document.body.style.backgroundSize = 'cover';
+      document.body.style.backgroundPosition = 'center';
+      document.body.style.backgroundRepeat = 'no-repeat';
+      document.body.style.backgroundAttachment = 'fixed';
+      document.body.style.backgroundColor = 'transparent';
+      document.body.classList.add('has-custom-bg');
+      applyTheme('dark');
+    } else if (bgType === 'color' && bgValue) {
+      document.body.style.backgroundImage = 'none';
+      document.body.style.backgroundColor = bgValue;
+      bgColorPicker.value = bgValue;
+      const hex = bgValue.replace('#', '');
+      const r = parseInt(hex.substr(0, 2), 16);
+      const g = parseInt(hex.substr(2, 2), 16);
+      const b = parseInt(hex.substr(4, 2), 16);
+      const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+      if (yiq >= 150) {
+        applyTheme('light');
+        document.documentElement.style.setProperty('--bg-grad', bgValue);
+        document.documentElement.style.setProperty('--card', 'rgba(255, 255, 255, 0.75)');
+        document.documentElement.style.setProperty('--card-border', 'rgba(255, 255, 255, 0.9)');
+        document.documentElement.style.setProperty('--input-bg', 'rgba(0, 0, 0, 0.04)');
+        document.documentElement.style.setProperty('--text', '#1a1a1a');
+        document.documentElement.style.setProperty('--text-soft', '#4a4a4a');
+        document.documentElement.style.setProperty('--text-mute', '#888888');
+      } else {
+        applyTheme('dark');
+        document.documentElement.style.setProperty('--bg-grad', bgValue);
+        document.documentElement.style.setProperty('--card', 'rgba(0, 0, 0, 0.35)');
+        document.documentElement.style.setProperty('--card-border', 'rgba(255, 255, 255, 0.1)');
+        document.documentElement.style.setProperty('--input-bg', 'rgba(255, 255, 255, 0.08)');
+        document.documentElement.style.setProperty('--text', '#ffffff');
+        document.documentElement.style.setProperty('--text-soft', 'rgba(255, 255, 255, 0.85)');
+        document.documentElement.style.setProperty('--text-mute', 'rgba(255, 255, 255, 0.65)');
+      }
+    } else {
+      document.body.style.backgroundImage = 'none';
+      document.documentElement.style.removeProperty('--bg-grad');
+      document.body.style.background = 'var(--bg-grad)';
+      document.body.style.backgroundAttachment = 'fixed';
+      bgColorPicker.value = '#f3f3f3';
+      applyTheme(store.get('nt_theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+    }
+  }
+  setTimeout(applyCustomBg, 50);
+
+  bgBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    bgPanel.classList.toggle('show');
+  });
+  document.addEventListener('click', (e) => {
+    if (!bgPanel.contains(e.target) && e.target !== bgBtn && !e.target.closest('#bgBtn')) {
+      bgPanel.classList.remove('show');
+    }
+  });
+
+  $('#bgUploadBtn').addEventListener('click', () => { bgUpload.click(); });
+  bgUpload.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) { toast('❌ 原图太大了，请选择小于 4MB 的图片'); return; }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const MAX_WIDTH = 2560;
+        let width = img.width;
+        let height = img.height;
+        if (width > MAX_WIDTH) {
+          height = Math.round((height * MAX_WIDTH) / width);
+          width = MAX_WIDTH;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.9);
+        try {
+          store.set('nt_bg_type', 'image');
+          store.set('nt_bg_value', compressedBase64);
+          store.set('nt_custom_bg', compressedBase64);
+          applyCustomBg();
+          bgPanel.classList.remove('show');
+          toast('✨ 背景图已更新（高清压缩）！');
+        } catch (err) {
+          toast('❌ 存储空间依然不足，请尝试纯色背景');
+          console.error(err);
+        }
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+    bgUpload.value = '';
+  });
+
+  bgColorPicker.addEventListener('input', (e) => {
+    const color = e.target.value;
+    store.set('nt_bg_type', 'color');
+    store.set('nt_bg_value', color);
+    store.set('nt_custom_bg', '');
+    applyCustomBg();
+  });
+
+  $('#bgResetBtn').addEventListener('click', () => {
+    store.set('nt_bg_type', 'default');
+    store.set('nt_bg_value', '');
+    store.set('nt_custom_bg', '');
+    document.documentElement.style.removeProperty('--bg-grad');
+    document.documentElement.style.removeProperty('--card');
+    document.documentElement.style.removeProperty('--card-border');
+    document.documentElement.style.removeProperty('--input-bg');
+    document.documentElement.style.removeProperty('--text');
+    document.documentElement.style.removeProperty('--text-soft');
+    document.documentElement.style.removeProperty('--text-mute');
+    applyCustomBg();
+    bgPanel.classList.remove('show');
+    toast('✅ 已恢复默认渐变背景');
   });
 
   // 导入配置
@@ -3843,6 +4259,19 @@
           }
           if (typeof updateWorkTime === 'function') updateWorkTime();
 
+          // 恢复背景（兼容旧版和新版）
+          if (data.bgType !== undefined && data.bgValue !== undefined) {
+            store.set('nt_bg_type', data.bgType);
+            store.set('nt_bg_value', data.bgValue);
+          } else if (data.customBg) {
+            store.set('nt_bg_type', 'image');
+            store.set('nt_bg_value', data.customBg);
+          } else {
+            store.set('nt_bg_type', 'default');
+            store.set('nt_bg_value', '');
+          }
+          applyCustomBg();
+
           toast('✨ 配置导入成功！页面即将刷新...');
           setTimeout(() => location.reload(), 1500);
 
@@ -3855,6 +4284,7 @@
     };
     input.click();
   });
+
 
 })();
 </script>
