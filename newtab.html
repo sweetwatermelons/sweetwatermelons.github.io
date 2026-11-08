@@ -353,7 +353,8 @@
   .prog-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width 0.5s ease; }
 
   .work-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; }
-  .work-time { font-size: 36px; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: -1px;}
+  .work-time { font-size: 36px; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: -1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .work-time.has-days { font-size: 28px; letter-spacing: -0.5px; }
   .work-status { font-size: 13px; color: var(--text-soft); font-weight: 500; }
   .work-config { display: flex; gap: 8px; margin-top: 8px; }
   .work-config input { background: var(--input-bg); border: 1px solid var(--divider); border-radius: 6px; padding: 6px; font-size: 12px; color: var(--text); outline: none; width: 70px; text-align: center; }
@@ -621,12 +622,13 @@
   /* 封面 */
   .mp-cover-square {
     width: 100%;
-    flex: 1 1 auto;
-    min-height: 0;
+    flex: 0 1 auto; /* 改为不强制撑满 */
+    height: 14em;   /* 限制最大高度，防止图片太大 */
+    max-height: 50%;
     background: var(--input-bg);
     border-radius: 1.1em;
     overflow: hidden;
-    margin: .35em 0 .3em;
+    margin: .35em 0 .5em;
     display: flex; align-items: center; justify-content: center;
     border: 1px solid var(--divider);
   }
@@ -635,17 +637,18 @@
 
   /* 新增：滚动字幕 */
   .mp-lyric-line {
-    height: 1.4em;
-    line-height: 1.4em;
-    font-size: .78em;
+    height: auto;
+    min-height: 2.2em;
+    line-height: 1.6;
+    font-size: 1.1em; /* 👈 歌词字号放大 */
     color: var(--accent);
     text-align: center;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    margin-bottom: .25em;
-    font-weight: 500;
-    opacity: 0.9;
+    margin: .2em 0 .4em; /* 👈 增加上下间距 */
+    font-weight: 600;
+    opacity: 0.95;
     transition: opacity 0.2s;
   }
 
@@ -978,7 +981,10 @@
     <div class="widget" data-id="fishing">
       <div class="widget-header">
         <div class="widget-title"><span class="dot"></span> 打工倒计时</div>
-        <button class="timer-btn" id="toggleWorkConfig">⚙️</button>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button class="timer-btn" id="nightShiftBtn" title="切换夜班模式">☀️ 白班</button>
+          <button class="timer-btn" id="toggleWorkConfig">⚙️</button>
+        </div>
       </div>
       
       <div class="work-wrap">
@@ -990,6 +996,9 @@
             <input type="time" id="workStart" value="09:00" title="上班时间" style="width: 80px;">
             <span style="color: var(--text-mute); font-size: 12px;">至</span>
             <input type="time" id="workEnd" value="18:00" title="下班时间" style="width: 80px;">
+          </div>
+          <div style="font-size: 11px; color: var(--text-mute); text-align: center;">
+            夜班请点标题栏 🌙 切换（下班时间早于上班时间表示跨天）
           </div>
           <div style="display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 4px; width: 100%;">
             <span style="font-size: 12px; color: var(--text-soft); font-weight: 500; white-space: nowrap;">上班日：</span>
@@ -1723,6 +1732,7 @@
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       fetchAllWeather(currentCity.id);
+      if (typeof updateProgressBars === 'function') updateProgressBars();
       clearInterval(weatherTimer);
       weatherTimer = setInterval(() => fetchAllWeather(currentCity.id), 1000 * 60 * 30);
     } else {
@@ -2253,7 +2263,10 @@
     if (isRunning) { stopTimer(); }
     else {
       const inputSec = getInputSeconds();
-      if (timerLeft <= 0 || timerLeft > inputSec || Math.abs(inputSec - timerLeft) > 1) {
+      // 输入框被用户手动改成与剩余时间不同 → 视为新设定，重置；否则从剩余时间继续
+      if (timerLeft <= 0 || inputSec <= 0) {
+        timerTotal = inputSec; timerLeft = inputSec;
+      } else if (Math.abs(inputSec - timerLeft) > 1) {
         timerTotal = inputSec; timerLeft = inputSec;
       }
       if (timerTotal <= 0) return;
@@ -2436,10 +2449,25 @@
   let workStartTime = store.get('nt_workStart', '09:00');
   let workEndTime = store.get('nt_workEnd', '18:00');
   let workDays = store.get('nt_workDays', [false, true, true, true, true, true, false]);
+  let nightShift = store.get('nt_nightShift', false);
+
+  const nightShiftBtn = $('#nightShiftBtn');
+  function applyNightShiftUI() {
+    nightShiftBtn.textContent = nightShift ? '🌙 夜班' : '☀️ 白班';
+  }
+  applyNightShiftUI();
+  nightShiftBtn.addEventListener('click', () => {
+    nightShift = !nightShift;
+    store.set('nt_nightShift', nightShift);
+    applyNightShiftUI();
+    updateWorkTime();
+    toast(nightShift ? '🌙 已切换为夜班模式' : '☀️ 已切换为白班模式');
+  });
   const workDayCheckboxes = document.querySelectorAll('.work-day');
   workDayCheckboxes.forEach(cb => {
     const dayIndex = parseInt(cb.value);
-    cb.checked = workDays[dayIndex] !== false;
+    if (typeof workDays[dayIndex] !== 'boolean') workDays[dayIndex] = (dayIndex >= 1 && dayIndex <= 5);
+    cb.checked = workDays[dayIndex];
     cb.addEventListener('change', () => {
       workDays[dayIndex] = cb.checked;
       store.set('nt_workDays', workDays);
@@ -2457,37 +2485,85 @@
   function parseTime(timeStr) {
     const [h, m] = timeStr.split(':').map(Number); return { h, m };
   }
+  function fmtDur(ms) {
+    if (ms < 0) ms = 0;
+    const totalSec = Math.floor(ms / 1000);
+    const days = Math.floor(totalSec / 86400);
+    const h = Math.floor((totalSec % 86400) / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    const hms = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    if (days > 0) return `${days}天 ${hms}`;
+    return hms;
+  }
+
   function updateWorkTime() {
     const now = new Date();
-    const currentDay = now.getDay();
     const timeDisplay = $('#workTime');
     const statusDisplay = $('#workStatus');
-    if (!workDays[currentDay]) {
-      timeDisplay.textContent = `🎉 休息日`; timeDisplay.style.color = 'var(--text-soft)';
-      statusDisplay.textContent = `今天不上班，好好享受生活吧！`; return; 
-    }
+    // 统一设置倒计时文本 + 按是否含「天」切换字号
+    const setTimeText = (text) => {
+      timeDisplay.textContent = text;
+      timeDisplay.classList.toggle('has-days', text.includes('天'));
+    };
     const { h: startH, m: startM } = parseTime(workStartTime);
     const { h: endH, m: endM } = parseTime(workEndTime);
-    const startDate = new Date(now); startDate.setHours(startH, startM, 0, 0);
-    const endDate = new Date(now); endDate.setHours(endH, endM, 0, 0);
-    if (now < startDate) {
-      const diff = startDate - now;
-      timeDisplay.textContent = `${String(Math.floor(diff / 3600000)).padStart(2, '0')}:${String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0')}:${String(Math.floor((diff % 60000) / 1000)).padStart(2, '0')}`;
-      timeDisplay.style.color = 'var(--text-mute)'; statusDisplay.textContent = `未上班，距离上班还有`;
-    } else if (now >= startDate && now <= endDate) {
-      const diff = endDate - now;
-      timeDisplay.textContent = `${String(Math.floor(diff / 3600000)).padStart(2, '0')}:${String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0')}:${String(Math.floor((diff % 60000) / 1000)).padStart(2, '0')}`;
-      timeDisplay.style.color = 'var(--accent)'; statusDisplay.textContent = `摸鱼中，距离下班还有`;
-    } else {
-      const tomorrowDay = (currentDay + 1) % 7;
-      if (workDays[tomorrowDay]) {
-        const tomorrowStart = new Date(now); tomorrowStart.setDate(tomorrowStart.getDate() + 1); tomorrowStart.setHours(startH, startM, 0, 0);
-        const diff = tomorrowStart - now;
-        timeDisplay.textContent = `${String(Math.floor(diff / 3600000)).padStart(2, '0')}:${String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0')}:${String(Math.floor((diff % 60000) / 1000)).padStart(2, '0')}`;
-        timeDisplay.style.color = 'var(--text-soft)'; statusDisplay.textContent = `已下班，距离明天上班还有`;
-      } else {
-        timeDisplay.textContent = `00:00:00`; timeDisplay.style.color = 'var(--accent)'; statusDisplay.textContent = `已下班，享受生活吧！`;
+    const isOvernight = nightShift && (endH * 60 + endM) <= (startH * 60 + startM);
+
+    // 判断某个「班次开始日」是否为上班日
+    const isWorkdayStart = (d) => !!workDays[d.getDay()];
+
+    // 返回某天的班次 [start, end]
+    function shiftOf(baseDate) {
+      const s = new Date(baseDate); s.setHours(startH, startM, 0, 0);
+      const e = new Date(baseDate); e.setHours(endH, endM, 0, 0);
+      if (isOvernight) e.setDate(e.getDate() + 1);
+      return { s, e };
+    }
+
+    // 候选班次：昨天（夜班跨到今天）、今天、明天
+    const candidates = [-1, 0, 1].map(off => {
+      const base = new Date(now); base.setDate(base.getDate() + off);
+      return { base, ...shiftOf(base) };
+    }).filter(x => isWorkdayStart(x.base));
+
+    // 1) 是否正处于某个班次中
+    const active = candidates.find(x => now >= x.s && now <= x.e);
+    if (active) {
+      setTimeText(fmtDur(active.e - now));
+      timeDisplay.style.color = 'var(--accent)';
+      statusDisplay.textContent = nightShift ? `🌙 摸鱼中，距离下班还有` : `摸鱼中，距离下班还有`;
+      return;
+    }
+
+    // 2) 找下一个未来的班次（今天尚未开始 / 明天 / 后天）
+    const future = candidates
+      .map(x => ({ ...x, base: new Date(x.base) }))
+      .filter(x => x.s > now)
+      .sort((a, b) => a.s - b.s)[0];
+
+    if (future) {
+      setTimeText(fmtDur(future.s - now));
+      timeDisplay.style.color = 'var(--text-mute)';
+      // 判断这个班次是不是「今天稍后」还是「明天/更晚」
+      const sameDay = future.s.toDateString() === now.toDateString();
+      if (sameDay) statusDisplay.textContent = nightShift ? `🌙 未上班，距离上班还有` : `未上班，距离上班还有`;
+      else {
+        const dayDiff = Math.round((new Date(future.s).setHours(0,0,0,0) - new Date(now).setHours(0,0,0,0)) / 86400000);
+        statusDisplay.textContent = dayDiff === 1 ? `已下班，距离明天上班还有` : `已下班，距离下次上班还有`;
       }
+      return;
+    }
+
+    // 3) 今天/明天都没排班
+    if (!isWorkdayStart(now) && !isWorkdayStart(new Date(now.getTime() + 86400000))) {
+      setTimeText(`🎉 休息日`);
+      timeDisplay.style.color = 'var(--text-soft)';
+      statusDisplay.textContent = `今天不上班，好好享受生活吧！`;
+    } else {
+      setTimeText(`00:00:00`);
+      timeDisplay.style.color = 'var(--accent)';
+      statusDisplay.textContent = `已下班，享受生活吧！`;
     }
   }
   updateWorkTime();
@@ -2639,7 +2715,7 @@
     progress:   { x: 0,    y: 1640, w: 380,  h: 300, visible: true, order: 9,  name: '进度条' },
     fishing:    { x: 400,  y: 1640, w: 360,  h: 300, visible: true, order: 10, name: '打工倒计时' },
     notepad:    { x: 780,  y: 1640, w: 370,  h: 360, visible: true, order: 11, name: '迷你记事本' },
-    musicplayer:{ x: 0,    y: 2020, w: 570,  h: 920, visible: false, order: 12, name: '音乐播放器' }
+ musicplayer:{ x: 0,    y: 2060, w: 620,  h: 650, visible: true, order: 12, name: '音乐播放器' }
   };
   Object.keys(defaultConfig).forEach(k => { if (defaultConfig[k].z === undefined) defaultConfig[k].z = 1; });
   let widgetConfig = store.get('nt_widgetConfig', null);
@@ -2664,7 +2740,9 @@
   function saveConfig() { store.set('nt_widgetConfig', widgetConfig); }
   function updateGridHeight() {
     let maxBottom = 0;
-    Object.values(widgetConfig).forEach(c => { if (c.visible && c.w > 0) maxBottom = Math.max(maxBottom, c.y + c.h); });
+    Object.values(widgetConfig).forEach(c => {
+      if (c.visible && c.w > 0 && c.h > 0) maxBottom = Math.max(maxBottom, c.y + c.h);
+    });
     grid.style.minHeight = (maxBottom + 40) + 'px';
   }
   function applyWidgetState() {
@@ -2680,14 +2758,26 @@
     });
     updateGridHeight();
   }
-  applyWidgetState();
+
+  const CURRENT_LAYOUT_VERSION = 'v2024.10.7';
+  if (store.get('nt_layout_version', '') !== CURRENT_LAYOUT_VERSION || !store.get('nt_widgetConfig', null)) {
+    widgetConfig = JSON.parse(JSON.stringify(defaultConfig));
+    saveConfig();
+    store.set('nt_layout_version', CURRENT_LAYOUT_VERSION);
+    setTimeout(() => { tidyLayout(true); }, 100); 
+  } else {
+    applyWidgetState();
+  }
   let _resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(_resizeTimer);
     _resizeTimer = setTimeout(() => {
       const gridW = grid.offsetWidth; let changed = false;
       Object.values(widgetConfig).forEach(c => {
-        if (c.visible && c.w > 0 && c.x + c.w > gridW) { c.x = Math.max(0, gridW - c.w); changed = true; }
+        if (!c.visible || !(c.w > 0)) return;
+        if (c.x + c.w > gridW) { c.x = Math.max(0, gridW - c.w); changed = true; }
+        if (c.x < 0) { c.x = 0; changed = true; }
+        if (c.y < 0) { c.y = 0; changed = true; }
       });
       if (changed) { saveConfig(); applyWidgetState(); }
     }, 150);
@@ -2727,9 +2817,8 @@
   });
 
   // ================= 一键整理 =================
-  function tidyLayout() {
+  function tidyLayout(silent = false) {
     const gridW = grid.offsetWidth, gap = 16, minW = 300;
-    // 取消了对 musicplayer 的排除，所有可见组件统一参与排版
     const items = Object.keys(widgetConfig).map(id => ({ id, conf: widgetConfig[id] })).filter(it => it.conf.visible).sort((a, b) => (a.conf.y - b.conf.y) || (a.conf.x - b.conf.x));
     
     let cols = 3;
@@ -2741,32 +2830,32 @@
     
     items.forEach((it) => {
       const c = it.conf;
-      let w = Math.min(colW, Math.max(minW, c.w));
-      let spanCols = 1;
-      // 宽度大于 1.4 倍则占满整行
-      if (c.w > colW * 1.4) { spanCols = cols; w = gridW; }
+      // 基于默认配置里的“意图宽度”判断宽卡片，避免反复整理漂移，也不污染持久化配置
+      const defW = (defaultConfig[it.id] && defaultConfig[it.id].w) || c.w;
+      const isWide = defW > colW * 1.4;
+      let w = isWide ? gridW : Math.min(colW, Math.max(minW, c.w));
+      let spanCols = isWide ? cols : 1;
       
-      // 换行判断
       if (col + spanCols > cols) { x = 0; y += rowMaxH + gap; col = 0; rowMaxH = 0; }
       if (x + w > gridW) w = Math.max(minW, gridW - x);
       
-      // 更新坐标和尺寸
       c.x = x; c.y = y; c.w = w; c.h = Math.max(160, c.h);
       rowMaxH = Math.max(rowMaxH, c.h);
       
-      // 累加 x 和 列数
-      x += (spanCols === cols ? gridW : colW) + gap; 
+      x += (spanCols === cols ? gridW : colW + gap);
       col += spanCols;
       
-      // 满行换行
       if (col >= cols) { x = 0; y += rowMaxH + gap; col = 0; rowMaxH = 0; }
     });
     
-    saveConfig(); applyWidgetState(); toast('已整理 ✨');
+    saveConfig(); applyWidgetState(); 
+    if (!silent) toast('已整理 ✨'); // 👈 只有点击按钮时才提示
   }
-  const tidyBtn = $('#tidyBtn');
-  if (tidyBtn) { tidyBtn.addEventListener('click', () => { tidyLayout(); }); }
-
+  // 👇 补上 🧹 按钮的点击绑定
+  $('#tidyBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    tidyLayout(false);
+  });
   // ================= 右键菜单 =================
   const ctxMenu = document.getElementById('widgetCtxMenu');
   let ctxTargetWidget = null, zCounter = 10;
@@ -2952,7 +3041,7 @@
       notepad: editorEl ? editorEl.innerHTML : '',
       theme: document.documentElement.getAttribute('data-theme'),
       fontSize: currentFontSize, engines: currentEngines, defaultEngine: currentDefEngine,
-      city: currentCity, cityHistory: cityHistory, workStart: workStartTime, workEnd: workEndTime, workDays: workDays,
+      city: currentCity, cityHistory: cityHistory, workStart: workStartTime, workEnd: workEndTime, workDays: workDays, nightShift: nightShift,
       customBg: store.get('nt_custom_bg', ''), bgType: store.get('nt_bg_type', 'default'), bgValue: store.get('nt_bg_value', '')
     };
     let fileContent = JSON.stringify(data);
@@ -3078,10 +3167,12 @@
           if (data.defaultEngine) { defaultEngineName = data.defaultEngine; store.set('nt_default_engine', defaultEngineName); }
           if (typeof renderEngineSelect === 'function') renderEngineSelect();
           if (data.city) { currentCity = data.city; store.set('nt_city', currentCity); fetchAllWeather(currentCity.id); }
-          if (Array.isArray(data.cityHistory)) { cityHistory = data.cityHistory.slice(0, 6); store.set('nt_city_history', cityHistory); renderCityHistory(); }
+          if (Array.isArray(data.cityHistory)) { cityHistory = data.cityHistory.slice(0, 6); } else { cityHistory = []; }
+          store.set('nt_city_history', cityHistory); renderCityHistory();
           if (data.workStart) { workStartTime = data.workStart; store.set('nt_workStart', workStartTime); $('#workStart').value = workStartTime; }
           if (data.workEnd) { workEndTime = data.workEnd; store.set('nt_workEnd', workEndTime); $('#workEnd').value = workEndTime; }
-          if (data.workDays) { workDays = data.workDays; store.set('nt_workDays', workDays); document.querySelectorAll('.work-day').forEach(cb => { cb.checked = workDays[parseInt(cb.value)] !== false; }); }
+          if (data.workDays) { workDays = data.workDays; store.set('nt_workDays', workDays); document.querySelectorAll('.work-day').forEach(cb => { const di = parseInt(cb.value); if (typeof workDays[di] !== 'boolean') workDays[di] = (di >= 1 && di <= 5); cb.checked = workDays[di]; }); }
+          if (typeof data.nightShift === 'boolean') { nightShift = data.nightShift; store.set('nt_nightShift', nightShift); if (typeof applyNightShiftUI === 'function') applyNightShiftUI(); }
           if (typeof updateWorkTime === 'function') updateWorkTime();
           if (data.bgType !== undefined && data.bgValue !== undefined) {
             store.set('nt_bg_type', data.bgType); store.set('nt_bg_value', data.bgValue);
@@ -3407,6 +3498,7 @@
     if (!kw) { mpShowToast('请输入关键词'); return; }
     if (mp.searching) return;
     mp.searching = true; mp.searchResults = [];
+    mp.playContext = [];   // 👈 新搜索前清空旧播放上下文，避免上一首/下一首跳到旧歌
     const box = document.getElementById('mp-searchResults');
     box.innerHTML = '<div class="loading">正在搜索…</div>'; box.classList.add('active');
 
@@ -3473,11 +3565,6 @@
   document.getElementById('mp-downloadBtn').addEventListener('click', downloadCurrent);
 
   const progressBar = document.getElementById('mp-progressBar');
-  progressBar.addEventListener('click', e => {
-    if (!mp.audio.duration || !isFinite(mp.audio.duration)) return;
-    const rect = progressBar.getBoundingClientRect();
-    mp.audio.currentTime = ((e.clientX - rect.left) / rect.width) * mp.audio.duration;
-  });
   let dragging = false;
   progressBar.addEventListener('pointerdown', e => {
     if (!mp.audio.duration || !isFinite(mp.audio.duration)) return;
@@ -3523,7 +3610,9 @@
       }
       if (idx !== -1 && idx !== mp.currentLyricIdx) {
         mp.currentLyricIdx = idx;
-        document.getElementById('mp-lyricLine').textContent = mp.lyricLines[idx].text;
+        const lyricEl = document.getElementById('mp-lyricLine');
+        lyricEl.textContent = mp.lyricLines[idx].text;
+        lyricEl.scrollLeft = 0;
       }
     }
   });
