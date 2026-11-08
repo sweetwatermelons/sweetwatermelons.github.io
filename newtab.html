@@ -2633,13 +2633,13 @@
     todo:       { x: 400,  y: 520,  w: 750,  h: 340, visible: true, order: 3,  name: '待办事项' },
     shortcuts:  { x: 0,    y: 880,  w: 560,  h: 340, visible: true, order: 4,  name: '快捷访问' },
     quote:      { x: 580,  y: 880,  w: 570,  h: 340, visible: true, order: 5,  name: '每日格言' },
-    calendar:   { x: 0,    y: 1240, w: 400,  h: 380, visible: true, order: 6,  name: '日历' },
-    holiday:    { x: 420,  y: 1240, w: 380,  h: 380, visible: true, order: 7,  name: '节日倒计时' },
+    calendar:   { x: 0,    y: 1240, w: 440,  h: 420, visible: true, order: 6,  name: '日历' },
+    holiday:    { x: 460,  y: 1240, w: 420,  h: 420, visible: true, order: 7,  name: '节日倒计时' },
     worldclock: { x: 820,  y: 1240, w: 330,  h: 380, visible: true, order: 8,  name: '世界时钟' },
     progress:   { x: 0,    y: 1640, w: 380,  h: 300, visible: true, order: 9,  name: '进度条' },
     fishing:    { x: 400,  y: 1640, w: 360,  h: 300, visible: true, order: 10, name: '打工倒计时' },
     notepad:    { x: 780,  y: 1640, w: 370,  h: 360, visible: true, order: 11, name: '迷你记事本' },
-    musicplayer:{ x: 0,    y: 2020, w: 380,  h: 460, visible: false, order: 12, name: '音乐播放器' }
+    musicplayer:{ x: 0,    y: 2020, w: 570,  h: 920, visible: false, order: 12, name: '音乐播放器' }
   };
   Object.keys(defaultConfig).forEach(k => { if (defaultConfig[k].z === undefined) defaultConfig[k].z = 1; });
   let widgetConfig = store.get('nt_widgetConfig', null);
