@@ -6,6 +6,7 @@
 <title>新标签页</title>
 <!-- 高精度农历库 -->
 <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
 <style>
   :root {
     --bg: #f3f3f3;
@@ -74,11 +75,14 @@
     background-attachment: fixed;
     color: var(--text);
     min-height: 100vh;
-    transition: background .4s, color .3s;
+    /* 主题切换过渡，但首帧 body[data-ready] 还没加，所以不会触发过渡 */
     display: flex;
     justify-content: center;
     padding: 32px 24px 80px;
-    overflow-x: hidden; /* 新增：彻底杜绝横向滚动条 */
+    overflow-x: hidden;
+  }
+  body[data-ready="true"] {
+    transition: background .4s, color .3s;
   }
 
   .app { width:100%; max-width:1200px; display:flex; flex-direction:column; gap:28px; position: relative; }
@@ -368,6 +372,12 @@
     box-shadow: none;
   }
   .sc .fav img { width: 28px; height: 28px; object-fit: contain; }
+  .sc .fav.fav-fallback img { display: none; }
+  .sc .fav.fav-fallback {
+    color: #fff !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+  }
   .sc .name { font-size:12px; font-weight:500; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; }
   .sc .del { position:absolute; top:2px; right:2px; border:none; background:transparent; color:var(--danger); font-size:16px; cursor:pointer; display:none; z-index: 2;}
   .sc:hover .del { display:block; }
@@ -425,7 +435,7 @@
   .cal-day.today .lunar { color: rgba(255,255,255,0.8); }
   .cal-day:not(.empty):hover { background: var(--hover); }
 
-  .holiday-list { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+  .holiday-list { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding-bottom: 8px; }
   .holiday-item { 
     display: flex; justify-content: space-between; align-items: center; 
     padding: 12px 16px; background: var(--input-bg); border-radius: 12px;
@@ -589,21 +599,40 @@
     display: flex; align-items: center; justify-content: center;
     cursor: help; transition: all 0.2s ease; user-select: none;
   }
-  .footer-tip-wrap:hover .footer-tip-btn { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .footer-tip-wrap.open .footer-tip-btn { background: var(--accent); color: #fff; border-color: var(--accent); }
   .footer-tip-popup {
-    position: absolute; bottom: calc(100% + 12px); left: 50%;
+    position: fixed; bottom: 80px; left: 50%;
     transform: translateX(-50%) translateY(6px);
     width: 280px; background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(10px);
     color: #fff; padding: 14px 16px; border-radius: 12px;
     font-size: 12.5px; line-height: 1.5; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    opacity: 0; visibility: hidden; pointer-events: none;
+    opacity: 0; visibility: hidden; pointer-events: auto;
     transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000;
   }
   .footer-tip-popup::after {
     content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
     border-width: 6px; border-style: solid; border-color: rgba(30, 30, 30, 0.95) transparent transparent transparent;
   }
-  .footer-tip-wrap:hover .footer-tip-popup { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+  /* ===== 气泡：鼠标在 ? 或气泡上时保持展开 ===== */
+  .footer-tip-wrap:hover .footer-tip-popup {
+    opacity: 1; visibility: visible; pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+  .footer-tip-wrap:hover .footer-tip-btn {
+    background: var(--accent); color: #fff; border-color: var(--accent);
+  }
+  /* 透明桥接：填满 ? 与气泡之间的空隙，鼠标滑过去不会中断 hover */
+  .footer-tip-wrap::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    top: -14px; height: 14px;
+    background: transparent;
+    pointer-events: none;   /* 让桥接区不拦截点击，只做 hover 延续 */
+  }
+  @media (hover: none) {
+    .footer-tip-wrap::after { display: none; } /* 触屏无 hover，桥接不需要 */
+  }
   .footer-tip-popup h5 {
     margin: 0 0 8px 0; font-size: 13px; font-weight: 600; color: #fff;
     border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 6px;
@@ -615,7 +644,7 @@
   @media (max-width: 860px) {
     .footer-tip-popup { left: auto; right: -10px; transform: translateX(0) translateY(6px); }
     .footer-tip-popup::after { left: auto; right: 15px; }
-    .footer-tip-wrap:hover .footer-tip-popup { transform: translateX(0) translateY(0); }
+    .footer-tip-wrap.open .footer-tip-popup { transform: translateX(0) translateY(0); }
   }
 
   .footer-text { text-align: center; font-size: 13px; color: var(--text-mute); margin-bottom: 40px;}
@@ -681,14 +710,19 @@
     transform-origin: center bottom;
   }
   
-  /* 敲击时的回弹动画（排除点击按钮组、背景设置面板等情况） */
-  .muyu-container:active:not(:has(.data-action-group *:active)):not(:has(.bg-panel *:active)) .muyu-img { 
+  /* 敲击时的回弹动画（排除点击按钮组、背景设置面板、字号按钮） */
+  .muyu-container:active:not(:has(.data-action-group *:active)):not(:has(.bg-panel *:active)):not(:has(#fontSizeBtn:active)) .muyu-img { 
     transform: scale(0.92, 0.88) translateY(4px); 
   }
-  /* 如果点击的是导出/导入按钮，强制取消木鱼的回弹 */
+  /* 旧版兜底：点击按钮组时也不回弹 */
   .muyu-container:has(.data-action-group button:active) .muyu-img {
     transform: none !important;
   }
+
+  /* ===== 全站字号缩放（小/中/大） ===== */
+  html[data-fontsize="small"] body { zoom: 0.9; }
+  html[data-fontsize="medium"] body { zoom: 1.0; }
+  html[data-fontsize="large"] body { zoom: 1.15; }
   .merit-text { 
     position: absolute; 
     top: -10px; 
@@ -724,7 +758,7 @@
   .modal-actions button { flex:1; border:none; border-radius:8px; padding:10px; font-size:14px; font-weight:600; cursor:pointer; }
   .btn-cancel { background:var(--input-bg); color:var(--text); }
   .btn-ok { background:var(--accent); color:#fff; }
-  .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--accent); color:#fff; padding:12px 24px; border-radius:8px; font-size:13.5px; font-weight:600; box-shadow:0 4px 12px rgba(0,103,192,0.3); opacity:0; transition:opacity .25s, transform .25s; z-index:2000; pointer-events:none; }
+  .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--accent); color:#fff; padding:12px 24px; border-radius:8px; font-size:13.5px; font-weight:600; box-shadow:0 4px 12px rgba(0,103,192,0.3); opacity:0; transition:opacity .25s, transform .25s; z-index:2000; pointer-events:none; display:flex; align-items:center; gap:4px; white-space:nowrap; }
   .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
   @media (max-width: 860px) {
@@ -1170,6 +1204,10 @@
       <div class="widget-header"><div class="widget-title"><span class="dot"></span> 迷你记事本</div></div>
       <div class="notepad-container">
         <div class="notepad-toolbar">
+          <!-- 新增：撤销 & 重做 -->
+          <button class="notepad-btn" id="btnUndo" title="撤销 (Ctrl+Z)">↩️</button>
+          <button class="notepad-btn" id="btnRedo" title="重做 (Ctrl+Y)">↪️</button>
+          
           <button class="notepad-btn" data-cmd="bold" title="加粗">B</button>
           <button class="notepad-btn" data-cmd="italic" title="斜体" style="font-style: italic;">I</button>
           <button class="notepad-btn" data-cmd="underline" title="下划线" style="text-decoration: underline;">U</button>
@@ -1181,7 +1219,7 @@
           <button class="font-menu-btn" id="fontMenuBtn" title="切换选中文字的字体" style="margin-left: 4px; margin-right: 8px;">字体▼</button>
           <button class="font-size-btn" id="exportWordBtn" title="导出为 Word 文档" style="font-size: 14px;">📥</button>
           <button class="font-size-btn" id="exportTxtBtn" title="导出为 TXT 纯文本" style="font-size: 14px;">📄</button>
-          <button class="font-size-btn" id="importTxtBtn" title="导入 TXT 纯文本" style="font-size: 14px;">📂</button>
+          <button class="font-size-btn" id="importTxtBtn" title="导入 TXT纯文本 / Word 文档" style="font-size: 14px;">📂</button>
           <div class="font-dropdown" id="fontDropdown">
             <div class="font-item" data-font="Microsoft YaHei" style="font-family: 'Microsoft YaHei', sans-serif;">微软雅黑</div>
             <div class="font-item" data-font="SimSun" style="font-family: 'SimSun', serif;">宋体</div>
@@ -1224,53 +1262,118 @@
       <!-- 这里是小提示按钮及气泡 -->
       <div class="footer-tip-wrap">
         <div class="footer-tip-btn">?</div>
-        <div class="footer-tip-popup" style="width: 320px; padding: 16px 18px; border-radius: 14px;">
-          <h5 style="font-size: 14px; margin-bottom: 10px;">💡 功能使用指南</h5>
-          <ul style="display: flex; flex-direction: column; gap: 12px;">
-            
-            <li style="display: flex; align-items: flex-start; gap: 8px;">
-              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">拖动布局</span>
-              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">按住卡片顶部的<strong>标题栏</strong>（带小圆点处）可随意拖动位置。</span>
-            </li>
-            
-            <li style="display: flex; align-items: flex-start; gap: 8px;">
-              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">缩放大小</span>
-              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">鼠标移到卡片<strong>边缘或四角</strong>变成双向箭头时，按住拖拽调整尺寸。</span>
-            </li>
-            
-            <li style="display: flex; align-items: flex-start; gap: 8px;">
-              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">层级调整</span>
-              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">在卡片空白处右键，可将其置于<strong>最顶层 / 最底层</strong>，防止遮挡。</span>
+        <div class="footer-tip-popup">
+          <h5 style="font-size: 15px; margin-bottom: 14px; font-weight: 600;">💡 功能使用指南（完整版）</h5>
+          <ul style="display: flex; flex-direction: column; gap: 14px; margin: 0; padding: 0; list-style: none;">
+
+            <!-- 1. 布局调整 -->
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">布局调整</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                <strong>① 拖动卡片：</strong>按住卡片顶部<strong>标题栏</strong>（带彩色小圆点那一行）即可拖动整张卡片，拖动中卡片会半透明并高亮边框，松开鼠标自动保存位置。<br>
+                <strong>② 缩放卡片：</strong>鼠标移到卡片<strong>四条边或四个角</strong>，光标变成双向箭头，按住拖动即可自由调整宽高；最小宽 240px、最小高 160px。<br>
+                <strong>③ 调整层级：</strong>在卡片上<strong>点击右键</strong>弹出菜单，可选「⬆️ 置于顶层」或「⬇️ 置于底层」，解决卡片互相遮挡。<br>
+                <strong>④ 自动限位：</strong>拖动/缩放时卡片被限制在容器内，不会跑出页面；窗口缩小后超出右边缘的卡片会被自动拉回可视区。
+              </span>
             </li>
 
-            <li style="display: flex; align-items: flex-start; gap: 8px;">
-              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">一键整理</span>
-              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">点击左下角<strong>扫把</strong>图标，自动紧凑排版卡片。</span>
-            </li>
-            
-            <li style="display: flex; align-items: flex-start; gap: 8px;">
-              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">组件显示</span>
-              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">点击左下角<strong>加号（+）</strong>，可选择隐藏或显示特定功能卡片。</span>
-            </li>
-            
-            <li style="display: flex; align-items: flex-start; gap: 8px;">
-              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">搜索引擎</span>
-              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">搜索框右侧齿轮⚙️可增删引擎；搜索框内可直接输入网址跳转。</span>
-            </li>
-            
-            <li style="display: flex; align-items: flex-start; gap: 8px;">
-              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">天气切换</span>
-              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">点击右上角天气区域，输入<strong>中文或拼音</strong>即可切换城市。</span>
-            </li>
-            
-            <li style="display: flex; align-items: flex-start; gap: 8px;">
-              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">数据备份</span>
-              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">右下角木鱼上方有 <strong>📤 导出 / 📥 导入</strong>，可将所有配置加密保存。</span>
+            <!-- 2. 组件管理 -->
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">组件管理</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                <strong>① 显示/隐藏：</strong>点击左下角<strong>加号（＋）</strong>弹出组件清单，每项右侧显示「显示中 / 已隐藏」，<strong>点一下即可切换</strong>，菜单不关闭，方便连续开关多个卡片。<br>
+                <strong>② 一键整理：</strong>点击加号旁的<strong>扫把（🧹）</strong>，自动把所有可见卡片按行紧凑排列——宽屏 3 列、中屏 2 列、窄屏 1 列，特别宽的卡片（如天气卡）自动占满整行，完成后提示「已整理 ✨」。<br>
+                <strong>③ 移动端：</strong>屏幕宽度 ≤ 860px 时卡片自动改为纵向流式排列，拖动/缩放手柄自动禁用，保证手机正常浏览。
+              </span>
             </li>
 
-            <li style="display: flex; align-items: flex-start; gap: 8px;">
-              <span style="background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">轻松一下</span>
-              <span style="color: #ddd; font-size: 12px; line-height: 1.4;">点右下角<strong>电子木鱼</strong>，功德+1，烦恼-1。</span>
+            <!-- 3. 搜索与天气 -->
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">搜索天气</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                <strong>① 智能搜索：</strong>搜索框直接输入网址（如 <code>github.com</code>）会<strong>直接跳转</strong>；输入普通文字则用默认引擎搜索。输入时下方实时出现建议项，可点选「打开网址」或「在 XX 搜索」。<br>
+                <strong>② 自定义引擎：</strong>点击搜索框右侧<strong>齿轮⚙️</strong>，可切换默认引擎、添加自定义引擎（名称 + 搜索链接，需含 <code>%s</code> 或 <code>q=</code>）、删除当前引擎。添加后自动设为默认。<br>
+                <strong>③ 切换城市：</strong>点击右上角<strong>天气区域</strong>展开城市搜索框，输入中文或拼音，从下拉列表选择城市即可切换，选择会本地保存。天气每 30 分钟自动刷新。<br>
+                <strong>④ 天气详情卡：</strong>显示当前温度/天气/风向/风力/湿度/气压/体感/能见度，下方有逐小时预报和未来 3 天预报。
+              </span>
+            </li>
+
+            <!-- 4. 待办与计时 -->
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">待办计时</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                <strong>① 待办事项：</strong>输入任务后按<strong>回车</strong>或点＋添加；勾选复选框标记完成（自动划线置灰）；点 × 删除。空内容提交时输入框会<strong>抖动变红</strong>并提示。标题栏右侧显示「未完成/总数」。<br>
+                <strong>② 计时器：</strong>直接修改时/分/秒输入框设定时长（分秒自动限制 0–59），点「开始」倒计时，环形进度条实时收缩；再点「暂停」可暂停，点「重置」恢复到你设定的原始时长。倒计时结束会<strong>播放提示音</strong>并弹 toast「时间到！休息一下吧 ☕」。
+              </span>
+            </li>
+
+            <!-- 5. 快捷访问 -->
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">快捷访问</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                <strong>① 添加：</strong>点「＋ 添加」，填写名称、网址（图标 URL 可留空，留空则自动抓取网站 favicon），确定即添加。<br>
+                <strong>② 拖拽排序：</strong>直接<strong>按住图标拖动</strong>即可跟手排序，松手自动保存顺序；拖动时有浮动幽灵元素和插入占位效果。<br>
+                <strong>③ 删除：</strong>鼠标悬停图标，右上角出现 ×，点击删除。<br>
+                <strong>④ 图标兜底：</strong>若 favicon 加载失败，会自动用网站名首字/首两字母生成彩色渐变图标，不会出现裂图。
+              </span>
+            </li>
+
+            <!-- 6. 日历 / 节日 / 世界时钟 / 进度条 -->
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">日历时钟</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                <strong>① 日历：</strong>支持上下月切换和「今天」快速回到当月；每格显示公历日 + 农历日（初一显示月份），今天高亮。<br>
+                <strong>② 节日倒计时：</strong>自动计算元旦、春节、劳动节、国庆节、中秋节距离今天的天数，按由近到远排序，当天显示「就是今天」。<br>
+                <strong>③ 世界时钟：</strong>显示北京、伦敦、纽约、东京当前时间，每 10 秒刷新一次。<br>
+                <strong>④ 进度条：</strong>实时显示今天、本周、今年的时间进度百分比，每分钟刷新。
+              </span>
+            </li>
+
+            <!-- 7. 打工倒计时 -->
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">打工倒计时</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                <strong>① 设置：</strong>点卡片右上角<strong>齿轮⚙️</strong>展开设置，可修改上班/下班时间，并勾选一周中哪些天上班（默认周一至周五）。<br>
+                <strong>② 智能状态：</strong>未上班时显示「距离上班还有」倒计时；上班中显示「摸鱼中，距离下班还有」；已下班且明天上班则显示「距离明天上班还有」；休息日显示「🎉 休息日」。所有设置本地保存。
+              </span>
+            </li>
+
+            <!-- 8. 迷你记事本 -->
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">迷你记事本</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                <strong>① 富文本：</strong>支持<strong>加粗 B、斜体 I、下划线 U、删除线 S</strong>；选中文字后可切换字体（微软雅黑/宋体/楷体/黑体/仿宋/华文行楷等 13 种）、放大 A+、缩小 A-、重置 Aa。<br>
+                <strong>② 导出：</strong>📥 导出为 <strong>Word（.doc）</strong>，📄 导出为 <strong>TXT</strong>，文件名自动带日期。<br>
+                <strong>③ 导入：</strong>📂 从本地导入 TXT，会询问「追加到末尾」还是「覆盖现有内容」。<br>
+                <strong>④ 自动保存：</strong>输入停顿 500ms 后自动存入本地；粘贴时自动转纯文本，避免外部样式污染。空内容导出会提示「记事本还是空的」。
+              </span>
+            </li>
+
+            <!-- 9. 主题 / 字号 / 背景 -->
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">外观设置</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                <strong>① 主题：</strong>右上角 🌙/☀️ 按钮切换深色/浅色，首次访问会跟随系统偏好。<br>
+                <strong>② 字号：</strong>木鱼上方「🔍 字号」按钮循环切换<strong>小 / 中 / 大</strong>三档，整站等比缩放（0.9 / 1.0 / 1.15），自动保存。<br>
+                <strong>③ 背景：</strong>木鱼上方「🖼️ 背景设置」可<strong>上传图片</strong>（自动压缩到最长边 2560px，限 4MB 内）或选择<strong>纯色背景</strong>（自动根据亮度切换深浅主题和文字颜色），也可「恢复默认渐变」。
+              </span>
+            </li>
+
+            <!-- 10. 数据备份 -->
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">数据备份</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                <strong>① 导出：</strong>点击木鱼上方「📤 导出」，会提示设置加密密码（可留空不加密）。设置密码后文件经<strong>5 轮高强度混淆加密</strong>，导出为「配置.txt」，包含卡片布局、快捷方式、待办、笔记、主题、字号、引擎、城市、打工设置、背景等全部数据。<br>
+                <strong>② 导入：</strong>点击「📥 导入」选择配置 txt，若是加密文件会要求输入密码，解密成功并确认覆盖后自动应用并刷新页面；密码错误或文件损坏会明确提示。
+              </span>
+            </li>
+
+            <!-- 11. 轻松一下 -->
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">轻松一下</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                累了就点一下右下角的<strong>电子木鱼</strong>吧——每敲一下会播放木鱼音效，并随机飘出「功德+1 / 烦恼-1 / 暴富+1 / Bug-1 / 逢考必过 / 水逆退散」等祝福语，颜色随机变化，功德无量 🙏。
+              </span>
             </li>
 
           </ul>
@@ -1295,9 +1398,10 @@
 <div class="muyu-container" id="muyu">
   <!-- 导入导出按钮组，放在木鱼上方 -->
   <div class="data-action-group" style="position: relative;">
-    <button id="exportBtn" title="导出所有配置（支持加密）">📤 导出</button>
-    <button id="importBtn" title="导入配置文件">📥 导入</button>
+    <button id="exportBtn" title="导出所有配置（支持加密）">📤 导出配置</button>
+    <button id="importBtn" title="导入配置文件">📥 导入配置</button>
     <button id="bgBtn" title="自定义背景设置">🖼️ 背景设置</button>
+    <button id="fontSizeBtn" title="切换字号 (小/中/大)">🔍 字号调节</button>
 
     <div class="bg-panel" id="bgPanel">
       <div class="bg-panel-title">背景设置</div>
@@ -1360,16 +1464,64 @@
     get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} },
   };
-  function toast(msg) {
+  function toast(msg, options = {}) {
     const t = $('#toast');
-    t.textContent = msg;
+    t.innerHTML = '';
+    t.style.pointerEvents = 'none';
+
+    const msgSpan = document.createElement('span');
+    msgSpan.textContent = msg;
+    t.appendChild(msgSpan);
+
+    // 如果有 action 按钮（如撤销）
+    if (options.actionText && typeof options.onAction === 'function') {
+      const btn = document.createElement('button');
+      btn.textContent = options.actionText;
+      btn.style.cssText = 'margin-left:12px;background:#fff;color:var(--accent);border:none;border-radius:6px;padding:4px 10px;font-size:12.5px;font-weight:600;cursor:pointer;';
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        options.onAction();
+        t.classList.remove('show');
+        clearTimeout(t._timer);
+      });
+      t.appendChild(btn);
+      t.style.pointerEvents = 'auto';
+    }
+
     t.classList.add('show');
     clearTimeout(t._timer);
-    t._timer = setTimeout(()=> t.classList.remove('show'), 2000);
+    t._timer = setTimeout(() => {
+      t.classList.remove('show');
+      t.style.pointerEvents = 'none';
+    }, options.duration || 4000);
   }
   function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    return String(s).replace(/[&<>"'`=\/]/g, m => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',
+      "'":'&#39;','`':'&#96;','=':'&#61;','/':'&#47;'
+    }[m]));
   }
+
+  // ================= 字号切换 =================
+  const fontSizeBtn = $('#fontSizeBtn');
+  let currentFontSize = store.get('nt_fontSize', 'small'); // 默认小
+
+  function applyFontSize(size) {
+    document.documentElement.setAttribute('data-fontsize', size);
+    if (size === 'large')       fontSizeBtn.textContent = '🔠 大字';
+    else if (size === 'medium') fontSizeBtn.textContent = '🔡 中字';
+    else                        fontSizeBtn.textContent = '🔍 小字';
+    store.set('nt_fontSize', size);
+  }
+  applyFontSize(currentFontSize);
+
+  fontSizeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (currentFontSize === 'small')       currentFontSize = 'medium';
+    else if (currentFontSize === 'medium') currentFontSize = 'large';
+    else                                   currentFontSize = 'small';
+    applyFontSize(currentFontSize);
+  });
 
   // ================= 主题 & 时钟 =================
   const themeBtn = $('#themeBtn');
@@ -1411,6 +1563,96 @@
   const weatherArea = $('#weatherArea'), cityDropdown = $('#cityDropdown');
   const citySearchInput = $('#citySearchInput'), cityList = $('#cityList');
   let currentCity = store.get('nt_city', { id: '101010100', name: '北京' });
+
+  // 历史城市记录（最多保留 6 个）
+  let cityHistory = store.get('nt_city_history', []);
+  if (!Array.isArray(cityHistory)) cityHistory = [];
+
+  function saveCityToHistory(city) {
+    cityHistory = cityHistory.filter(c => c.id !== city.id && c.name !== city.name);
+    cityHistory.unshift({ id: city.id, name: city.name });
+    cityHistory = cityHistory.slice(0, 6);
+    store.set('nt_city_history', cityHistory);
+  }
+
+  function renderCityHistory() {
+    if (!cityHistory.length) {
+      cityList.innerHTML = `<div class="city-tip">🔍 输入拼音或中文查找</div>`;
+      return;
+    }
+    cityList.innerHTML = '';
+    const title = document.createElement('div');
+    title.className = 'city-tip';
+    title.style.cssText = 'margin:0 0 6px 0;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;';
+
+    const titleText = document.createElement('span');
+    titleText.textContent = '🕘 最近使用';
+    title.appendChild(titleText);
+
+    // 清除历史按钮
+    const clearBtn = document.createElement('button');
+    clearBtn.textContent = '清除';
+    clearBtn.style.cssText = 'background:transparent;border:none;color:var(--danger);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:4px;transition:background 0.2s;';
+    clearBtn.addEventListener('mouseenter', () => clearBtn.style.background = 'var(--hover)');
+    clearBtn.addEventListener('mouseleave', () => clearBtn.style.background = 'transparent');
+    clearBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!confirm('确定要清除所有历史城市吗？')) return;
+      cityHistory = [];
+      store.set('nt_city_history', cityHistory);
+      renderCityHistory();
+      toast('🗑️ 历史城市已清除');
+    });
+    title.appendChild(clearBtn);
+
+    cityList.appendChild(title);
+
+    cityHistory.forEach(loc => {
+      const div = document.createElement('div');
+      div.className = 'city-item';
+      div.style.display = 'flex';
+      div.style.justifyContent = 'space-between';
+      div.style.alignItems = 'center';
+
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = loc.name;
+      nameSpan.style.flex = '1';
+      nameSpan.style.overflow = 'hidden';
+      nameSpan.style.textOverflow = 'ellipsis';
+      nameSpan.style.whiteSpace = 'nowrap';
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = '×';
+      delBtn.style.cssText = 'background:transparent; border:none; color:var(--text-mute); font-size:16px; cursor:pointer; padding:0 4px; line-height:1; transition:color 0.2s;';
+      delBtn.title = '删除此记录';
+      
+      delBtn.addEventListener('mouseenter', () => delBtn.style.color = 'var(--danger)');
+      delBtn.addEventListener('mouseleave', () => delBtn.style.color = 'var(--text-mute)');
+      
+      delBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // 阻止触发切换城市
+        cityHistory = cityHistory.filter(c => c.id !== loc.id && c.name !== loc.name);
+        store.set('nt_city_history', cityHistory);
+        renderCityHistory(); // 重新渲染列表
+        toast('🗑️ 已移除记录');
+      });
+
+      div.appendChild(nameSpan);
+      div.appendChild(delBtn);
+
+      // 点击整行切换城市（点击 × 时已被上面的 stopPropagation 拦截）
+      div.addEventListener('click', () => {
+        currentCity = { id: loc.id, name: loc.name };
+        store.set('nt_city', currentCity);
+        saveCityToHistory(currentCity);
+        fetchAllWeather(currentCity.id);
+        cityDropdown.classList.remove('show');
+        citySearchInput.value = '';
+      });
+      
+      cityList.appendChild(div);
+    });
+  }
 
   function iconToEmoji(code) {
     const c = parseInt(code);
@@ -1519,6 +1761,7 @@
           div.addEventListener('click', () => {
             currentCity = { id: loc.id, name: loc.name };
             store.set('nt_city', currentCity);
+            saveCityToHistory(currentCity);   // 👈 记入历史
             fetchAllWeather(currentCity.id);
             cityDropdown.classList.remove('show');
             citySearchInput.value = '';
@@ -1538,7 +1781,7 @@
     clearTimeout(searchTimer);
     const val = e.target.value.trim();
     if (!val) {
-      cityList.innerHTML = `<div class="city-tip">✏️ 请输入拼音或中文</div>`;
+      renderCityHistory();   // 👈 空输入时展示历史
       return;
     }
     searchTimer = setTimeout(() => searchCity(val), 500);
@@ -1546,15 +1789,29 @@
 
   weatherArea.addEventListener('click', (e) => {
     if (e.target.closest('.city-dropdown')) return;
-	    cityDropdown.classList.toggle('show');
-    if (cityDropdown.classList.contains('show')) setTimeout(() => citySearchInput.focus(), 100);
+    cityDropdown.classList.toggle('show');
+    if (cityDropdown.classList.contains('show')) {
+      // 👈 打开时先展示历史城市
+      if (!citySearchInput.value.trim()) renderCityHistory();
+      setTimeout(() => citySearchInput.focus(), 100);
+    }
   });
   document.addEventListener('click', (e) => {
     if (!weatherArea.contains(e.target)) cityDropdown.classList.remove('show');
   });
 
+  saveCityToHistory(currentCity);   // 👈 当前城市作为历史起点
   fetchAllWeather(currentCity.id);
-  setInterval(() => fetchAllWeather(currentCity.id), 1000 * 60 * 30);
+  let weatherTimer = setInterval(() => fetchAllWeather(currentCity.id), 1000 * 60 * 30);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      fetchAllWeather(currentCity.id);
+      clearInterval(weatherTimer);
+      weatherTimer = setInterval(() => fetchAllWeather(currentCity.id), 1000 * 60 * 30);
+    } else {
+      clearInterval(weatherTimer);
+    }
+  });
 
   // ================= 搜索 =================
   const searchInput = $('#searchInput'), searchBtn = $('#searchBtn'), suggestions = $('#suggestions');
@@ -1564,7 +1821,6 @@
     { name: '百度',   url: 'https://www.baidu.com/s?wd=', icon: '🌐' },
     { name: 'Google', url: 'https://www.google.com/search?q=', icon: '🌐' },
     { name: 'Bing',   url: 'https://www.bing.com/search?q=', icon: '🌐' },
-    { name: 'GitHub', url: 'https://github.com/search?q=', icon: '🌐' },
   ];
 
   // 读取本地保存的引擎库和默认引擎名
@@ -1769,12 +2025,7 @@
   document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) suggestions.classList.remove('show'); });
 
   // ================= 快捷方式 =================
-  const DEFAULT_SHORTCUTS = [
-    { name: 'Google', url: 'https://google.com' },
-    { name: 'YouTube', url: 'https://youtube.com' },
-    { name: 'GitHub', url: 'https://github.com' },
-    { name: 'Bilibili', url: 'https://bilibili.com' },
-  ];
+  const DEFAULT_SHORTCUTS = [];
   let shortcuts = store.get('nt_shortcuts', null);
   if (!Array.isArray(shortcuts) || !shortcuts.length) {
     shortcuts = DEFAULT_SHORTCUTS.slice();
@@ -1792,10 +2043,8 @@
   function handleFavError(imgElement, name) {
     imgElement.style.display = 'none';
     const container = imgElement.parentElement;
+    container.classList.add('fav-fallback');
     container.style.background = getGradientColor(name);
-    container.style.color = '#fff';
-    container.style.fontWeight = 'bold';
-    container.style.fontSize = '16px';
     container.textContent = getIconText(name);
   }
 
@@ -1820,8 +2069,9 @@
     shortcuts.forEach((sc, idx) => {
       const a = document.createElement('a');
       a.className = 'sc';
-      a.href = sc.url;
+      a.href = /^https?:\/\//i.test(sc.url) ? sc.url : '#';
       a.target = '_blank';
+      a.rel = 'noopener noreferrer';
       a.title = sc.url;
       a.dataset.idx = idx;
       a.draggable = false; // 👈 核心修复：防止 a 标签被原生拖拽
@@ -1845,10 +2095,27 @@
       a.querySelector('.del').addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+
+        // 保存快照，用于撤销
+        const snapshot = JSON.parse(JSON.stringify(shortcuts));
+        const removed = shortcuts[idx];
+
         shortcuts.splice(idx, 1);
         store.set('nt_shortcuts', shortcuts);
         renderShortcuts();
-        renderInlineLayout(); // 👈 加上这一行，同步更新隐藏的排版面板
+        renderInlineLayout();
+
+        toast(`🗑️ 已删除「${removed.name}」`, {
+          actionText: '撤销',
+          duration: 5000,
+          onAction: () => {
+            shortcuts = snapshot;
+            store.set('nt_shortcuts', shortcuts);
+            renderShortcuts();
+            renderInlineLayout();
+            toast('✨ 已恢复');
+          }
+        });
       });
 
       grid.appendChild(a);
@@ -2083,6 +2350,7 @@
     store.set('nt_todos', todos); input.value = ''; renderTodos();
     input.focus(); // 添加完成后保持焦点，方便连续输入
   }
+  $('#addTodoBtn').addEventListener('mousedown', e => e.preventDefault()); // 阻止按钮抢焦点
   $('#addTodoBtn').addEventListener('click', addTodo);
   $('#todoInput').addEventListener('keydown', e => { if (e.key === 'Enter') addTodo(); });
   renderTodos();
@@ -2138,10 +2406,10 @@
     input.addEventListener('input', () => {
       if (isRunning) stopTimer();
       
-      if (input === inputM || input === inputS) {
-        if (input.value > 59) input.value = 59;
-      }
-      if (input.value < 0) input.value = 0;
+      let v = parseInt(input.value, 10);
+      if (isNaN(v) || v < 0) v = 0;
+      if (input === inputM || input === inputS) v = Math.min(v, 59);
+      input.value = String(v).padStart(2, '0');
 
       timerTotal = getInputSeconds();
       timerLeft = timerTotal;
@@ -3341,6 +3609,28 @@
   // 6. 迷你记事本
   const notepadEditor = $('#notepadEditor');
   notepadEditor.innerHTML = store.get('nt_notepad', '');
+
+  // ===== 自定义撤销/重做历史栈 =====
+  let historyStack = [notepadEditor.innerHTML];
+  let historyIndex = 0;
+  let historyTimer = null;
+
+  function pushHistory() {
+    const current = notepadEditor.innerHTML;
+    // 如果和当前记录一样，就不存了
+    if (historyStack[historyIndex] === current) return;
+    
+    // 截断掉当前索引之后的重做分支
+    historyStack = historyStack.slice(0, historyIndex + 1);
+    historyStack.push(current);
+    
+    // 限制最多存 100 步，防止内存爆炸
+    if (historyStack.length > 100) {
+      historyStack.shift();
+    } else {
+      historyIndex++;
+    }
+  }
   
   // 防止粘贴富文本污染样式
   notepadEditor.addEventListener('paste', (e) => {
@@ -3350,21 +3640,73 @@
   });
   
   let saveTimer;
+  // ===== 输入法兼容处理（防止拼音字母进历史） =====
+  let isComposing = false;
+  
+  notepadEditor.addEventListener('compositionstart', () => {
+    isComposing = true;
+  });
+  
+  notepadEditor.addEventListener('compositionend', () => {
+    isComposing = false;
+    // 拼音上屏完成后，主动触发一次记录
+    clearTimeout(historyTimer);
+    historyTimer = setTimeout(() => {
+      pushHistory();
+    }, 400);
+  });
+
   notepadEditor.addEventListener('input', () => {
+    // 1. 原有的防抖保存到本地 (这里保持一直保存，不影响)
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
       store.set('nt_notepad', notepadEditor.innerHTML);
     }, 500);
+
+    // 2. 如果还在拼音拼写阶段，不记入历史！
+    if (isComposing) return;
+
+    // 3. 否则，正常防抖记录
+    clearTimeout(historyTimer);
+    historyTimer = setTimeout(() => {
+      pushHistory();
+    }, 400);
   });
 
-  const notepadBtns = $$('.notepad-btn');
+  // 撤销和重做（使用自定义历史栈）
+  $('#btnUndo').addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    // 如果刚打完字还没存历史，立刻存一下，防止丢失
+    clearTimeout(historyTimer);
+    pushHistory(); 
+    
+    if (historyIndex > 0) {
+      historyIndex--;
+      notepadEditor.innerHTML = historyStack[historyIndex];
+      store.set('nt_notepad', notepadEditor.innerHTML);
+      notepadEditor.focus();
+    }
+  });
+  
+  $('#btnRedo').addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    if (historyIndex < historyStack.length - 1) {
+      historyIndex++;
+      notepadEditor.innerHTML = historyStack[historyIndex];
+      store.set('nt_notepad', notepadEditor.innerHTML);
+      notepadEditor.focus();
+    }
+  });
+
+  // 其他文字格式按钮
+  const notepadBtns = $$('.notepad-btn[data-cmd]'); // 只选带 data-cmd 的按钮
   notepadBtns.forEach(btn => {
     btn.addEventListener('mousedown', (e) => {
       e.preventDefault();
       const cmd = btn.dataset.cmd;
+      notepadEditor.focus();
       document.execCommand(cmd, false, null);
       btn.classList.toggle('active', document.queryCommandState(cmd));
-      notepadEditor.focus();
     });
   });
 
@@ -3441,7 +3783,11 @@
 
   $('#exportWordBtn').addEventListener('click', () => {
     const htmlContent = notepadEditor.innerHTML;
-    if (!htmlContent.trim()) { toast('❌ 记事本还是空的，没有内容可以导出哦'); return; }
+    const plainText   = notepadEditor.innerText;
+    // 双检：HTML 或纯文本任一为空都拦截，避免 <br> 等占位符被误判为“有内容”
+    if (!plainText.trim() || !htmlContent.replace(/<br\s*\/?>|<div[^>]*>\s*<\/div>|&nbsp;/gi, '').trim()) {
+      toast('❌ 记事本还是空的，没有内容可以导出哦'); return;
+    }
     const header = `
       <html xmlns:o='urn:schemas-microsoft-com:office:office'
             xmlns:w='urn:schemas-microsoft-com:office:word'
@@ -3488,23 +3834,43 @@
   $('#importTxtBtn').addEventListener('click', () => {
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
-    fileInput.accept = '.txt,text/plain';
-    fileInput.addEventListener('change', (e) => {
+    fileInput.accept = '.txt,text/plain,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    fileInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const content = event.target.result;
+
+      const isDocx = /\.docx$/i.test(file.name);
+
+      const writeContent = (html) => {
         const isAppend = confirm('📂 文件读取成功！\n\n点击【确定】：追加到现有内容末尾\n点击【取消】：覆盖现有内容');
         if (isAppend) {
-          notepadEditor.innerHTML += '<br><br>' + content.replace(/\n/g, '<br>');
+          notepadEditor.innerHTML += '<br><br>' + html;
         } else {
-          notepadEditor.innerHTML = content.replace(/\n/g, '<br>');
+          notepadEditor.innerHTML = html;
         }
         notepadEditor.dispatchEvent(new Event('input'));
         toast('✨ 导入成功！');
       };
-      reader.readAsText(file, 'UTF-8');
+
+      if (isDocx) {
+        // 用 mammoth 把 .docx 转成 HTML
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const result = await mammoth.convertToHtml({ arrayBuffer });
+          writeContent(result.value || '');
+        } catch (err) {
+          console.error(err);
+          toast('❌ Word 解析失败，请确认是 .docx 文件');
+        }
+      } else {
+        // 普通 txt 文本导入
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const text = event.target.result;
+          writeContent(text.replace(/\n/g, '<br>'));
+        };
+        reader.readAsText(file, 'UTF-8');
+      }
     });
     fileInput.click();
   });
@@ -3513,17 +3879,17 @@
   const grid = document.getElementById('draggableGrid');
 
   const defaultConfig = {
-    weather:    { x: 0,    y: 0,    w: 1150, h: 320, visible: true, order: 1,  name: '天气详情' },
-    timer:      { x: 0,    y: 340,  w: 360,  h: 280, visible: true, order: 2,  name: '计时' },
-    todo:       { x: 380,  y: 340,  w: 770,  h: 280, visible: true, order: 3,  name: '待办事项' },
-    shortcuts:  { x: 0,    y: 640,  w: 560,  h: 280, visible: true, order: 4,  name: '快捷访问' },
-    quote:      { x: 580,  y: 640,  w: 570,  h: 280, visible: true, order: 5,  name: '每日格言' },
-    calendar:   { x: 0,    y: 940,  w: 380,  h: 320, visible: true, order: 6,  name: '日历' },
-    holiday:    { x: 400,  y: 940,  w: 380,  h: 320, visible: true, order: 7,  name: '节日倒计时' },
-    worldclock: { x: 800,  y: 940,  w: 350,  h: 320, visible: true, order: 8,  name: '世界时钟' },
-    progress:   { x: 0,    y: 1280, w: 360,  h: 260, visible: true, order: 9,  name: '进度条' },
-    fishing:    { x: 380,  y: 1280, w: 360,  h: 260, visible: true, order: 10, name: '打工倒计时' },
-    notepad:    { x: 760,  y: 1280, w: 390,  h: 300, visible: true, order: 11, name: '迷你记事本' }
+    weather:    { x: 0,    y: 0,    w: 1150, h: 500, visible: true, order: 1,  name: '天气详情' },
+    timer:      { x: 0,    y: 520,  w: 380,  h: 340, visible: true, order: 2,  name: '计时' },
+    todo:       { x: 400,  y: 520,  w: 750,  h: 340, visible: true, order: 3,  name: '待办事项' },
+    shortcuts:  { x: 0,    y: 880,  w: 560,  h: 340, visible: true, order: 4,  name: '快捷访问' },
+    quote:      { x: 580,  y: 880,  w: 570,  h: 340, visible: true, order: 5,  name: '每日格言' },
+    calendar:   { x: 0,    y: 1240, w: 400,  h: 380, visible: true, order: 6,  name: '日历' },
+    holiday:    { x: 420,  y: 1240, w: 380,  h: 380, visible: true, order: 7,  name: '节日倒计时' },
+    worldclock: { x: 820,  y: 1240, w: 330,  h: 380, visible: true, order: 8,  name: '世界时钟' },
+    progress:   { x: 0,    y: 1640, w: 380,  h: 300, visible: true, order: 9,  name: '进度条' },
+    fishing:    { x: 400,  y: 1640, w: 360,  h: 300, visible: true, order: 10, name: '打工倒计时' },
+    notepad:    { x: 780,  y: 1640, w: 370,  h: 360, visible: true, order: 11, name: '迷你记事本' }
   };
 
   // 为所有组件默认 z-index = 1
@@ -3584,17 +3950,20 @@
   }
 
   applyWidgetState();
+  let _resizeTimer;
   window.addEventListener('resize', () => {
-    // 窗口变窄时，把超出右边界的 widget 拉回来
-    const gridW = grid.offsetWidth;
-    let changed = false;
-    Object.values(widgetConfig).forEach(c => {
-      if (c.visible && c.x + c.w > gridW) {
-        c.x = Math.max(0, gridW - c.w);
-        changed = true;
-      }
-    });
-    if (changed) { saveConfig(); applyWidgetState(); }
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(() => {
+      const gridW = grid.offsetWidth;
+      let changed = false;
+      Object.values(widgetConfig).forEach(c => {
+        if (c.visible && c.x + c.w > gridW) {
+          c.x = Math.max(0, gridW - c.w);
+          changed = true;
+        }
+      });
+      if (changed) { saveConfig(); applyWidgetState(); }
+    }, 150);
   });
 
   // ================= 菜单渲染 =================
@@ -4028,9 +4397,11 @@
       todos: todos,
       notepad: editorEl ? editorEl.innerHTML : '',
       theme: document.documentElement.getAttribute('data-theme'),
+      fontSize: currentFontSize,
       engines: currentEngines,
       defaultEngine: currentDefEngine,
       city: currentCity,
+      cityHistory: cityHistory,          // 👈 连同历史城市一起导出
       workStart: workStartTime,
       workEnd: workEndTime,
       workDays: workDays,
@@ -4239,6 +4610,7 @@
           if (data.todos) { todos = data.todos; store.set('nt_todos', todos); renderTodos(); }
           if (data.notepad !== undefined) { store.set('nt_notepad', data.notepad); notepadEditor.innerHTML = data.notepad; }
           if (data.theme) { applyTheme(data.theme); }
+          if (data.fontSize) { currentFontSize = data.fontSize; applyFontSize(currentFontSize); }
           if (data.engines && Array.isArray(data.engines)) { 
             engines = data.engines; 
             store.set('nt_engines_list', engines); 
@@ -4249,6 +4621,11 @@
           }
           if (typeof renderEngineSelect === 'function') renderEngineSelect();
           if (data.city) { currentCity = data.city; store.set('nt_city', currentCity); fetchAllWeather(currentCity.id); }
+          if (Array.isArray(data.cityHistory)) {
+            cityHistory = data.cityHistory.slice(0, 6);
+            store.set('nt_city_history', cityHistory);
+            renderCityHistory();
+          }
           if (data.workStart) { workStartTime = data.workStart; store.set('nt_workStart', workStartTime); $('#workStart').value = workStartTime; }
           if (data.workEnd) { workEndTime = data.workEnd; store.set('nt_workEnd', workEndTime); $('#workEnd').value = workEndTime; }
           if (data.workDays) { 
@@ -4289,5 +4666,91 @@
 
 })();
 </script>
+<script>
+(function(){
+  const tipWrap  = document.querySelector('.footer-tip-wrap');
+  const tipBtn   = document.querySelector('.footer-tip-btn');
+  const tipPopup = document.querySelector('.footer-tip-popup');
+  if (!tipWrap || !tipBtn || !tipPopup) return;
+
+  // 桌面端：纯 CSS :hover 控制，无需 JS。
+  // 触屏设备（无 hover）：兜底用点击切换 open。
+  const isTouch = matchMedia('(hover: none)').matches;
+  if (isTouch) {
+    tipBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      tipWrap.classList.toggle('open');
+    });
+    document.addEventListener('click', (e) => {
+      if (!tipWrap.contains(e.target)) tipWrap.classList.remove('open');
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') tipWrap.classList.remove('open');
+    });
+  }
+})();
+</script>
+<style>
+  /* =======================================================
+     1. 全局极细滚动条 (接管整个页面以及所有内部滚动区域)
+     ======================================================= */
+  
+  /* Firefox */
+  * {
+    scrollbar-width: thin !important;
+    scrollbar-color: var(--scrollbar) transparent !important;
+  }
+
+  /* Chrome / Edge / Safari (Webkit) */
+  ::-webkit-scrollbar {
+    width: 4px !important;
+    height: 4px !important;
+    background-color: transparent !important;
+  }
+  ::-webkit-scrollbar-track {
+    background-color: transparent !important;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar) !important;
+    border-radius: 10px !important;
+    border: 1px solid transparent !important;
+    background-clip: padding-box !important;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-mute) !important;
+  }
+
+  /* =======================================================
+     2. 修复 ? 气泡的错位与专属白条
+     ======================================================= */
+  .footer-tip-popup {
+    position: absolute !important;
+    bottom: calc(100% + 12px) !important;
+    right: -10px !important;
+    left: auto !important;
+    transform: translateY(6px) !important;
+    width: 440px;
+    max-width: calc(100vw - 32px);
+    max-height: min(65vh, 520px);
+    overflow-y: auto !important;
+    /* 防止 Windows 自动隐藏滚动条 */
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+  }
+  .footer-tip-wrap.open .footer-tip-popup,
+  .footer-tip-wrap:hover .footer-tip-popup {
+    transform: translateY(0) !important;
+  }
+  
+  /* 气泡内部因为是深色背景，单独把滚动条改成半透明白色 */
+  .footer-tip-popup::-webkit-scrollbar {
+    width: 6px !important;
+  }
+  .footer-tip-popup::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.45) !important;
+  }
+  .footer-tip-popup::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+  }
+</style>
 </body>
 </html>
