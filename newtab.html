@@ -201,7 +201,11 @@
     display: flex; flex-direction: column; position: absolute;
     left: 0; top: 0; width: 320px; height: 240px;
     box-sizing: border-box; transition: box-shadow 0.2s, border-color 0.2s;
-    overflow: hidden;
+    overflow: hidden; user-select: none; /* 👈 防止拖动时选中文字 */
+  }
+  /* 允许需要输入/选中的区域恢复选中 */
+  .widget input, .widget textarea, .widget .notepad-editor, .widget .quote-text, .widget .joke-text {
+    user-select: text;
   }
   .widget-header {
     display: flex; align-items: center; justify-content: space-between;
@@ -297,7 +301,7 @@
   .sc .fav img { width: 28px; height: 28px; object-fit: contain; }
   .sc .fav.fav-fallback img { display: none; }
   .sc .fav.fav-fallback { color: #fff !important; font-weight: bold !important; font-size: 16px !important; }
-  .sc .name { font-size:12px; font-weight:500; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; }
+  .sc .name { font-size:12px; font-weight:500; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; padding: 0 2px; }
   .sc .del { position:absolute; top:2px; right:2px; border:none; background:transparent; color:var(--danger); font-size:16px; cursor:pointer; display:none; z-index: 2;}
   .sc:hover .del { display:block; }
 
@@ -422,7 +426,7 @@
 
   /* 悬浮按钮 & 菜单 */
   .add-widget-btn { position: fixed; bottom: 40px; left: 40px; width: 48px; height: 48px; border-radius: 12px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,103,192,0.3); cursor: pointer; z-index: 1000; transition: transform 0.2s, background 0.2s; }
-  .add-widget-btn::before { content: '+'; font-size: 26px; font-weight: 300; line-height: 1; display: block; margin-top: -2px; }
+  .add-widget-btn svg { width: 24px; height: 24px; transition: transform 0.2s ease; }
   .add-widget-btn:hover { transform: scale(1.05); }
   .add-widget-btn.active { transform: scale(1.05) rotate(45deg); }
   .tidy-btn { position: fixed; bottom: 40px; left: 100px; width: 48px; height: 48px; border-radius: 12px; background: var(--card); border: 1px solid var(--card-border); backdrop-filter: blur(30px) saturate(150%); color: var(--text-soft); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); cursor: pointer; z-index: 1000; font-size: 22px; transition: transform 0.2s, color 0.2s, background 0.2s; }
@@ -448,7 +452,7 @@
   .footer-tip-wrap { position: relative; display: inline-flex; }
   .footer-tip-btn { width: 24px; height: 24px; border-radius: 50%; background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-mute); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: help; transition: all 0.2s ease; user-select: none; }
   .footer-tip-wrap.open .footer-tip-btn { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .footer-tip-popup { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(6px); width: 280px; background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(10px); color: #fff; padding: 14px 16px; border-radius: 12px; font-size: 12.5px; line-height: 1.5; box-shadow: 0 10px 25px rgba(0,0,0,0.2); opacity: 0; visibility: hidden; pointer-events: auto; transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; }
+  .footer-tip-popup { background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(10px); color: #fff; padding: 14px 16px; border-radius: 12px; font-size: 12.5px; line-height: 1.5; box-shadow: 0 10px 25px rgba(0,0,0,0.2); opacity: 0; visibility: hidden; pointer-events: auto; transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; }
   .footer-tip-popup::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border-width: 6px; border-style: solid; border-color: rgba(30, 30, 30, 0.95) transparent transparent transparent; }
   .footer-tip-wrap:hover .footer-tip-popup { opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) translateY(0); }
   .footer-tip-wrap:hover .footer-tip-btn { background: var(--accent); color: #fff; border-color: var(--accent); }
@@ -1215,19 +1219,28 @@
         <div class="notepad-toolbar">
           <button class="notepad-btn" id="btnUndo" title="撤销 (Ctrl+Z)">↩️</button>
           <button class="notepad-btn" id="btnRedo" title="重做 (Ctrl+Y)">↪️</button>
-          
-          <button class="notepad-btn" data-cmd="bold" title="加粗">B</button>
-          <button class="notepad-btn" data-cmd="italic" title="斜体" style="font-style: italic;">I</button>
-          <button class="notepad-btn" data-cmd="underline" title="下划线" style="text-decoration: underline;">U</button>
-          <button class="notepad-btn" data-cmd="strikeThrough" title="删除线" style="text-decoration: line-through;">S</button>
 
+          <span class="np-sep"></span>
+          <button class="notepad-btn" data-cmd="bold" title="加粗 (Ctrl+B)" style="font-weight:bold;">B</button>
+          <button class="notepad-btn" data-cmd="italic" title="斜体 (Ctrl+I)" style="font-style: italic;">I</button>
+          <button class="notepad-btn" data-cmd="underline" title="下划线 (Ctrl+U)" style="text-decoration: underline;">U</button>
+          <button class="notepad-btn" data-cmd="strikeThrough" title="删除线" style="text-decoration: line-through;">S</button>
+          <button class="font-menu-btn" id="fontMenuBtn" title="切换选中文字的字体">字体▼</button>
           <button class="font-size-btn reset-size" id="fontSizeReset" title="重置字号">Aa</button>
           <button class="font-size-btn" id="fontSizeMinus" title="缩小字号">A-</button>
           <button class="font-size-btn" id="fontSizePlus" title="放大字号">A+</button>
-          <button class="font-menu-btn" id="fontMenuBtn" title="切换选中文字的字体" style="margin-left: 4px; margin-right: 8px;">字体▼</button>
+          <button class="notepad-btn" id="insertTableBtn" title="插入表格">▦</button>
+          <button class="notepad-btn" id="insertImageBtn" title="插入图片">🖼️</button>
+          <button class="notepad-btn" id="findReplaceBtn" title="查找替换 (Ctrl+F)">🔍</button>
+
+          <!-- 更多（折叠不常用功能） -->
+          <button class="notepad-btn" id="moreToolsBtn" title="更多工具">⋯</button>
+
+          <span class="np-sep"></span>
           <button class="font-size-btn" id="exportWordBtn" title="导出为 Word 文档" style="font-size: 14px;">📥</button>
           <button class="font-size-btn" id="exportTxtBtn" title="导出为 TXT 纯文本" style="font-size: 14px;">📄</button>
           <button class="font-size-btn" id="importTxtBtn" title="导入 TXT纯文本 / Word 文档" style="font-size: 14px;">📂</button>
+
           <div class="font-dropdown" id="fontDropdown">
             <div class="font-item" data-font="Microsoft YaHei" style="font-family: 'Microsoft YaHei', sans-serif;">微软雅黑</div>
             <div class="font-item" data-font="SimSun" style="font-family: 'SimSun', serif;">宋体</div>
@@ -1243,6 +1256,8 @@
             <div class="font-item" data-font="Verdana" style="font-family: Verdana, sans-serif;">Verdana</div>
             <div class="font-item" data-font="Comic Sans MS" style="font-family: 'Comic Sans MS', cursive;">Comic</div>
           </div>
+
+
         </div>
         <div class="notepad-editor" id="notepadEditor" contenteditable="true" placeholder="在这里记录你的灵感..."></div>
       </div>
@@ -1388,7 +1403,7 @@
               <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">组件管理</span>
               <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
                 <strong>① 显示/隐藏：</strong>点击左下角<strong>加号（＋）</strong>弹出组件清单，每项右侧显示「显示中 / 已隐藏」，<strong>点一下即可切换</strong>，菜单不关闭，方便连续开关多个卡片。<br>
-                <strong>② 组件清单：</strong>天气详情、计时、待办事项、快捷访问、每日格言、日历、节日倒计时、世界时钟、进度条、打工倒计时、汇率换算、单位换算、时间戳转换、二维码生成、摸鱼笑话、迷你记事本、音乐播放器，共 17 个组件。<br>
+                <strong>② 组件清单：</strong>天气详情、计时、待办事项、快捷访问、每日格言、日历、节日倒计时、世界时钟、进度条、打工倒计时、汇率换算、单位换算、时间戳转换、二维码生成、摸鱼笑话、迷你记事本、音乐播放器，共 <span id="footerWidgetCount">17</span> 个组件。<br>
                 <strong>③ 布局持久化：</strong>所有卡片的位置、大小、显隐、层级都会自动保存到本地，刷新页面后恢复。
               </span>
             </li>
@@ -1465,11 +1480,13 @@
             <li style="display: flex; align-items: flex-start; gap: 10px;">
               <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">迷你记事本</span>
               <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
-                <strong>① 富文本：</strong>支持<strong>加粗 B、斜体 I、下划线 U、删除线 S</strong>；选中文字后可切换字体（微软雅黑/宋体/楷体/黑体/仿宋/华文行楷等 13 种）、放大 A+、缩小 A-、重置 Aa。<br>
-                <strong>② 撤销重做：</strong>↩️ 撤销、↪️ 重做，也支持 Ctrl+Z / Ctrl+Y。<br>
-                <strong>③ 导出：</strong>📥 导出为 <strong>Word（.doc）</strong>，📄 导出为 <strong>TXT</strong>，文件名自动带日期。<br>
-                <strong>④ 导入：</strong>📂 从本地导入 TXT 或 .docx，会询问「追加到末尾」还是「覆盖现有内容」。<br>
-                <strong>⑤ 自动保存：</strong>输入停顿 500ms 后自动存入本地；粘贴时自动转纯文本，避免外部样式污染。空内容导出会提示「记事本还是空的」。
+                <strong>① 富文本：</strong>支持<strong>加粗 B、斜体 I、下划线 U、删除线 S</strong>；选中文字后可切换字体（微软雅黑/宋体/楷体/黑体/仿宋/华文行楷等 13 种）、放大 A+、缩小 A-、重置 Aa。点「⋯」更多工具还可设置<strong>字体颜色、背景高亮、上下标、段落对齐、列表、缩进、插入链接 / 分隔线</strong>。<br>
+                <strong>② 表格 / 图片：</strong>「▦」插入表格（最大 6×8）；「🖼️」插入本地图片（自动压缩到最长边 1200px，单张限 3MB）。<br>
+                <strong>③ 查找替换：</strong>点「🔍」或 Ctrl+F 弹出查找替换面板，支持上一个 / 下一个 / 替换 / 全部替换。<br>
+                <strong>④ 撤销重做：</strong>↩️ 撤销、↪️ 重做，也支持 Ctrl+Z / Ctrl+Y。<br>
+                <strong>⑤ 导出：</strong>📥 导出为 <strong>Word（.doc）</strong>，📄 导出为 <strong>TXT</strong>，文件名自动带日期；空内容会提示「记事本还是空的」。<br>
+                <strong>⑥ 导入：</strong>📂 从本地导入 TXT 或 .docx，会询问「追加到末尾」还是「覆盖现有内容」。<br>
+                <strong>⑦ 自动保存：</strong>输入停顿 500ms 后自动存入本地；粘贴时去除外部样式（仅保留纯文字和换行）。
               </span>
             </li>
 
@@ -1495,7 +1512,7 @@
             <li style="display: flex; align-items: flex-start; gap: 10px;">
               <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">数据备份</span>
               <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
-                <strong>① 导出：</strong>点击木鱼上方「📤 导出」，会提示设置加密密码（可留空不加密）。设置密码后文件经<strong>5 轮高强度混淆加密</strong>，导出为「配置.txt」，包含卡片布局、快捷方式、待办、笔记、主题、字号、引擎、城市、打工设置、背景等全部数据。<br>
+                <strong>① 导出：</strong>点击木鱼上方「📤 导出」，会提示设置加密密码（可留空不加密）。设置密码后文件经<strong>多层混淆处理</strong>（5 轮 XOR + 位置洗牌 + 自定义字母表 Base64 + 外壳包装，<u>非密码学级加密</u>，仅防随手查看，请勿存敏感数据；<code>file://</code> 下同样可用），导出为「配置.txt」，包含卡片布局、快捷方式、待办、笔记、主题、字号、引擎、城市、打工设置、背景等全部数据。<br>
                 <strong>② 导入：</strong>点击「📥 导入」选择配置 txt，若是加密文件会要求输入密码，解密成功并确认覆盖后自动应用并刷新页面；密码错误或文件损坏会明确提示。
               </span>
             </li>
@@ -1523,10 +1540,14 @@
 </div>
 
 <div class="widget-menu" id="widgetMenu"></div>
-<div class="add-widget-btn" id="addWidgetBtn"></div>
+<div class="add-widget-btn" id="addWidgetBtn">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+    <path d="M12 5v14M5 12h14"/>
+  </svg>
+</div>
 <div class="tidy-btn" id="tidyBtn" title="一键整理">🧹</div>
 
-<audio id="mp-audio" preload="metadata" crossorigin="anonymous"></audio>
+<audio id="mp-audio" preload="metadata"></audio>
 
 <div class="muyu-container" id="muyu">
   <!-- 导入导出按钮组，放在木鱼上方 -->
@@ -1582,6 +1603,54 @@
 <div class="widget-ctxmenu" id="widgetCtxMenu">
   <div class="ctx-item" data-action="top"><span class="ctx-icon">⬆️</span>置于顶层</div>
   <div class="ctx-item" data-action="bottom"><span class="ctx-icon">⬇️</span>置于底层</div>
+</div>
+
+<!-- 记事本浮层（放 body 末尾避免被 .widget 的 overflow:hidden + backdrop-filter 裁剪） -->
+<div class="np-more-panel" id="moreToolsPanel">
+  <div class="np-more-title">文字格式</div>
+  <div class="np-more-row">
+    <button class="notepad-btn" data-cmd="superscript" title="上标">x²</button>
+    <button class="notepad-btn" data-cmd="subscript" title="下标">x₂</button>
+    <button class="notepad-btn" id="textColorBtn" title="字体颜色">A<span style="color:#d93025;">■</span></button>
+    <button class="notepad-btn" id="hiliteColorBtn" title="背景高亮">🖍️</button>
+    <button class="notepad-btn" id="clearFormatBtn" title="清除格式">🧹</button>
+  </div>
+  <div class="np-more-title">段落对齐</div>
+  <div class="np-more-row">
+    <button class="notepad-btn" data-cmd="justifyLeft" title="左对齐">⬅️</button>
+    <button class="notepad-btn" data-cmd="justifyCenter" title="居中">↔️</button>
+    <button class="notepad-btn" data-cmd="justifyRight" title="右对齐">➡️</button>
+    <button class="notepad-btn" data-cmd="justifyFull" title="两端对齐">☰</button>
+  </div>
+  <div class="np-more-title">列表与缩进</div>
+  <div class="np-more-row">
+    <button class="notepad-btn" data-cmd="insertUnorderedList" title="无序列表">•</button>
+    <button class="notepad-btn" data-cmd="insertOrderedList" title="有序列表">1.</button>
+    <button class="notepad-btn" data-cmd="outdent" title="减少缩进">⇤</button>
+    <button class="notepad-btn" data-cmd="indent" title="增加缩进">⇥</button>
+  </div>
+  <div class="np-more-title">插入</div>
+  <div class="np-more-row">
+    <button class="notepad-btn" id="insertLinkBtn" title="插入链接">🔗</button>
+    <button class="notepad-btn" id="insertHrBtn" title="插入分隔线">—</button>
+  </div>
+</div>
+
+<div class="np-find-panel" id="findPanel">
+  <div class="np-find-row">
+    <input type="text" id="findInput" placeholder="查找内容">
+    <span id="findCount" class="np-find-count"></span>
+  </div>
+  <div class="np-find-row">
+    <input type="text" id="replaceInput" placeholder="替换为">
+  </div>
+  <div class="np-find-actions">
+    <button id="findPrevBtn" title="上一个">↑</button>
+    <button id="findNextBtn" title="下一个">↓</button>
+    <button id="replaceOneBtn">替换</button>
+    <button id="replaceAllBtn">全部替换</button>
+    <button id="findCloseBtn" title="关闭">✕</button>
+  </div>
 </div>
 
 <script>
@@ -1675,13 +1744,14 @@
 
     const h = now.getHours();
     let greet = '你好';
-    if (h < 5) greet = '夜深了';
-    else if (h < 9) greet = '早上好';
-    else if (h < 12) greet = '上午好';
+    if (h < 5)         greet = '夜深了';   // 00:00–04:59 真正的深夜
+    else if (h < 6)    greet = '凌晨好';   // 05:00–05:59 凌晨
+    else if (h < 9)    greet = '早上好';   // 06:00–08:59 清晨/早上
+    else if (h < 12)   greet = '上午好';
     else if (h === 12) greet = '中午好';
-    else if (h < 18) greet = '下午好';
-    else if (h < 23) greet = '晚上好';
-    else greet = '夜深了';
+    else if (h < 18)   greet = '下午好';
+    else if (h < 23)   greet = '晚上好';
+    else               greet = '夜深了';   // 23:00–23:59
 
     $('#greeting').innerHTML = `${greet}<span>。</span>`;
   }
@@ -2234,7 +2304,7 @@
       Object.assign(ghost.style, {
         position: 'fixed', left: '0', top: '0',
         width: rect.width + 'px', height: rect.height + 'px',
-        pointerEvents: 'none', zIndex: '9999', opacity: '.92',
+        pointerEvents: 'none', zIndex: '9999', opacity: '0.9', /* 稍微调低透明度防闪烁 */
         boxShadow: '0 14px 34px rgba(0,0,0,.45)',
         willChange: 'transform',
         transform: `translate3d(${drag.startX - drag.offsetX}px, ${drag.startY - drag.offsetY}px, 0) scale(1.04)`,
@@ -2567,25 +2637,87 @@
     '国庆节': ['2023-10-01', '2024-10-01', '2025-10-01', '2026-10-01', '2027-10-01', '2028-10-01'],
     '中秋节': ['2023-09-29', '2024-09-17', '2025-10-06', '2026-09-25', '2027-09-15', '2028-10-03']
   };
+  // 数据覆盖的最后一年：超出此年份后改用规则推算兜底
+  const HOLIDAY_DATA_LAST_YEAR = 2028;
+
+  // 固定公历节日规则：month 从 1 开始
+  const FIXED_SOLAR_HOLIDAYS = {
+    '元旦': { month: 1, day: 1 },
+    '劳动节': { month: 5, day: 1 },
+    '国庆节': { month: 10, day: 1 },
+  };
+
+  /**
+   * 规则推算某年的节日日期（用于硬编码数据用尽后的无限兜底）
+   * @param {string} name 节日名
+   * @param {number} year 公历年份
+   * @returns {Date|null}
+   */
+  function computeHolidayByRule(name, year) {
+    // 固定公历节日
+    if (FIXED_SOLAR_HOLIDAYS[name]) {
+      const r = FIXED_SOLAR_HOLIDAYS[name];
+      return new Date(year, r.month - 1, r.day);
+    }
+    // 农历节日：借助 lunar-javascript 反推公历日期
+    if (typeof Lunar !== 'undefined') {
+      try {
+        if (name === '春节') {
+          // 正月初一
+          return new Date(Lunar.fromYmd(year, 1, 1).getSolar().toYmd());
+        }
+        if (name === '中秋节') {
+          // 八月十五
+          return new Date(Lunar.fromYmd(year, 8, 15).getSolar().toYmd());
+        }
+      } catch (e) {
+        console.warn('农历节日推算失败:', name, year, e);
+      }
+    }
+    return null;
+  }
   function renderHolidays() {
     const today = new Date(); today.setHours(0,0,0,0);
     const list = [];
+    let usedFallback = false;
+
     for (const [name, dates] of Object.entries(HOLIDAY_DATES)) {
       let nextDate = null;
+
+      // 1) 优先从硬编码表里找今天及以后的最近一个日期
       for (const dStr of dates) {
         const d = new Date(dStr);
         if (d >= today) { nextDate = d; break; }
       }
+
+      // 2) 硬编码里没有（今天已超过表中最后日期）→ 用规则推算兜底，保证"无限"
+      if (!nextDate) {
+        let y = today.getFullYear();
+        // 最多往后找 3 年，足够覆盖任何"刚刚过完今年，明年还没到"的情况
+        for (let i = 0; i < 3 && !nextDate; i++) {
+          const candidate = computeHolidayByRule(name, y + i);
+          if (candidate && candidate >= today) nextDate = candidate;
+        }
+        if (nextDate) usedFallback = true;
+      }
+
       if (nextDate) {
         const diffTime = nextDate - today;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         list.push({ name, days: diffDays });
       }
     }
+
     list.sort((a, b) => a.days - b.days);
     const container = $('#holidayList');
     container.innerHTML = '';
-    if (list.length === 0) { container.innerHTML = '<div style="text-align: center; color: var(--text-mute); padding: 20px;">暂无近期节日</div>'; return; }
+
+    if (list.length === 0) {
+      // 极端情况：农历库缺失导致规则也推不出来
+      container.innerHTML = '<div style="text-align: center; color: var(--text-mute); padding: 20px;">暂无近期节日</div>';
+      return;
+    }
+
     list.forEach(item => {
       const el = document.createElement('div');
       el.className = 'holiday-item';
@@ -2596,6 +2728,17 @@
       }
       container.appendChild(el);
     });
+
+    // 若走了规则兜底（超出硬编码年份），在列表底部给一行轻提示，提醒可更新数据源
+    const lunarMissing = typeof Lunar === 'undefined';
+    if (usedFallback || lunarMissing) {
+      const tip = document.createElement('div');
+      tip.style.cssText = 'text-align:center; font-size:11px; color:var(--text-mute); padding:8px 0 2px;';
+      tip.textContent = lunarMissing
+        ? '农历库未加载，春节/中秋暂时无法推算'
+        : `部分节日已超出数据表（${HOLIDAY_DATA_LAST_YEAR} 年），当前为规则推算结果`;
+      container.appendChild(tip);
+    }
   }
   renderHolidays();
 
@@ -3298,12 +3441,28 @@
     if (historyStack[historyIndex] === current) return;
     historyStack = historyStack.slice(0, historyIndex + 1);
     historyStack.push(current);
-    if (historyStack.length > 100) historyStack.shift(); else historyIndex++;
+    if (historyStack.length > 100) historyStack.shift(); 
+    historyIndex = historyStack.length - 1; 
   }
+  function saveNotepad() { store.set('nt_notepad', notepadEditor.innerHTML); }
   notepadEditor.addEventListener('paste', (e) => {
     e.preventDefault();
-    const text = (e.originalEvent || e).clipboardData.getData('text/plain');
-    document.execCommand('insertText', false, text);
+    const cd = (e.originalEvent || e).clipboardData;
+    const items = cd.items || [];
+    // 支持从剪贴板粘贴图片
+    for (const item of items) {
+      if (item.type && item.type.indexOf('image') === 0) {
+        const blob = item.getAsFile();
+        if (blob) { insertImageFromBlob(blob); return; }
+      }
+    }
+    const text = cd.getData('text/plain');
+    if (text.length > 50000) {
+      toast('❌ 粘贴内容过长，已截断');
+      document.execCommand('insertText', false, text.slice(0, 50000));
+    } else {
+      document.execCommand('insertText', false, text);
+    }
   });
   let saveTimer;
   let isComposing = false;
@@ -3315,26 +3474,433 @@
   });
   notepadEditor.addEventListener('input', () => {
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => { store.set('nt_notepad', notepadEditor.innerHTML); }, 500);
+    saveTimer = setTimeout(saveNotepad, 500);
     if (isComposing) return;
     clearTimeout(historyTimer);
     historyTimer = setTimeout(() => { pushHistory(); }, 400);
   });
+  // 快捷键
+  notepadEditor.addEventListener('keydown', (e) => {
+    const ctrl = e.ctrlKey || e.metaKey;
+    if (!ctrl) return;
+    const k = e.key.toLowerCase();
+    if (k === 'b') { e.preventDefault(); document.execCommand('bold'); }
+    else if (k === 'i') { e.preventDefault(); document.execCommand('italic'); }
+    else if (k === 'u') { e.preventDefault(); document.execCommand('underline'); }
+    else if (k === 'z' && !e.shiftKey) { e.preventDefault(); $('#btnUndo').dispatchEvent(new MouseEvent('mousedown')); }
+    else if ((k === 'y') || (k === 'z' && e.shiftKey)) { e.preventDefault(); $('#btnRedo').dispatchEvent(new MouseEvent('mousedown')); }
+    else if (k === 'f') { e.preventDefault(); openFindPanel(); }
+    else if (k === 's') { e.preventDefault(); saveNotepad(); toast('💾 已保存'); }
+  });
   $('#btnUndo').addEventListener('mousedown', (e) => {
     e.preventDefault(); clearTimeout(historyTimer); pushHistory(); 
-    if (historyIndex > 0) { historyIndex--; notepadEditor.innerHTML = historyStack[historyIndex]; store.set('nt_notepad', notepadEditor.innerHTML); notepadEditor.focus(); }
+    if (historyIndex > 0) { historyIndex--; notepadEditor.innerHTML = historyStack[historyIndex]; saveNotepad(); notepadEditor.focus(); }
   });
   $('#btnRedo').addEventListener('mousedown', (e) => {
     e.preventDefault();
-    if (historyIndex < historyStack.length - 1) { historyIndex++; notepadEditor.innerHTML = historyStack[historyIndex]; store.set('nt_notepad', notepadEditor.innerHTML); notepadEditor.focus(); }
+    if (historyIndex < historyStack.length - 1) { historyIndex++; notepadEditor.innerHTML = historyStack[historyIndex]; saveNotepad(); notepadEditor.focus(); }
   });
+  // 通用命令按钮（含新增的上下标、对齐、列表、缩进等）
   const notepadBtns = $$('.notepad-btn[data-cmd]');
   notepadBtns.forEach(btn => {
     btn.addEventListener('mousedown', (e) => {
       e.preventDefault(); const cmd = btn.dataset.cmd; notepadEditor.focus();
-      document.execCommand(cmd, false, null); btn.classList.toggle('active', document.queryCommandState(cmd));
+      document.execCommand(cmd, false, null);
+      if (cmd === 'bold' || cmd === 'italic' || cmd === 'underline' || cmd === 'strikeThrough') {
+        btn.classList.toggle('active', document.queryCommandState(cmd));
+      }
+      saveNotepad();
     });
   });
+  // 字体颜色 / 高亮
+  $('#textColorBtn').addEventListener('mousedown', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const input = document.createElement('input'); input.type = 'color'; input.value = '#d93025';
+    input.style.cssText = 'position:fixed;opacity:0;pointer-events:none;';
+    document.body.appendChild(input);
+    input.addEventListener('input', () => {
+      notepadEditor.focus();
+      document.execCommand('foreColor', false, input.value);
+      saveNotepad();
+    });
+    input.addEventListener('change', () => { setTimeout(() => input.remove(), 100); });
+    input.click();
+  });
+  $('#hiliteColorBtn').addEventListener('mousedown', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const input = document.createElement('input'); input.type = 'color'; input.value = '#fff176';
+    input.style.cssText = 'position:fixed;opacity:0;pointer-events:none;';
+    document.body.appendChild(input);
+    input.addEventListener('input', () => {
+      notepadEditor.focus();
+      document.execCommand('hiliteColor', false, input.value);
+      saveNotepad();
+    });
+    input.addEventListener('change', () => { setTimeout(() => input.remove(), 100); });
+    input.click();
+  });
+  // 清除格式
+  $('#clearFormatBtn').addEventListener('mousedown', (e) => {
+    e.preventDefault(); notepadEditor.focus();
+    document.execCommand('removeFormat', false, null);
+    saveNotepad();
+  });
+  // 插入分隔线
+  $('#insertHrBtn').addEventListener('mousedown', (e) => {
+    e.preventDefault(); notepadEditor.focus();
+    document.execCommand('insertHorizontalRule', false, null);
+    saveNotepad();
+  });
+  // 插入链接（用页面内输入框代替 prompt，避免被浏览器拦截）
+  $('#insertLinkBtn').addEventListener('mousedown', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    notepadEditor.focus();
+
+    // 创建临时弹窗
+    const mask = document.createElement('div');
+    mask.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.3);backdrop-filter:blur(4px);z-index:999999;display:flex;align-items:center;justify-content:center;';
+    const box = document.createElement('div');
+    box.style.cssText = 'background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:20px;width:320px;box-shadow:0 20px 40px rgba(0,0,0,0.2);display:flex;flex-direction:column;gap:12px;';
+    box.innerHTML = `
+      <div style="font-size:15px;font-weight:600;color:var(--text);">插入链接</div>
+      <input type="text" id="np-link-url" placeholder="https://" value="https://" style="background:var(--input-bg);border:1px solid var(--divider);border-radius:8px;padding:9px 12px;font-size:13.5px;color:var(--text);outline:none;">
+      <input type="text" id="np-link-text" placeholder="显示文字（可选，留空则用 URL）" style="background:var(--input-bg);border:1px solid var(--divider);border-radius:8px;padding:9px 12px;font-size:13.5px;color:var(--text);outline:none;">
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button id="np-link-cancel" style="flex:1;padding:9px;border:none;border-radius:8px;background:var(--input-bg);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;">取消</button>
+        <button id="np-link-ok" style="flex:1;padding:9px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer;">插入</button>
+      </div>
+    `;
+    mask.appendChild(box);
+    document.body.appendChild(mask);
+
+    const urlInput = box.querySelector('#np-link-url');
+    const textInput = box.querySelector('#np-link-text');
+    setTimeout(() => { urlInput.focus(); urlInput.select(); }, 50);
+
+    const close = () => mask.remove();
+
+    const doInsert = () => {
+      const url = urlInput.value.trim();
+      if (!url || url === 'https://') { urlInput.style.borderColor = 'var(--danger)'; urlInput.focus(); return; }
+      const text = textInput.value.trim() || url;
+      notepadEditor.focus();
+      const sel = window.getSelection();
+      const hasSel = sel && sel.rangeCount && !sel.getRangeAt(0).collapsed;
+      if (hasSel) {
+        document.execCommand('createLink', false, url);
+      } else {
+        document.execCommand('insertHTML', false, `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(text)}</a>`);
+      }
+      saveNotepad();
+      close();
+      toast('🔗 链接已插入');
+    };
+
+    box.querySelector('#np-link-ok').addEventListener('click', doInsert);
+    box.querySelector('#np-link-cancel').addEventListener('click', close);
+    mask.addEventListener('click', (ev) => { if (ev.target === mask) close(); });
+    box.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') { ev.preventDefault(); doInsert(); }
+      else if (ev.key === 'Escape') { ev.preventDefault(); close(); }
+    });
+  });
+  // 插入图片（本地文件）
+  const npImgInput = document.createElement('input');
+  npImgInput.type = 'file'; npImgInput.accept = 'image/*'; npImgInput.style.display = 'none';
+  document.body.appendChild(npImgInput);
+  function insertImageFromBlob(blob) {
+    if (blob.size > 3 * 1024 * 1024) { toast('❌ 图片太大，请选择小于 3MB 的图片'); return; }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        // 压缩到最长边 1200px，控制存储体积
+        const MAX = 1200; let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
+          else { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+        notepadEditor.focus();
+        document.execCommand('insertHTML', false, `<img src="${dataUrl}" alt="图片" style="max-width:100%;border-radius:6px;margin:4px 0;">`);
+        saveNotepad(); toast('🖼️ 图片已插入');
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(blob);
+  }
+  $('#insertImageBtn').addEventListener('mousedown', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    npImgInput.value = '';
+    npImgInput.onchange = () => {
+      const f = npImgInput.files[0];
+      if (f) insertImageFromBlob(f);
+    };
+    npImgInput.click();
+  });
+  // 插入表格（表格选择器）
+  const tablePicker = document.createElement('div');
+  tablePicker.className = 'np-table-picker';
+  tablePicker.innerHTML = `<div class="np-table-hint" id="npTableHint">选择行列数</div><div class="np-table-grid" id="npTableGrid"></div>`;
+  document.body.appendChild(tablePicker);
+  const npTableGrid = tablePicker.querySelector('#npTableGrid');
+  const npTableHint = tablePicker.querySelector('#npTableHint');
+  const NP_ROWS = 6, NP_COLS = 8;
+  for (let r = 0; r < NP_ROWS; r++) {
+    for (let c = 0; c < NP_COLS; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'np-table-cell';
+      cell.dataset.r = r + 1; cell.dataset.c = c + 1;
+      cell.addEventListener('mouseenter', () => {
+        npTableGrid.querySelectorAll('.np-table-cell').forEach(x => {
+          x.classList.toggle('active', +x.dataset.r <= r + 1 && +x.dataset.c <= c + 1);
+        });
+        npTableHint.textContent = `${r + 1} 行 × ${c + 1} 列`;
+      });
+      cell.addEventListener('click', () => {
+        insertTable(r + 1, c + 1);
+        tablePicker.classList.remove('show');
+      });
+      npTableGrid.appendChild(cell);
+    }
+  }
+  function insertTable(rows, cols) {
+    let html = '<table><tbody>';
+    for (let r = 0; r < rows; r++) {
+      html += '<tr>';
+      for (let c = 0; c < cols; c++) {
+        html += '<td>&nbsp;</td>';
+      }
+      html += '</tr>';
+    }
+    html += '</tbody></table><p><br></p>';
+    notepadEditor.focus();
+    document.execCommand('insertHTML', false, html);
+    saveNotepad(); toast(`▦ 已插入 ${rows}×${cols} 表格`);
+  }
+  $('#insertTableBtn').addEventListener('mousedown', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const willShow = !tablePicker.classList.contains('show');
+    tablePicker.classList.toggle('show');
+    if (willShow) {
+      // 先显示再测量尺寸，然后定位到 ▦ 按钮下方（左对齐）
+      positionFixedPanel(tablePicker, $('#insertTableBtn'), 'left');
+    }
+  });
+  // 点击外部关闭表格选择器
+  document.addEventListener('click', (e) => {
+    if (!tablePicker.classList.contains('show')) return;
+    if (tablePicker.contains(e.target)) return;
+    if (e.target.closest('#insertTableBtn')) return;
+    tablePicker.classList.remove('show');
+  });
+
+  // ===== 更多工具折叠面板 =====
+  const moreToolsBtn = $('#moreToolsBtn');
+  const moreToolsPanel = $('#moreToolsPanel');
+  moreToolsBtn.addEventListener('mousedown', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const willShow = !moreToolsPanel.classList.contains('show');
+    moreToolsPanel.classList.toggle('show');
+    if (willShow) {
+      positionFixedPanel(moreToolsPanel, moreToolsBtn, 'left');
+    }
+  });
+  // 点面板外部关闭
+  document.addEventListener('click', (e) => {
+    if (!moreToolsPanel.classList.contains('show')) return;
+    if (moreToolsPanel.contains(e.target)) return;
+    if (e.target.closest('#moreToolsBtn')) return;
+    moreToolsPanel.classList.remove('show');
+  });
+
+  // ===== 查找替换 =====
+  const findPanel = $('#findPanel');
+  const findInput = $('#findInput');
+  const replaceInput = $('#replaceInput');
+  const findCount = $('#findCount');
+  let findMatches = [];
+  let findIdx = -1;
+
+  function clearFindHighlights() {
+    if (window.CSS && CSS.highlights) {
+      try { CSS.highlights.delete('np-find'); } catch(e) {}
+    }
+    findMatches = []; findIdx = -1;
+    findCount.textContent = '';
+    if (!document.hasFocus() || (document.activeElement !== findInput && document.activeElement !== replaceInput)) {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount) sel.removeAllRanges();
+    }
+  }
+  function collectFindMatches(keyword) {
+    clearFindHighlights();
+    if (!keyword) return;
+    // 使用 TreeWalker 遍历文本节点，记录 range
+    const walker = document.createTreeWalker(notepadEditor, NodeFilter.SHOW_TEXT, null);
+    const ranges = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      const text = node.nodeValue;
+      let start = 0, pos;
+      while ((pos = text.indexOf(keyword, start)) !== -1) {
+        const r = document.createRange();
+        r.setStart(node, pos);
+        r.setEnd(node, pos + keyword.length);
+        ranges.push(r);
+        start = pos + keyword.length;
+      }
+    }
+    findMatches = ranges;
+    if (ranges.length) {
+      findIdx = 0;
+      if (window.CSS && CSS.highlights && typeof Highlight !== 'undefined') {
+        try {
+          const hl = new Highlight(...ranges);
+          CSS.highlights.set('np-find', hl);
+        } catch(e) {}
+      }
+      findCount.textContent = `1 / ${ranges.length}`;
+      scrollToMatch(0);
+    } else {
+      findCount.textContent = '无结果';
+    }
+  }
+  function scrollToMatch(i) {
+    if (!findMatches[i]) return;
+    findIdx = i;
+    findCount.textContent = `${i + 1} / ${findMatches.length}`;
+    const rect = findMatches[i].getBoundingClientRect();
+    const panelRect = notepadEditor.getBoundingClientRect();
+    if (rect.top < panelRect.top || rect.bottom > panelRect.bottom) {
+      const targetTop = rect.top - panelRect.top + notepadEditor.scrollTop - notepadEditor.clientHeight / 2;
+      notepadEditor.scrollTo({ top: targetTop, behavior: 'smooth' });
+    }
+    // 选中该 range
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(findMatches[i]);
+    // 高亮当前项（CSS 中无法区分当前项，用 outline 通过临时标记）
+  }
+  // 通用：把 fixed 浮层定位到触发按钮下方（右对齐或左对齐）
+  function positionFixedPanel(panel, anchorBtn, align = 'right') {
+    if (!panel || !anchorBtn) return;
+    const r = anchorBtn.getBoundingClientRect();
+    const panelW = panel.offsetWidth || 300;
+    const panelH = panel.offsetHeight || 160;
+    const margin = 6;
+    let left = align === 'right' ? (r.right - panelW) : r.left;
+    let top = r.bottom + margin;
+    // 水平不出屏
+    if (left < 8) left = 8;
+    if (left + panelW > window.innerWidth - 8) left = window.innerWidth - panelW - 8;
+    // 下方空间不足则翻到按钮上方
+    if (top + panelH > window.innerHeight - 8) {
+      top = r.top - panelH - margin;
+      if (top < 8) top = 8;
+    }
+    panel.style.left = left + 'px';
+    panel.style.top = top + 'px';
+  }
+
+  function openFindPanel() {
+    findPanel.classList.add('show');
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount && !sel.getRangeAt(0).collapsed) {
+      const txt = sel.toString().trim();
+      if (txt && txt.length < 60) findInput.value = txt;
+    }
+    // 定位到 🔍 按钮下方（右对齐）
+    positionFixedPanel(findPanel, $('#findReplaceBtn'), 'right');
+    findInput.focus();
+    if (findInput.value) collectFindMatches(findInput.value);
+  }
+  $('#findReplaceBtn').addEventListener('mousedown', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    if (findPanel.classList.contains('show')) findPanel.classList.remove('show');
+    else openFindPanel();
+  });
+  $('#findCloseBtn').addEventListener('click', () => { findPanel.classList.remove('show'); clearFindHighlights(); });
+
+  // 窗口缩放 / 页面滚动 / 卡片拖动时，重新定位已打开的 fixed 浮层，使其跟随按钮
+  function repositionOpenPanels() {
+    if (findPanel.classList.contains('show')) {
+      positionFixedPanel(findPanel, $('#findReplaceBtn'), 'right');
+    }
+    if (tablePicker.classList.contains('show')) {
+      positionFixedPanel(tablePicker, $('#insertTableBtn'), 'left');
+    }
+    if (moreToolsPanel.classList.contains('show')) {
+      positionFixedPanel(moreToolsPanel, moreToolsBtn, 'left');
+    }
+  }
+  window.addEventListener('resize', repositionOpenPanels);
+  window.addEventListener('scroll', repositionOpenPanels, true);
+  // 卡片拖动/缩放会改变按钮位置，用 MutationObserver 监听 style 变化兜底
+  (function(){
+    const notepadWidget = document.querySelector('.widget[data-id="notepad"]');
+    if (!notepadWidget) return;
+    const mo = new MutationObserver(() => repositionOpenPanels());
+    mo.observe(notepadWidget, { attributes: true, attributeFilter: ['style'] });
+  })();
+  let findInputTimer;
+  findInput.addEventListener('input', () => {
+    clearTimeout(findInputTimer);
+    findInputTimer = setTimeout(() => {
+      clearFindHighlights();
+      if (findInput.value) collectFindMatches(findInput.value);
+    }, 200);
+  });
+  $('#findNextBtn').addEventListener('click', () => {
+    if (!findMatches.length) { collectFindMatches(findInput.value); return; }
+    scrollToMatch((findIdx + 1) % findMatches.length);
+  });
+  $('#findPrevBtn').addEventListener('click', () => {
+    if (!findMatches.length) { collectFindMatches(findInput.value); return; }
+    scrollToMatch((findIdx - 1 + findMatches.length) % findMatches.length);
+  });
+  function replaceMatch() {
+    if (!findMatches.length) { collectFindMatches(findInput.value); return; }
+    const range = findMatches[findIdx];
+    if (!range) return;
+    const oldIdx = findIdx;
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    document.execCommand('insertText', false, replaceInput.value);
+    saveNotepad();
+    collectFindMatches(findInput.value);
+    if (findMatches.length) scrollToMatch(Math.min(oldIdx, findMatches.length - 1));
+    findInput.focus();
+  }
+  $('#replaceOneBtn').addEventListener('click', replaceMatch);
+  $('#replaceAllBtn').addEventListener('click', () => {
+    const kw = findInput.value;
+    if (!kw) { toast('请输入查找内容'); return; }
+    if (!findMatches.length) collectFindMatches(kw);
+    if (!findMatches.length) { toast('没有可替换的内容'); return; }
+    if (!confirm(`确定要替换全部 ${findMatches.length} 处吗？`)) return;
+    const count = findMatches.length;
+    const rep = replaceInput.value;
+    for (let i = findMatches.length - 1; i >= 0; i--) {
+      const r = findMatches[i];
+      r.deleteContents();
+      r.insertNode(document.createTextNode(rep));
+    }
+    saveNotepad();
+    collectFindMatches(kw);
+    toast(`✨ 已替换 ${count} 处`);
+  });
+  // 点击外部关闭查找面板
+  document.addEventListener('click', (e) => {
+    if (!findPanel.contains(e.target) && e.target !== $('#findReplaceBtn') && !e.target.closest('#findReplaceBtn')) {
+      // 保留面板，不自动关闭；用户可手动关闭
+    }
+  });
+  // 字体菜单
   const fontMenuBtn = $('#fontMenuBtn'), fontDropdown = $('#fontDropdown');
   fontMenuBtn.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); fontDropdown.classList.toggle('show'); });
   document.addEventListener('click', (e) => { if (!fontDropdown.contains(e.target) && e.target !== fontMenuBtn) { fontDropdown.classList.remove('show'); } });
@@ -3342,10 +3908,11 @@
     item.addEventListener('mousedown', (e) => {
       e.preventDefault(); e.stopPropagation(); const font = item.dataset.font;
       notepadEditor.focus(); document.execCommand('fontName', false, font);
-      store.set('nt_notepad', notepadEditor.innerHTML); fontDropdown.classList.remove('show');
+      saveNotepad(); fontDropdown.classList.remove('show');
       toast(`✨ 已应用字体：${item.textContent}`);
     });
   });
+  // 字号调整（A+ / A- / Aa）
   function changeFontSize(delta) {
     notepadEditor.focus(); const selection = window.getSelection();
     if (!selection.rangeCount) return; const range = selection.getRangeAt(0);
@@ -3357,7 +3924,7 @@
     span.style.fontSize = newSize + 'px'; span.appendChild(range.extractContents());
     range.insertNode(span); selection.removeAllRanges();
     const newRange = document.createRange(); newRange.selectNodeContents(span); selection.addRange(newRange);
-    store.set('nt_notepad', notepadEditor.innerHTML);
+    saveNotepad();
   }
   $('#fontSizePlus').addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); changeFontSize(2); });
   $('#fontSizeMinus').addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); changeFontSize(-2); });
@@ -3369,14 +3936,15 @@
     span.appendChild(range.extractContents()); range.insertNode(span);
     selection.removeAllRanges(); const newRange = document.createRange();
     newRange.selectNodeContents(span); selection.addRange(newRange);
-    store.set('nt_notepad', notepadEditor.innerHTML);
+    saveNotepad();
   });
+  // 导出 Word（增强：内联样式，表格/图片保留）
   $('#exportWordBtn').addEventListener('click', () => {
     const htmlContent = notepadEditor.innerHTML, plainText = notepadEditor.innerText;
-    if (!plainText.trim() || !htmlContent.replace(/<br\s*\/?>|<div[^>]*>\s*<\/div>|&nbsp;/gi, '').trim()) {
+    if (!plainText.trim() && !htmlContent.includes('<img') && !htmlContent.includes('<table')) {
       toast('❌ 记事本还是空的，没有内容可以导出哦'); return;
     }
-    const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset="utf-8"><title>我的记事本</title><style>body { font-family: 'Microsoft YaHei', sans-serif; font-size: 14px; line-height: 1.6; }</style></head><body>`;
+    const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset="utf-8"><title>我的记事本</title><style>body { font-family: 'Microsoft YaHei', sans-serif; font-size: 14px; line-height: 1.6; } table { border-collapse: collapse; } td, th { border: 1px solid #666; padding: 6px 10px; } img { max-width: 100%; } hr { border: none; border-top: 1px solid #999; } a { color: #0067c0; }</style></head><body>`;
     const footer = "</body></html>";
     const blob = new Blob(['\ufeff', header + htmlContent + footer], { type: 'application/msword' });
     const url = URL.createObjectURL(blob); const a = document.createElement('a');
@@ -3384,6 +3952,7 @@
     document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
     toast('✅ 已成功导出为 Word 文档！');
   });
+  // 导出 TXT
   $('#exportTxtBtn').addEventListener('click', () => {
     const textContent = notepadEditor.innerText;
     if (!textContent.trim()) { toast('❌ 记事本还是空的，没有内容可以导出哦'); return; }
@@ -3393,6 +3962,7 @@
     document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
     toast('✅ 已成功导出为 TXT 文档！');
   });
+  // 导入 TXT / DOCX（保留原逻辑）
   $('#importTxtBtn').addEventListener('click', () => {
     const fileInput = document.createElement('input');
     fileInput.type = 'file'; fileInput.accept = '.txt,text/plain,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
@@ -3441,6 +4011,11 @@
  musicplayer:{ x: 400,  y: 2680, w: 620,  h: 650, visible: true, order: 17, name: '音乐播放器' }
   };
   Object.keys(defaultConfig).forEach(k => { if (defaultConfig[k].z === undefined) defaultConfig[k].z = 1; });
+  // 同步 footer 中的组件数量，避免写死数字与配置脱节
+  (function syncFooterWidgetCount(){
+    const el = document.getElementById('footerWidgetCount');
+    if (el) el.textContent = String(Object.keys(defaultConfig).length);
+  })();
   let widgetConfig = store.get('nt_widgetConfig', null);
   const isOldConfig = widgetConfig && widgetConfig.weather && widgetConfig.weather.size !== undefined;
   if (!widgetConfig || isOldConfig) {
@@ -3556,7 +4131,7 @@
       // 基于默认配置里的“意图宽度”判断宽卡片，避免反复整理漂移，也不污染持久化配置
       const defW = (defaultConfig[it.id] && defaultConfig[it.id].w) || c.w;
       const isWide = defW > colW * 1.4;
-      let w = isWide ? gridW : Math.min(colW, Math.max(minW, c.w));
+      let w = isWide ? gridW : Math.max(minW, Math.min(colW, c.w));
       let spanCols = isWide ? cols : 1;
       
       if (col + spanCols > cols) { x = 0; y += rowMaxH + gap; col = 0; rowMaxH = 0; }
@@ -3709,48 +4284,138 @@
   });
 
   // ================= 导入导出配置 =================
-  const ENC_ROUNDS = 5;
-  function deriveSeed(pwd) {
+  // ===== 多层混淆（file:// 可用，密文一眼看不出来） =====
+  // 流程：UTF-8 字节 → 5 轮 XOR → 字节位置洗牌 → 自定义字母表 base64 → 外壳包装
+  // 只做“混淆”，不是密码学加密；能防随手打开 txt 看内容，不防专业破译。
+  const OBFUSCATE_ROUNDS = 5;
+  const OBFUSCATE_SALT = 'nt-page-obfuscate-v3';
+
+  // 自定义 Base64 字母表（跟标准表不同，直接用标准 base64 解会得到乱码）
+  const STD_B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  const SHUFFLED_B64 = 'ZYXWVUTSRQPONMLKJIHGFEDCBA9876543210zyxwvutsrqponmlkjihgfedcba+/.';
+
+  function encodeShuffled(bytes) {
+    let bin = '';
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    const std = btoa(bin);
+    let out = '';
+    for (let i = 0; i < std.length; i++) {
+      const idx = STD_B64.indexOf(std[i]);
+      out += idx === -1 ? std[i] : SHUFFLED_B64[idx];
+    }
+    return out;
+  }
+
+  function decodeShuffled(str) {
+    let std = '';
+    for (let i = 0; i < str.length; i++) {
+      const idx = SHUFFLED_B64.indexOf(str[i]);
+      std += idx === -1 ? str[i] : STD_B64[idx];
+    }
+    const bin = atob(std);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  function obfuscateSeed(password) {
+    const input = password + '|' + OBFUSCATE_SALT;
     let h = 2166136261;
-    for (let i = 0; i < pwd.length; i++) { h ^= pwd.charCodeAt(i); h = Math.imul(h, 16777619); }
+    for (let i = 0; i < input.length; i++) {
+      h ^= input.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
     return h >>> 0;
   }
-  function roundKey(pwd, round) {
-    const seed = deriveSeed(pwd + '|' + round);
-    const key = new Uint8Array(32); let x = seed;
+
+  function obfuscateRoundKey(password, round) {
+    let seed = obfuscateSeed(password + '#' + round) || 1;
+    const key = new Uint8Array(32);
     for (let i = 0; i < 32; i++) {
-      x ^= x << 13; x >>>= 0; x ^= x >>> 17; x ^= x << 5;  x >>>= 0; key[i] = x & 0xff;
+      seed ^= seed << 13; seed >>>= 0;
+      seed ^= seed >>> 17;
+      seed ^= seed << 5; seed >>>= 0;
+      key[i] = seed & 0xff;
     }
     return key;
   }
-  function encryptData(text, pwd) {
-    const encoder = new TextEncoder(); let bytes = encoder.encode(text);
-    for (let r = 0; r < ENC_ROUNDS; r++) {
-      const key = roundKey(pwd, r); const out = new Uint8Array(bytes.length);
-      for (let i = 0; i < bytes.length; i++) {
-        const pos = (i * (r + 1) + r * 7) & 0xff;
-        out[i] = bytes[i] ^ key[i % 32] ^ pos;
-      }
-      bytes = out;
+
+  // 用密码派生一个位置洗牌序列（Fisher-Yates）
+  function obfuscateShuffle(password, len) {
+    const arr = new Uint32Array(len);
+    for (let i = 0; i < len; i++) arr[i] = i;
+    let seed = obfuscateSeed(password + '#shuffle') || 1;
+    const rnd = () => {
+      seed ^= seed << 13; seed >>>= 0;
+      seed ^= seed >>> 17;
+      seed ^= seed << 5; seed >>>= 0;
+      return seed;
+    };
+    for (let i = len - 1; i > 0; i--) {
+      const j = rnd() % (i + 1);
+      const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
     }
-    let binary = '';
-    for (let i = 0; i < bytes.length; i++) { binary += String.fromCharCode(bytes[i]); }
-    return btoa(binary);
+    return arr;
   }
-  function decryptData(base64Str, pwd) {
-    try {
-      const binary = atob(base64Str); let bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); }
-      for (let r = ENC_ROUNDS - 1; r >= 0; r--) {
-        const key = roundKey(pwd, r); const out = new Uint8Array(bytes.length);
-        for (let i = 0; i < bytes.length; i++) {
-          const pos = (i * (r + 1) + r * 7) & 0xff;
-          out[i] = bytes[i] ^ key[i % 32] ^ pos;
-        }
-        bytes = out;
+
+  const SHELL_PREFIX = '##NTDATA##v3##';
+  const SHELL_SUFFIX = '##END##';
+
+  function encryptData(text, password) {
+    const bytes = new TextEncoder().encode(text);
+    let buf = new Uint8Array(bytes);
+
+    // 第 1~5 轮 XOR
+    for (let r = 0; r < OBFUSCATE_ROUNDS; r++) {
+      const key = obfuscateRoundKey(password, r);
+      const out = new Uint8Array(buf.length);
+      for (let i = 0; i < buf.length; i++) {
+        out[i] = buf[i] ^ key[i % 32] ^ ((i * (r + 3) + r * 17) & 0xff);
       }
-      return new TextDecoder().decode(bytes);
-    } catch (e) { return null; }
+      buf = out;
+    }
+
+    // 位置洗牌（同一密码同一内容结果稳定）
+    const order = obfuscateShuffle(password, buf.length);
+    const shuffled = new Uint8Array(buf.length);
+    for (let i = 0; i < buf.length; i++) shuffled[i] = buf[order[i]];
+
+    // 自定义字母表 base64 + 外壳
+    return SHELL_PREFIX + encodeShuffled(shuffled) + SHELL_SUFFIX;
+  }
+
+  function decryptData(payload, password) {
+    try {
+      let body = payload;
+      if (body.startsWith(SHELL_PREFIX)) {
+        if (!body.endsWith(SHELL_SUFFIX)) return null;
+        body = body.slice(SHELL_PREFIX.length, body.length - SHELL_SUFFIX.length);
+      }
+
+      let shuffled = decodeShuffled(body);
+
+      // 还原洗牌
+      const order = obfuscateShuffle(password, shuffled.length);
+      const buf0 = new Uint8Array(shuffled.length);
+      for (let i = 0; i < shuffled.length; i++) buf0[order[i]] = shuffled[i];
+
+      // 反向 XOR
+      let buf = buf0;
+      for (let r = OBFUSCATE_ROUNDS - 1; r >= 0; r--) {
+        const key = obfuscateRoundKey(password, r);
+        const out = new Uint8Array(buf.length);
+        for (let i = 0; i < buf.length; i++) {
+          out[i] = buf[i] ^ key[i % 32] ^ ((i * (r + 3) + r * 17) & 0xff);
+        }
+        buf = out;
+      }
+
+      const text = new TextDecoder().decode(buf);
+      // 校验是合法 JSON，密码错会解出乱码 → 返回 null
+      return text.trim().startsWith('{') ? text : null;
+    } catch (e) {
+      return null;
+    }
   }
   $('#exportBtn').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -3772,7 +4437,7 @@
     const blob = new Blob([fileContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob); const a = document.createElement('a');
     a.href = url; a.download = '配置.txt'; a.click(); URL.revokeObjectURL(url);
-    toast('✅ 配置已高强度加密导出');
+    toast('✅ 配置已加密导出');
   });
 
   // ================= 自定义背景 =================
@@ -4072,7 +4737,7 @@
           const d = j.data;
           t.title = d.name || t.title; t.artist = d.artist || t.artist;
           t.album = d.album || t.album; t.cover = d.pic || t.cover;
-          t.audioUrl = d.url || t.audioUrl; t.lyric = d.lyric || t.lyric;
+          t.audioUrl = d.url || t.audioUrl;
           t.lrc = d.lyric || t.lrc;
         }
       } else if (t.source === 'joox') {
@@ -4159,8 +4824,11 @@
     updateTrackUI(t);
     resetProgress();
     mpShowToast('加载中…');
+    // 给一个 10 秒的超时兜底，防止网络极差时卡死
+    const playTimeout = setTimeout(() => { mpShowToast('加载超时，请检查网络'); setPlayingUI(false); }, 10000);
     try {
       await fetchDetails(t);
+      clearTimeout(playTimeout);
       updateTrackUI(t);
       if (!t.audioUrl) { mpShowToast('这首歌暂无可用音源'); return; }
       mp.audio.pause(); mp.audio.src = t.audioUrl;
@@ -4363,7 +5031,7 @@
     const box = document.getElementById('mp-searchResults');
     if (!box.contains(e.target) && !e.target.closest('.mp-search-bar')) box.classList.remove('active');
   });
-  document.getElementById('mp-searchResults').addEventListener('click', e => e.stopPropagation());
+  
 
   resetProgress(); updatePlayIcon();
 
@@ -4415,6 +5083,114 @@
   }
   ::-webkit-scrollbar-thumb:hover {
     background-color: var(--text-mute) !important;
+  }
+
+  /* ===== 记事本编辑器增强样式 ===== */
+  .notepad-toolbar { gap: 3px; }
+  .np-sep {
+    width: 1px; height: 18px; background: var(--divider);
+    margin: 0 4px; flex-shrink: 0;
+  }
+  .notepad-btn { min-width: 28px; height: 28px; font-size: 13px; padding: 0 4px; }
+  .notepad-editor:focus { outline: none; }
+  .notepad-editor img {
+    max-width: 100%; height: auto; border-radius: 6px;
+    margin: 4px 0; cursor: pointer;
+  }
+  .notepad-editor img.np-img-selected {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+  .notepad-editor table {
+    border-collapse: collapse; margin: 8px 0; max-width: 100%;
+    font-size: 13px;
+  }
+  .notepad-editor table td,
+  .notepad-editor table th {
+    border: 1px solid var(--text-mute); padding: 6px 10px;
+    min-width: 40px; vertical-align: top;
+  }
+  .notepad-editor table th { background: var(--input-bg); font-weight: 600; }
+  .notepad-editor blockquote {
+    border-left: 3px solid var(--accent); margin: 8px 0;
+    padding: 4px 12px; color: var(--text-soft); background: var(--input-bg);
+    border-radius: 0 6px 6px 0;
+  }
+  .notepad-editor a { color: var(--accent); text-decoration: underline; }
+  .notepad-editor hr {
+    border: none; border-top: 1px solid var(--divider); margin: 12px 0;
+  }
+  .notepad-editor ul, .notepad-editor ol { padding-left: 24px; margin: 6px 0; }
+  .notepad-editor h1 { font-size: 1.6em; margin: 10px 0 6px; font-weight: 700; }
+  .notepad-editor h2 { font-size: 1.35em; margin: 8px 0 5px; font-weight: 700; }
+  .notepad-editor h3 { font-size: 1.15em; margin: 6px 0 4px; font-weight: 600; }
+
+  /* 查找替换浮层（fixed 定位，避免被卡片 overflow:hidden 裁剪） */
+  .np-find-panel {
+    position: fixed; top: 0; left: 0;
+    width: 300px; background: var(--card); backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid var(--card-border); border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18); padding: 10px;
+    display: none; flex-direction: column; gap: 8px; z-index: 1000000;
+  }
+  .np-find-panel.show { display: flex; }
+  .np-find-row { display: flex; align-items: center; gap: 6px; }
+  .np-find-row input {
+    flex: 1; background: var(--input-bg); border: 1px solid var(--divider);
+    border-radius: 6px; padding: 7px 10px; font-size: 12.5px; color: var(--text);
+    outline: none; min-width: 0;
+  }
+  .np-find-row input:focus { border-color: var(--accent); }
+  .np-find-count { font-size: 11px; color: var(--text-mute); white-space: nowrap; min-width: 48px; text-align: right; }
+  .np-find-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .np-find-actions button {
+    flex: 1; background: var(--input-bg); border: 1px solid var(--divider);
+    border-radius: 6px; padding: 6px 8px; font-size: 12px; font-weight: 600;
+    color: var(--text-soft); cursor: pointer; transition: 0.15s; white-space: nowrap;
+  }
+  .np-find-actions button:hover { background: var(--hover); color: var(--text); }
+  #replaceAllBtn { background: var(--accent); color: #fff; border-color: var(--accent); }
+  #replaceAllBtn:hover { filter: brightness(1.1); color: #fff; }
+  #findCloseBtn { flex: 0 0 auto; min-width: 32px; }
+
+  /* 插入表格弹层（fixed 定位，避免被卡片 overflow:hidden 裁剪） */
+  .np-table-picker {
+    position: fixed; top: 0; left: 0; z-index: 1000000;
+    background: var(--card); backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid var(--card-border); border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18); padding: 10px;
+    display: none; flex-direction: column; gap: 8px;
+  }
+  .np-table-picker.show { display: flex; }
+  .np-table-grid { display: grid; grid-template-columns: repeat(8, 18px); gap: 3px; }
+  .np-table-cell {
+    width: 18px; height: 18px; border-radius: 3px;
+    background: var(--input-bg); border: 1px solid var(--divider);
+    cursor: pointer; transition: 0.1s;
+  }
+  .np-table-cell.active { background: var(--accent); border-color: var(--accent); }
+  .np-table-hint { font-size: 11px; color: var(--text-mute); text-align: center; }
+
+  /* 更多工具折叠面板 */
+  .np-more-panel {
+    position: fixed; top: 0; left: 0; z-index: 1000000;
+    width: 230px; background: var(--card);
+    backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid var(--card-border); border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18); padding: 10px;
+    display: none; flex-direction: column; gap: 6px;
+  }
+  .np-more-panel.show { display: flex; }
+  .np-more-title {
+    font-size: 11px; font-weight: 600; color: var(--text-mute);
+    margin: 4px 0 2px; padding-left: 2px;
+  }
+  .np-more-title:first-child { margin-top: 0; }
+  .np-more-row { display: flex; flex-wrap: wrap; gap: 4px; }
+
+  /* 查找高亮（CSS Custom Highlight API） */
+  ::highlight(np-find) {
+    background-color: rgba(255, 213, 0, 0.55);
+    color: inherit;
   }
 
   /* =======================================================
