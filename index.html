@@ -103,7 +103,7 @@
     align-items: center;
     justify-content: space-between; 
     width: 100%;
-    max-width: 780px; /* 给三个按钮预留足够空间 */
+    max-width: 880px; /* 加宽以容纳四个按钮 */
     margin-bottom: 35px;
   }
 
@@ -231,6 +231,26 @@
   }
   .footer-text a:hover { background: transparent; color: #38bdf8; box-shadow: none; text-decoration: underline;}
 
+  /* ================= 极简反馈按钮 ================= */
+  .feedback-link {
+    margin-top: 24px;
+    font-size: 12.5px;
+    color: #94a3b8; /* 低调的浅灰色 */
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    user-select: none;
+    display: inline-block;
+  }
+
+  .feedback-link:hover {
+    color: #0284c7; /* 悬停时变为主题蓝 */
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15);
+  }
+
   /* ================= 响应式适配 ================= */
   @media (max-width: 860px) {
     .title { font-size: 2.8rem; flex-wrap: wrap; gap: 8px; }
@@ -293,10 +313,9 @@
           抽奖转盘
         </a>
 
-        <!-- 像素风谷歌小恐龙 (新增) -->
+        <!-- 像素风谷歌小恐龙 -->
         <a href="https://sweetwatermelons.github.io/dino.html" target="_blank" class="btn pixel-dino-btn">
           <svg viewBox="0 0 24 24" width="18" height="18" style="image-rendering: pixelated; shape-rendering: crispEdges;">
-            <!-- 像素小恐龙图标（基于经典Chrome小恐龙轮廓简化） -->
             <path fill="#38bdf8" d="M3 18h2v-4H3v4zm0-6h2v-2H3v2zm2 2h2v-2H5v2zm2-4h2V8H7v2zm2 2h2v-2H9v2zm2-6h2V4h-2v2zm2 2h2V8h-2v2zm2 2h2v-2h-2v2zm2 2h2v-2h-2v2zm0 2h4v-2h-4v2zm0 2h2v-2h-2v2zM3 20h14v-2H3v2z"/>
           </svg>
           像素小恐龙
@@ -317,6 +336,10 @@
         如果好用的话，记得给个star哦~ 
         <a href="https://github.com/sweetwatermelons/sweetwatermelons.github.io" target="_blank">点击进入仓库</a>
       </div>
+      
+      <!-- 新增：极简反馈按钮 -->
+      <a href="https://f.kdocs.cn/ksform/w/write/BP5mPjyw/" target="_blank" class="feedback-link">👆 点击反馈</a>
+      
     </div>
 
   </div>
