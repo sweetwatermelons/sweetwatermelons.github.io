@@ -359,7 +359,7 @@
   .work-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; }
   .work-time { font-size: 36px; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: -1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .work-time.has-days { font-size: 28px; letter-spacing: -0.5px; }
-  .work-status { font-size: 13px; color: var(--text-soft); font-weight: 500; }
+  .work-status { font-size: 13px; color: var(--text-mute); font-weight: 500; margin-top: -4px; }
   .work-config { display: flex; gap: 8px; margin-top: 8px; }
   .work-config input { background: var(--input-bg); border: 1px solid var(--divider); border-radius: 6px; padding: 6px; font-size: 12px; color: var(--text); outline: none; width: 70px; text-align: center; }
   .work-config input:focus { border-color: var(--accent); }
@@ -1037,18 +1037,23 @@
         </div>
       </div>
       
-      <div class="work-wrap">
+      <div class="work-wrap" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
         <div class="work-time" id="workTime">--:--:--</div>
         <div class="work-status" id="workStatus">未到上班时间</div>
         
         <div class="work-config" id="workConfig" style="display: none; flex-direction: column; gap: 8px; width: 100%;">
-          <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <input type="time" id="workStart" value="09:00" title="上班时间" style="width: 80px;">
-            <span style="color: var(--text-mute); font-size: 12px;">至</span>
-            <input type="time" id="workEnd" value="18:00" title="下班时间" style="width: 80px;">
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;">
+              <span style="font-size: 12px; color: var(--text-soft);">上班：</span>
+              <input type="time" id="workStart" value="09:00" title="上班时间" style="width: 90px; max-width: 50%;">
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;">
+              <span style="font-size: 12px; color: var(--text-soft);">下班：</span>
+              <input type="time" id="workEnd" value="18:00" title="下班时间" style="width: 90px; max-width: 50%;">
+            </div>
           </div>
-          <div style="font-size: 11px; color: var(--text-mute); text-align: center;">
-            夜班请点标题栏 🌙 切换（下班时间早于上班时间表示跨天）
+          <div style="font-size: 11px; color: var(--text-mute); text-align: center; line-height: 1.4;">
+            夜班请点标题栏 🌙 切换<br>（下班时间早于上班时间表示跨天）
           </div>
           <div style="display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 4px; width: 100%;">
             <span style="font-size: 12px; color: var(--text-soft); font-weight: 500; white-space: nowrap;">上班日：</span>
@@ -1242,19 +1247,8 @@
           <button class="font-size-btn" id="importTxtBtn" title="导入 TXT纯文本 / Word 文档" style="font-size: 14px;">📂</button>
 
           <div class="font-dropdown" id="fontDropdown">
-            <div class="font-item" data-font="Microsoft YaHei" style="font-family: 'Microsoft YaHei', sans-serif;">微软雅黑</div>
-            <div class="font-item" data-font="SimSun" style="font-family: 'SimSun', serif;">宋体</div>
-            <div class="font-item" data-font="KaiTi" style="font-family: 'KaiTi', serif;">楷体</div>
-            <div class="font-item" data-font="SimHei" style="font-family: 'SimHei', sans-serif;">黑体</div>
-            <div class="font-item" data-font="FangSong" style="font-family: 'FangSong', serif;">仿宋</div>
-            <div class="font-item" data-font="STXingkai" style="font-family: 'STXingkai', cursive;">华文行楷</div>
-            <div class="font-item" data-font="STKaiti" style="font-family: 'STKaiti', serif;">华文楷体</div>
-            <div class="font-item" data-font="Arial" style="font-family: Arial, sans-serif;">Arial</div>
-            <div class="font-item" data-font="Georgia" style="font-family: Georgia, serif;">Georgia</div>
-            <div class="font-item" data-font="Times New Roman" style="font-family: 'Times New Roman', serif;">Times</div>
-            <div class="font-item" data-font="Courier New" style="font-family: 'Courier New', monospace;">Courier</div>
-            <div class="font-item" data-font="Verdana" style="font-family: Verdana, sans-serif;">Verdana</div>
-            <div class="font-item" data-font="Comic Sans MS" style="font-family: 'Comic Sans MS', cursive;">Comic</div>
+            <input type="text" class="font-search-input" id="fontSearchInput" placeholder="搜索字体…" autocomplete="off">
+            <div class="font-list" id="fontList"></div>
           </div>
 
 
@@ -1293,6 +1287,15 @@
         <!-- 搜索结果面板 -->
         <div class="mp-search-results" id="mp-searchResults"></div>
 
+        <!-- 收藏面板 -->
+        <div class="mp-fav-panel" id="mp-favPanel">
+          <div class="mp-fav-header">
+            <span>⭐ 我的收藏</span>
+            <button class="mp-fav-close" id="mp-favClose" aria-label="关闭">✕</button>
+          </div>
+          <div class="mp-fav-list" id="mp-favList"></div>
+        </div>
+
         <!-- 歌曲信息 -->
         <div class="mp-top-info">
           <div class="mp-track-meta">
@@ -1300,7 +1303,19 @@
             <span class="mp-track-artist" id="mp-trackArtist">搜索一首歌开始吧</span>
           </div>
           <div class="mp-top-actions">
-            <!-- 仅保留下载 -->
+            <!-- 收藏 -->
+            <button class="mp-icon-btn" id="mp-favBtn" aria-label="收藏" title="收藏当前歌曲">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.9-5.2-2.7-5.2 2.7 1-5.9-4.3-4.1 5.9-.9z"/>
+              </svg>
+            </button>
+            <!-- 收藏列表 -->
+            <button class="mp-icon-btn" id="mp-favListBtn" aria-label="收藏列表" title="收藏列表">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 6h16M4 12h16M4 18h10"/>
+              </svg>
+            </button>
+            <!-- 下载 -->
             <button class="mp-icon-btn" id="mp-downloadBtn" aria-label="下载">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 3.5v10.5"/><path d="m7.5 10 4.5 4.5L16.5 10"/><path d="M4.5 19.5h15"/>
@@ -1664,7 +1679,10 @@
   const $$ = s => document.querySelectorAll(s);
   const store = {
     get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} },
+    set(k, v) {
+      try { localStorage.setItem(k, JSON.stringify(v)); return true; }
+      catch(e) { console.warn('localStorage set failed:', k, e); return false; }
+    },
   };
   function toast(msg, options = {}) {
     const t = $('#toast');
@@ -2845,8 +2863,15 @@
       timeDisplay.textContent = text;
       timeDisplay.classList.toggle('has-days', text.includes('天'));
     };
-    const { h: startH, m: startM } = parseTime(workStartTime);
-    const { h: endH, m: endM } = parseTime(workEndTime);
+    let { h: startH, m: startM } = parseTime(workStartTime);
+    let { h: endH, m: endM } = parseTime(workEndTime);
+    
+    // 【自动纠错】如果是白班（非夜班），且“上班”时间晚于“下班”时间，自动交换
+    if (!nightShift && (startH * 60 + startM) > (endH * 60 + endM)) {
+      [startH, endH] = [endH, startH];
+      [startM, endM] = [endM, startM];
+    }
+
     const isOvernight = nightShift && (endH * 60 + endM) <= (startH * 60 + startM);
 
     // 判断某个「班次开始日」是否为上班日
@@ -2871,6 +2896,7 @@
     if (active) {
       setTimeText(fmtDur(active.e - now));
       timeDisplay.style.color = 'var(--accent)';
+      statusDisplay.style.color = 'var(--text-mute)'; // 强制灰色
       statusDisplay.textContent = nightShift ? `🌙 摸鱼中，距离下班还有` : `摸鱼中，距离下班还有`;
       return;
     }
@@ -2883,7 +2909,8 @@
 
     if (future) {
       setTimeText(fmtDur(future.s - now));
-      timeDisplay.style.color = 'var(--text-mute)';
+      timeDisplay.style.color = 'var(--accent)'; // 强制蓝色大字
+      statusDisplay.style.color = 'var(--text-mute)'; // 强制灰色提示
       // 判断这个班次是不是「今天稍后」还是「明天/更晚」
       const sameDay = future.s.toDateString() === now.toDateString();
       if (sameDay) statusDisplay.textContent = nightShift ? `🌙 未上班，距离上班还有` : `未上班，距离上班还有`;
@@ -3001,7 +3028,9 @@
 
     // 数据格式：json[base][target]
     let rate = null;
-    if (from === exchangeRatesCache.base) {
+    if (from === to) {
+      rate = 1;
+    } else if (from === exchangeRatesCache.base) {
       rate = data[to];
     } else if (to === exchangeRatesCache.base) {
       rate = 1 / data[from];
@@ -3554,6 +3583,11 @@
   // 插入链接（用页面内输入框代替 prompt，避免被浏览器拦截）
   $('#insertLinkBtn').addEventListener('mousedown', (e) => {
     e.preventDefault(); e.stopPropagation();
+    
+    // 👇 新增：点击插入链接时，强制关闭左侧的更多工具面板，防止重叠
+    const moreToolsPanel = document.getElementById('moreToolsPanel');
+    if (moreToolsPanel) moreToolsPanel.classList.remove('show');
+    
     notepadEditor.focus();
 
     // 创建临时弹窗
@@ -3900,30 +3934,294 @@
       // 保留面板，不自动关闭；用户可手动关闭
     }
   });
-  // 字体菜单
+  // ===== 字体菜单（128 种，支持搜索）=====
+  const FONT_LIST = [
+    /* ---------- 中文 · Windows 常见 ---------- */
+    { name: '微软雅黑',            font: 'Microsoft YaHei',        fb: 'sans-serif' },
+    { name: '微软雅黑 Light',      font: 'Microsoft YaHei Light',  fb: 'sans-serif' },
+    { name: '微软雅黑 UI',         font: 'Microsoft YaHei UI',     fb: 'sans-serif' },
+    { name: '宋体',                font: 'SimSun',                 fb: 'serif' },
+    { name: '新宋体',              font: 'NSimSun',                fb: 'monospace' },
+    { name: '黑体',                font: 'SimHei',                 fb: 'sans-serif' },
+    { name: '楷体',                font: 'KaiTi',                  fb: 'serif' },
+    { name: '楷体_GB2312',         font: 'KaiTi_GB2312',           fb: 'serif' },
+    { name: '仿宋',                font: 'FangSong',               fb: 'serif' },
+    { name: '仿宋_GB2312',         font: 'FangSong_GB2312',        fb: 'serif' },
+    { name: '等线',                font: 'DengXian',               fb: 'sans-serif' },
+    { name: '等线 Light',          font: 'DengXian Light',         fb: 'sans-serif' },
+    { name: '幼圆',                font: 'YouYuan',                fb: 'sans-serif' },
+    { name: '隶书',                font: 'LiSu',                   fb: 'cursive' },
+    { name: '华文行楷',            font: 'STXingkai',              fb: 'cursive' },
+    { name: '华文楷体',            font: 'STKaiti',                fb: 'serif' },
+    { name: '华文宋体',            font: 'STSong',                 fb: 'serif' },
+    { name: '华文仿宋',            font: 'STFangsong',             fb: 'serif' },
+    { name: '华文细黑',            font: 'STXihei',                fb: 'sans-serif' },
+    { name: '华文中宋',            font: 'STZhongsong',            fb: 'serif' },
+    { name: '华文彩云',            font: 'STCaiyun',               fb: 'cursive' },
+    { name: '华文琥珀',            font: 'STHupo',                 fb: 'cursive' },
+    { name: '华文隶书',            font: 'STLiti',                 fb: 'cursive' },
+    { name: '华文新魏',            font: 'STXinwei',               fb: 'cursive' },
+    { name: '华文黑体',            font: 'STHeiti',                fb: 'sans-serif' },
+    { name: '华文圆体',            font: 'STYuanti',               fb: 'sans-serif' },
+    { name: '方正舒体',            font: 'FZShuTi',                fb: 'cursive' },
+    { name: '方正姚体',            font: 'FZYaoti',                fb: 'sans-serif' },
+    { name: '方正楷体',            font: 'FZKai-Z03',              fb: 'serif' },
+    { name: '方正书宋',            font: 'FZShuSong-Z01',          fb: 'serif' },
+    { name: '标楷体',              font: 'DFKai-SB',               fb: 'serif' },
+    { name: '细明体',              font: 'MingLiU',                fb: 'serif' },
+    { name: '新细明体',            font: 'PMingLiU',               fb: 'serif' },
+    { name: '微软正黑体',          font: 'Microsoft JhengHei',     fb: 'sans-serif' },
+    /* ---------- 中文 · macOS 常见 ---------- */
+    { name: '苹方',                font: 'PingFang SC',            fb: 'sans-serif' },
+    { name: '苹方 繁体',           font: 'PingFang TC',            fb: 'sans-serif' },
+    { name: '苹方 港体',           font: 'PingFang HK',            fb: 'sans-serif' },
+    { name: '冬青黑体',            font: 'Hiragino Sans GB',       fb: 'sans-serif' },
+    { name: '冬青明朝',            font: 'Hiragino Mincho ProN',   fb: 'serif' },
+    { name: '娃娃体',              font: 'HanziPen SC',            fb: 'cursive' },
+    { name: '翩翩体',              font: 'Hannotate SC',           fb: 'cursive' },
+    { name: '手札体',              font: 'Hanzipen SC',            fb: 'cursive' },
+    { name: '圆体',                font: 'Yuanti SC',              fb: 'sans-serif' },
+    { name: '娃娃体 繁体',         font: 'HanziPen TC',            fb: 'cursive' },
+    { name: '翩翩体 繁体',         font: 'Hannotate TC',           fb: 'cursive' },
+    { name: '圆体 繁体',           font: 'Yuanti TC',              fb: 'sans-serif' },
+    { name: '翩翩体 港体',         font: 'Hannotate HK',           fb: 'cursive' },
+    /* ---------- 英文 · 无衬线 Sans-serif ---------- */
+    { name: 'Arial',               font: 'Arial',                  fb: 'sans-serif' },
+    { name: 'Arial Black',         font: 'Arial Black',            fb: 'sans-serif' },
+    { name: 'Arial Narrow',        font: 'Arial Narrow',           fb: 'sans-serif' },
+    { name: 'Arial Rounded MT',    font: 'Arial Rounded MT Bold',  fb: 'sans-serif' },
+    { name: 'Helvetica',           font: 'Helvetica',              fb: 'sans-serif' },
+    { name: 'Helvetica Neue',      font: 'Helvetica Neue',         fb: 'sans-serif' },
+    { name: 'Verdana',             font: 'Verdana',                fb: 'sans-serif' },
+    { name: 'Tahoma',              font: 'Tahoma',                 fb: 'sans-serif' },
+    { name: 'Trebuchet MS',        font: 'Trebuchet MS',           fb: 'sans-serif' },
+    { name: 'Segoe UI',            font: 'Segoe UI',               fb: 'sans-serif' },
+    { name: 'Calibri',             font: 'Calibri',                fb: 'sans-serif' },
+    { name: 'Candara',             font: 'Candara',                fb: 'sans-serif' },
+    { name: 'Corbel',              font: 'Corbel',                 fb: 'sans-serif' },
+    { name: 'Century Gothic',      font: 'Century Gothic',         fb: 'sans-serif' },
+    { name: 'Franklin Gothic',     font: 'Franklin Gothic Medium', fb: 'sans-serif' },
+    { name: 'Gill Sans',           font: 'Gill Sans',              fb: 'sans-serif' },
+    { name: 'Gill Sans MT',        font: 'Gill Sans MT',           fb: 'sans-serif' },
+    { name: 'Futura',              font: 'Futura',                 fb: 'sans-serif' },
+    { name: 'Optima',              font: 'Optima',                 fb: 'sans-serif' },
+    { name: 'Impact',              font: 'Impact',                 fb: 'sans-serif' },
+    { name: 'Lucida Sans',         font: 'Lucida Sans Unicode',    fb: 'sans-serif' },
+    { name: 'Lucida Grande',       font: 'Lucida Grande',          fb: 'sans-serif' },
+    { name: 'Myriad Pro',          font: 'Myriad Pro',             fb: 'sans-serif' },
+    { name: 'Roboto',              font: 'Roboto',                 fb: 'sans-serif' },
+    { name: 'Open Sans',           font: 'Open Sans',              fb: 'sans-serif' },
+    { name: 'Lato',                font: 'Lato',                   fb: 'sans-serif' },
+    { name: 'Montserrat',          font: 'Montserrat',             fb: 'sans-serif' },
+    { name: 'Poppins',             font: 'Poppins',                fb: 'sans-serif' },
+    /* ---------- 英文 · 衬线 Serif ---------- */
+    { name: 'Georgia',             font: 'Georgia',                fb: 'serif' },
+    { name: 'Times New Roman',     font: 'Times New Roman',        fb: 'serif' },
+    { name: 'Times',               font: 'Times',                  fb: 'serif' },
+    { name: 'Palatino',            font: 'Palatino Linotype',      fb: 'serif' },
+    { name: 'Palatino Linotype',   font: 'Palatino Linotype',      fb: 'serif' },
+    { name: 'Cambria',             font: 'Cambria',                fb: 'serif' },
+    { name: 'Constantia',          font: 'Constantia',             fb: 'serif' },
+    { name: 'Book Antiqua',        font: 'Book Antiqua',           fb: 'serif' },
+    { name: 'Bookman Old Style',   font: 'Bookman Old Style',      fb: 'serif' },
+    { name: 'Garamond',            font: 'Garamond',               fb: 'serif' },
+    { name: 'Baskerville',         font: 'Baskerville',            fb: 'serif' },
+    { name: 'Didot',               font: 'Didot',                  fb: 'serif' },
+    { name: 'Bodoni MT',           font: 'Bodoni MT',              fb: 'serif' },
+    { name: 'Rockwell',            font: 'Rockwell',               fb: 'serif' },
+    { name: 'Century Schoolbook',  font: 'Century Schoolbook',     fb: 'serif' },
+    { name: 'Hoefler Text',        font: 'Hoefler Text',           fb: 'serif' },
+    { name: 'Perpetua',            font: 'Perpetua',               fb: 'serif' },
+    { name: 'Copperplate',         font: 'Copperplate',            fb: 'serif' },
+    /* ---------- 英文 · 等宽 Monospace ---------- */
+    { name: 'Courier New',         font: 'Courier New',            fb: 'monospace' },
+    { name: 'Courier',             font: 'Courier',                fb: 'monospace' },
+    { name: 'Consolas',            font: 'Consolas',               fb: 'monospace' },
+    { name: 'Monaco',              font: 'Monaco',                 fb: 'monospace' },
+    { name: 'Menlo',               font: 'Menlo',                  fb: 'monospace' },
+    { name: 'Lucida Console',      font: 'Lucida Console',         fb: 'monospace' },
+    { name: 'Lucida Sans Typewriter', font: 'Lucida Sans Typewriter', fb: 'monospace' },
+    { name: 'Andale Mono',         font: 'Andale Mono',            fb: 'monospace' },
+    { name: 'Source Code Pro',     font: 'Source Code Pro',        fb: 'monospace' },
+    /* ---------- 英文 · 手写 / 装饰 / 趣味 ---------- */
+    { name: 'Comic Sans MS',       font: 'Comic Sans MS',          fb: 'cursive' },
+    { name: 'Brush Script',        font: 'Brush Script MT',        fb: 'cursive' },
+    { name: 'Segoe Script',        font: 'Segoe Script',           fb: 'cursive' },
+    { name: 'Segoe Print',         font: 'Segoe Print',            fb: 'cursive' },
+    { name: 'Lucida Handwriting',  font: 'Lucida Handwriting',     fb: 'cursive' },
+    { name: 'Bradley Hand',        font: 'Bradley Hand',           fb: 'cursive' },
+    { name: 'Marker Felt',         font: 'Marker Felt',            fb: 'cursive' },
+    { name: 'Chalkduster',         font: 'Chalkduster',            fb: 'fantasy' },
+    { name: 'Papyrus',             font: 'Papyrus',                fb: 'fantasy' },
+    { name: 'Trattatello',         font: 'Trattatello',            fb: 'fantasy' },
+    { name: 'Herculanum',          font: 'Herculanum',             fb: 'fantasy' },
+    { name: 'Zapfino',             font: 'Zapfino',                fb: 'cursive' },
+    { name: 'Noteworthy',          font: 'Noteworthy',             fb: 'cursive' },
+    { name: 'Apple Chancery',      font: 'Apple Chancery',         fb: 'cursive' },
+    { name: 'Snell Roundhand',     font: 'Snell Roundhand',        fb: 'cursive' },
+    { name: 'Party LET',           font: 'Party LET',              fb: 'fantasy' },
+    { name: 'Stencil',             font: 'Stencil',                fb: 'fantasy' },
+    { name: 'Wide Latin',          font: 'Wide Latin',             fb: 'serif' },
+    { name: 'Old English Text MT', font: 'Old English Text MT',    fb: 'serif' },
+    /* ---------- 表情 / 符号 / 图标字体 ---------- */
+    { name: 'Segoe UI Emoji',      font: 'Segoe UI Emoji',         fb: 'sans-serif' },
+    { name: 'Segoe UI Symbol',     font: 'Segoe UI Symbol',        fb: 'sans-serif' },
+    { name: 'Apple Color Emoji',   font: 'Apple Color Emoji',      fb: 'sans-serif' },
+    { name: 'Symbol',              font: 'Symbol',                 fb: 'serif' }
+  ];
+
   const fontMenuBtn = $('#fontMenuBtn'), fontDropdown = $('#fontDropdown');
-  fontMenuBtn.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); fontDropdown.classList.toggle('show'); });
-  document.addEventListener('click', (e) => { if (!fontDropdown.contains(e.target) && e.target !== fontMenuBtn) { fontDropdown.classList.remove('show'); } });
-  $$('.font-item').forEach(item => {
-    item.addEventListener('mousedown', (e) => {
-      e.preventDefault(); e.stopPropagation(); const font = item.dataset.font;
-      notepadEditor.focus(); document.execCommand('fontName', false, font);
-      saveNotepad(); fontDropdown.classList.remove('show');
-      toast(`✨ 已应用字体：${item.textContent}`);
+  const fontListEl = $('#fontList');
+  const fontSearchInput = $('#fontSearchInput');
+
+  // 全局变量，用来暂存选区
+  let savedFontRange = null;
+
+  function renderFontList(keyword) {
+    const kw = (keyword || '').trim().toLowerCase();
+    const filtered = kw
+      ? FONT_LIST.filter(f => f.name.toLowerCase().includes(kw) || f.font.toLowerCase().includes(kw))
+      : FONT_LIST;
+    if (!filtered.length) {
+      fontListEl.innerHTML = '<div class="font-empty">没有匹配的字体</div>';
+      return;
+    }
+    fontListEl.innerHTML = '';
+    filtered.forEach(f => {
+      const div = document.createElement('div');
+      div.className = 'font-item';
+      div.dataset.font = f.font;
+      div.style.fontFamily = `'${f.font}', ${f.fb}`;
+      div.textContent = f.name;
+      
+      div.addEventListener('mousedown', (e) => {
+        e.preventDefault(); // 阻止焦点转移
+        e.stopPropagation();
+        
+        notepadEditor.focus(); // 让记事本重新获取焦点
+        
+        // 恢复暂存的选区
+        const sel = window.getSelection();
+        if (savedFontRange) {
+          sel.removeAllRanges();
+          sel.addRange(savedFontRange);
+        }
+        
+        if (sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          
+          if (!range.collapsed) {
+            // 【情况 1：选中了文字】
+            const span = document.createElement('span');
+            span.style.fontFamily = `'${f.font}', ${f.fb}`;
+            span.appendChild(range.extractContents());
+            range.insertNode(span);
+            
+            range.selectNodeContents(span);
+            sel.removeAllRanges();
+            sel.addRange(range);
+            saveNotepad();
+            toast(`✨ 已应用字体：${f.name}`);
+          } else {
+            // 【情况 2：没选中文字，只有光标】
+            const span = document.createElement('span');
+            span.style.fontFamily = `'${f.font}', ${f.fb}`;
+            span.innerHTML = '&#8203;'; // 零宽字符占位
+            range.insertNode(span);
+            
+            const newRange = document.createRange();
+            newRange.setStart(span.firstChild, 1);
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+            saveNotepad();
+            toast(`✨ 已设为 ${f.name} 字体`);
+          }
+        }
+        
+        fontDropdown.classList.remove('show');
+        fontSearchInput.value = '';
+      });
+      fontListEl.appendChild(div);
     });
+  }
+  renderFontList('');
+
+  fontMenuBtn.addEventListener('mousedown', (e) => {
+    e.preventDefault(); // 阻止默认行为，保住选区
+    e.stopPropagation();
+    
+    // 打开菜单时，暂存当前的选区
+    const sel = window.getSelection();
+    if (sel.rangeCount > 0 && notepadEditor.contains(sel.anchorNode)) {
+      savedFontRange = sel.getRangeAt(0).cloneRange();
+    }
+
+    const willShow = !fontDropdown.classList.contains('show');
+    fontDropdown.classList.toggle('show');
+    if (willShow) {
+      fontSearchInput.value = '';
+      renderFontList('');
+    }
+  });
+  document.addEventListener('click', (e) => {
+    if (!fontDropdown.contains(e.target) && e.target !== fontMenuBtn) {
+      fontDropdown.classList.remove('show');
+    }
+  });
+  fontSearchInput.addEventListener('input', () => renderFontList(fontSearchInput.value));
+  
+  // 允许点击搜索框进行打字搜索
+  fontSearchInput.addEventListener('mousedown', (e) => {
+    e.stopPropagation();
+    // 这里不需要做复杂的处理，允许浏览器默认聚焦到搜索框
+  });
+  fontSearchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      fontSearchInput.value = '';
+      renderFontList('');
+      fontDropdown.classList.remove('show');
+    }
   });
   // 字号调整（A+ / A- / Aa）
   function changeFontSize(delta) {
-    notepadEditor.focus(); const selection = window.getSelection();
-    if (!selection.rangeCount) return; const range = selection.getRangeAt(0);
-    if (range.collapsed) return;
-    const span = document.createElement('span'); let currentSize = 14;
-    const parentEl = range.startContainer.nodeType === 1 ? range.startContainer : range.startContainer.parentElement;
-    if (parentEl) { const parentStyle = window.getComputedStyle(parentEl); if (parentStyle.fontSize) currentSize = parseFloat(parentStyle.fontSize); }
+    notepadEditor.focus();
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    
+    let currentSize = 14;
+    let parentEl = range.startContainer.nodeType === 1 ? range.startContainer : range.startContainer.parentElement;
+    if (parentEl) {
+      const parentStyle = window.getComputedStyle(parentEl);
+      if (parentStyle.fontSize) currentSize = parseFloat(parentStyle.fontSize);
+    }
     let newSize = Math.max(10, Math.min(100, currentSize + delta));
-    span.style.fontSize = newSize + 'px'; span.appendChild(range.extractContents());
-    range.insertNode(span); selection.removeAllRanges();
-    const newRange = document.createRange(); newRange.selectNodeContents(span); selection.addRange(newRange);
+
+    if (!range.collapsed) {
+      // 选中了文字
+      const span = document.createElement('span');
+      span.style.fontSize = newSize + 'px';
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+      
+      sel.removeAllRanges();
+      const newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      sel.addRange(newRange);
+    } else {
+      // 没选中文字（仅光标）
+      const span = document.createElement('span');
+      span.style.fontSize = newSize + 'px';
+      span.innerHTML = '&#8203;';
+      range.insertNode(span);
+      
+      const newRange = document.createRange();
+      newRange.setStart(span.firstChild, 1);
+      newRange.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+    }
     saveNotepad();
   }
   $('#fontSizePlus').addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); changeFontSize(2); });
@@ -4008,7 +4306,7 @@
     qrcode:     { x: 390,  y: 2280, w: 370,  h: 320, visible: true, order: 14, name: '二维码生成' },
     joke:       { x: 780,  y: 2280, w: 370,  h: 320, visible: true, order: 15, name: '摸鱼笑话' },
     notepad:    { x: 0,    y: 2680, w: 370,  h: 380, visible: true, order: 16, name: '迷你记事本' },
- musicplayer:{ x: 400,  y: 2680, w: 620,  h: 650, visible: true, order: 17, name: '音乐播放器' }
+ musicplayer:{ x: 400,  y: 2680, w: 620,  h: 740, visible: true, order: 17, name: '音乐播放器' }
   };
   Object.keys(defaultConfig).forEach(k => { if (defaultConfig[k].z === undefined) defaultConfig[k].z = 1; });
   // 同步 footer 中的组件数量，避免写死数字与配置脱节
@@ -4430,7 +4728,8 @@
       theme: document.documentElement.getAttribute('data-theme'),
       fontSize: currentFontSize, engines: currentEngines, defaultEngine: currentDefEngine,
       city: currentCity, cityHistory: cityHistory, workStart: workStartTime, workEnd: workEndTime, workDays: workDays, nightShift: nightShift,
-      customBg: store.get('nt_custom_bg', ''), bgType: store.get('nt_bg_type', 'default'), bgValue: store.get('nt_bg_value', '')
+      customBg: store.get('nt_custom_bg', ''), bgType: store.get('nt_bg_type', 'default'), bgValue: store.get('nt_bg_value', ''),
+      mpFavorites: store.get('nt_mp_favorites', [])
     };
     let fileContent = JSON.stringify(data);
     if (pwd.trim() !== '') { fileContent = "🔒LOCKED_DATA🔒" + encryptData(fileContent, pwd); }
@@ -4562,6 +4861,9 @@
           if (data.workDays) { workDays = data.workDays; store.set('nt_workDays', workDays); document.querySelectorAll('.work-day').forEach(cb => { const di = parseInt(cb.value); if (typeof workDays[di] !== 'boolean') workDays[di] = (di >= 1 && di <= 5); cb.checked = workDays[di]; }); }
           if (typeof data.nightShift === 'boolean') { nightShift = data.nightShift; store.set('nt_nightShift', nightShift); if (typeof applyNightShiftUI === 'function') applyNightShiftUI(); }
           if (typeof updateWorkTime === 'function') updateWorkTime();
+          if (Array.isArray(data.mpFavorites)) {
+            store.set('nt_mp_favorites', data.mpFavorites);
+          }
           if (data.bgType !== undefined && data.bgValue !== undefined) {
             store.set('nt_bg_type', data.bgType); store.set('nt_bg_value', data.bgValue);
           } else if (data.customBg) {
@@ -4606,6 +4908,12 @@
     currentTrack: null,
     playContext: [],
     searchResults: [],
+    favorites: (function(){
+      const v = store.get('nt_mp_favorites', []);
+      if (!Array.isArray(v)) return [];
+      // 过滤掉缺 uid/title 的脏数据，避免渲染异常
+      return v.filter(x => x && x.uid && (x.title || x.songid));
+    })(),
     isPlaying: false,
     isMuted: false,
     searching: false,
@@ -4700,7 +5008,9 @@
   }
 
   async function fetchDetails(t) {
-    if (t._detFetched || t._detFetching) return t;
+    // audioUrl 有 + 已拉过详情 + （歌词已就绪 或 确实没有歌词源）→ 才跳过
+    if (t.audioUrl && t._detFetched && (t.lrc || !t.lrcUrl)) return t;
+    if (t._detFetching) return t;
     t._detFetching = true;
     try {
       if (t.source === 'netease') {
@@ -4784,6 +5094,112 @@
       ? '<rect x="6.2" y="4.8" width="4" height="14.4" rx="1.4" fill="currentColor"/><rect x="13.8" y="4.8" width="4" height="14.4" rx="1.4" fill="currentColor"/>'
       : '<path d="M7.5 5.2v13.6L19.5 12z" fill="currentColor"/>';
   }
+
+  // ===== 收藏功能 =====
+  function isFav(uid) { return !!uid && mp.favorites.some(f => f.uid === uid); }
+
+  function updateFavBtn() {
+    const btn = document.getElementById('mp-favBtn');
+    if (!btn) return;
+    const active = !!(mp.currentTrack && isFav(mp.currentTrack.uid));
+    btn.classList.toggle('active', active);
+    btn.title = active ? '取消收藏' : '收藏当前歌曲';
+  }
+
+  function toggleFav() {
+    const t = mp.currentTrack;
+    if (!t) { mpShowToast('先播放一首歌吧'); return; }
+    const idx = mp.favorites.findIndex(f => f.uid === t.uid);
+    if (idx >= 0) {
+      mp.favorites.splice(idx, 1);
+      store.set('nt_mp_favorites', mp.favorites);
+      mpShowToast('已取消收藏');
+    } else {
+      // 按源决定歌词怎么存：
+      // - 网易云：有可重拉的 lrcUrl（fetchDetails 里被置 null，这里补回），不存 lrc 省空间
+      // - QQ/酷我/JOOX：没有 lrcUrl，歌词是直接拿的文本，必须存 lrc，否则二次播放拉不回来
+      let savedLrcUrl = t.lrcUrl;
+      let savedLrc = null;
+      if (t.source === 'netease') {
+        if (!savedLrcUrl && t.songid) {
+          savedLrcUrl = `https://api.qijieya.cn/meting/?server=netease&type=lrc&id=${encodeURIComponent(t.songid)}`;
+        }
+      } else {
+        savedLrcUrl = null;
+        savedLrc = t.lrc || null;   // QQ/酷我/JOOX 存文本
+      }
+      mp.favorites.unshift({
+        uid: t.uid, source: t.source, songid: t.songid,
+        qqMid: t.qqMid, jooxIdx: t.jooxIdx,
+        title: t.title, artist: t.artist, album: t.album,
+        cover: t.cover, audioUrl: t.audioUrl,
+        lrcUrl: savedLrcUrl,
+        lrc: savedLrc,
+        detailsLoaded: t.detailsLoaded,
+        _detFetched: t._detFetched
+      });
+      if (!store.set('nt_mp_favorites', mp.favorites)) {
+        mp.favorites.shift(); // 回滚
+        mpShowToast('❌ 存储空间不足，收藏失败');
+        return;
+      }
+      mpShowToast('⭐ 已收藏');
+    }
+    updateFavBtn();
+    const panel = document.getElementById('mp-favPanel');
+    if (panel && panel.classList.contains('active')) renderFavList();
+  }
+
+  function renderFavList() {
+    const list = document.getElementById('mp-favList');
+    if (!list) return;
+    const prevScroll = list.scrollTop;   // 保存滚动位置
+    if (!mp.favorites.length) {
+      list.innerHTML = '<div class="empty">还没有收藏，播放歌曲时点 ⭐ 收藏吧</div>';
+      list.scrollTop = 0;   // 空列表时归零，保持行为一致
+      return;
+    }
+    list.innerHTML = mp.favorites.map(t => {
+      const isActive = mp.currentTrack && mp.currentTrack.uid === t.uid;
+      return `
+        <div class="mp-fav-item ${isActive ? 'active-track' : ''}" data-uid="${mpEsc(t.uid)}">
+          <div class="mp-result-cover">${t.cover ? `<img src="${mpEsc(t.cover)}" alt="" referrerpolicy="no-referrer">` : '♪'}</div>
+          <div class="mp-result-info">
+            <div class="mp-result-title">${mpEsc(t.title) || '未知歌曲'}</div>
+            <div class="mp-result-artist">${mpEsc(t.artist)}</div>
+          </div>
+          <span class="mp-result-source ${t.source}">${SRC_NAME[t.source] || ''}</span>
+          <button class="mp-fav-del" data-uid="${mpEsc(t.uid)}" title="删除收藏">×</button>
+        </div>`;
+    }).join('');
+
+    list.querySelectorAll('.mp-fav-item').forEach(el => {
+      el.addEventListener('click', (e) => {
+        if (e.target.closest('.mp-fav-del')) return;
+        const uid = el.dataset.uid;
+        const t = mp.favorites.find(x => x.uid === uid);
+        if (t) {
+          playTrack(t, mp.favorites.slice());
+          document.getElementById('mp-favPanel').classList.remove('active');
+        }
+      });
+    });
+    list.querySelectorAll('.mp-fav-del').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const uid = btn.dataset.uid;
+        const idx = mp.favorites.findIndex(f => f.uid === uid);
+        if (idx >= 0) {
+          mp.favorites.splice(idx, 1);
+          store.set('nt_mp_favorites', mp.favorites);
+          renderFavList();
+          updateFavBtn();
+          mpShowToast(uid === mp.currentTrack?.uid ? '已从收藏移除' : '已删除收藏');
+        }
+      });
+    });
+    list.scrollTop = prevScroll;   // 恢复滚动位置
+  }
   
   function updateTrackUI(t) {
     document.getElementById('mp-trackTitle').textContent = t.title || '音乐播放器';
@@ -4806,6 +5222,7 @@
     }
     
     updateActiveInResults();
+    updateFavBtn();
   }
   
   function setPlayingUI(playing) { mp.isPlaying = playing; updatePlayIcon(); }
@@ -4825,7 +5242,7 @@
     resetProgress();
     mpShowToast('加载中…');
     // 给一个 10 秒的超时兜底，防止网络极差时卡死
-    const playTimeout = setTimeout(() => { mpShowToast('加载超时，请检查网络'); setPlayingUI(false); }, 10000);
+    const playTimeout = setTimeout(() => { mpShowToast('加载较慢，请稍候…'); }, 10000);
     try {
       await fetchDetails(t);
       clearTimeout(playTimeout);
@@ -4850,7 +5267,12 @@
     const list = mp.playContext;
     if (!list.length) { mpShowToast('播放列表为空'); return; }
     let idx = list.findIndex(x => x.uid === mp.currentTrack?.uid);
-    idx = (idx + (dir === 'prev' ? -1 : 1) + list.length) % list.length;
+    if (idx === -1) {
+      // 当前曲目不在播放列表里：next 从头开始，prev 从末尾开始
+      idx = dir === 'prev' ? list.length - 1 : 0;
+    } else {
+      idx = (idx + (dir === 'prev' ? -1 : 1) + list.length) % list.length;
+    }
     playTrack(list[idx], list);
   }
 
@@ -4889,7 +5311,7 @@
     if (!kw) { mpShowToast('请输入关键词'); return; }
     if (mp.searching) return;
     mp.searching = true; mp.searchResults = [];
-    mp.playContext = [];   // 👈 新搜索前清空旧播放上下文，避免上一首/下一首跳到旧歌
+    document.getElementById('mp-favPanel').classList.remove('active');
     const box = document.getElementById('mp-searchResults');
     box.innerHTML = '<div class="loading">正在搜索…</div>'; box.classList.add('active');
 
@@ -5031,7 +5453,21 @@
     const box = document.getElementById('mp-searchResults');
     if (!box.contains(e.target) && !e.target.closest('.mp-search-bar')) box.classList.remove('active');
   });
-  
+
+  // 收藏按钮事件
+  document.getElementById('mp-favBtn').addEventListener('click', toggleFav);
+  document.getElementById('mp-favListBtn').addEventListener('click', () => {
+    const panel = document.getElementById('mp-favPanel');
+    const willShow = !panel.classList.contains('active');
+    panel.classList.toggle('active');
+    if (willShow) {
+      renderFavList();
+      document.getElementById('mp-searchResults').classList.remove('active');
+    }
+  });
+  document.getElementById('mp-favClose').addEventListener('click', () => {
+    document.getElementById('mp-favPanel').classList.remove('active');
+  });
 
   resetProgress(); updatePlayIcon();
 
@@ -5193,6 +5629,61 @@
     color: inherit;
   }
 
+  /* ===== 字体菜单：搜索框 + 滚动列表 ===== */
+  .font-dropdown {
+    width: 220px !important;
+    max-height: 320px !important;
+    padding: 6px !important;
+    overflow: hidden !important;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .font-dropdown.show { display: flex; }
+  .font-search-input {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--divider);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12.5px;
+    color: var(--text);
+    outline: none;
+    flex-shrink: 0;
+  }
+  .font-search-input:focus { border-color: var(--accent); }
+  .font-search-input::placeholder { color: var(--text-mute); }
+  .font-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 0;
+  }
+  .font-list::-webkit-scrollbar { width: 4px; }
+  .font-list::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
+  .font-list .font-item {
+    padding: 8px 12px;
+    font-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+    border-radius: 4px;
+    text-align: left;
+    transition: 0.15s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+  }
+  .font-list .font-item:hover { background: var(--hover); color: var(--accent); }
+  .font-empty {
+    padding: 20px 8px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-mute);
+  }
+
   /* =======================================================
      2. 修复 ? 气泡的错位与专属白条
      ======================================================= */
@@ -5222,6 +5713,57 @@
   .footer-tip-popup::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.8) !important;
   }
+
+  /* ===== 音乐收藏 ===== */
+  #mp-favBtn.active { color: #ffb400; }
+  #mp-favBtn.active svg { fill: #ffb400; stroke: #ffb400; }
+
+  .mp-fav-panel {
+    position: absolute;
+    top: 3em; left: 0; right: 0; bottom: 0;
+    background: var(--card);
+    border-radius: 1.1em;
+    box-shadow: 0 .4em 1.6em rgba(0,0,0,.1);
+    z-index: 21;
+    overflow: hidden;
+    display: none;
+    flex-direction: column;
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(20px);
+  }
+  .mp-fav-panel.active { display: flex; }
+  .mp-fav-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: .5em .9em; font-size: .85em; font-weight: 600;
+    color: var(--text); border-bottom: 1px solid var(--divider);
+    flex-shrink: 0;
+  }
+  .mp-fav-close {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-mute); font-size: 1em; padding: .2em .4em;
+    border-radius: 50%;
+  }
+  .mp-fav-close:hover { background: var(--hover); color: var(--accent); }
+  .mp-fav-list { flex: 1; overflow-y: auto; padding: .3em 0; }
+  .mp-fav-list .empty {
+    padding: 2em .8em; text-align: center;
+    color: var(--text-mute); font-size: .85em;
+  }
+  .mp-fav-item {
+    display: flex; align-items: center; gap: .7em;
+    padding: .55em .9em; cursor: pointer;
+    transition: background .15s;
+    border-bottom: 1px solid var(--divider);
+  }
+  .mp-fav-item:last-child { border-bottom: none; }
+  .mp-fav-item:hover { background: var(--hover); }
+  .mp-fav-item.active-track { background: var(--accent-soft); }
+  .mp-fav-del {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-mute); font-size: 1.1em; padding: .1em .4em;
+    border-radius: 50%; flex-shrink: 0;
+  }
+  .mp-fav-del:hover { color: var(--danger); }
 </style>
 </body>
 </html>
