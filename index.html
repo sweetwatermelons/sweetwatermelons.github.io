@@ -5,331 +5,186 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>sweet🍉的小站</title>
 <style>
-  /* ================= 基础重置 ================= */
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
-  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
   body {
-    /* 极简天蓝色渐变背景 */
     background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-    background-image: 
-      radial-gradient(rgba(255, 255, 255, 0.8) 2px, transparent 2px),
-      linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.8) 2px, transparent 2px), linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
     background-size: 40px 40px, 100% 100%;
-    
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
     font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
-    padding: 20px;
-    overflow-x: hidden;
+    padding: 20px; overflow-x: hidden;
   }
 
-  /* 主容器 */
   .container {
-    max-width: 1000px; /* 稍微加宽一点以容纳三个按钮 */
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center; 
-    margin-top: -2vh;
+    max-width: 1000px; width: 100%;
+    display: flex; flex-direction: column; align-items: center; margin-top: -2vh;
   }
 
-  /* ================= 标题区域 ================= */
-  .title-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center; 
-    width: 100%;
-  }
+  /* 标题区 */
+  .title-wrap { display: flex; flex-direction: column; align-items: center; width: 100%; }
+  .title { font-size: 4.5rem; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; text-shadow: 0 4px 15px rgba(255, 255, 255, 0.8); }
+  .title .en { font-family: 'Georgia', serif; font-style: italic; transform: rotate(-3deg); }
+  .title .emoji { font-size: 4rem; display: inline-block; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-8px) rotate(10deg); } }
+  .title .zh { font-size: 2.8rem; font-weight: 700; color: #0284c7; }
+  .underline { width: 60%; height: 4px; background: linear-gradient(90deg, transparent 0%, #ffb6c1 50%, transparent 100%); border-radius: 2px; margin-bottom: 35px; box-shadow: 0 0 12px rgba(255, 182, 193, 0.5); }
 
-  .title {
-    font-size: 4.5rem;
-    font-weight: 900;
-    letter-spacing: 1px;
-    color: #0f172a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 20px;
-    text-shadow: 0 4px 15px rgba(255, 255, 255, 0.8);
-    font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
-  }
+  /* 操作区 */
+  .action-area { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 880px; margin-bottom: 35px; }
+  .my-works { display: inline-flex; align-items: center; gap: 8px; font-size: 1.35rem; font-weight: 700; color: #0369a1; }
+  .my-works::before { content: '✨'; font-size: 1.2rem; }
+  .right-buttons { display: flex; align-items: center; gap: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: #ffffff; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50px; font-size: 0.95rem; font-weight: 700; color: #0369a1; text-decoration: none; transition: all 0.3s; box-shadow: 0 4px 15px rgba(3, 105, 161, 0.1); white-space: nowrap; }
+  .btn:hover { transform: translateY(-3px); border-color: #38bdf8; color: #0284c7; box-shadow: 0 10px 25px rgba(56, 189, 248, 0.3); }
+  .btn svg { width: 18px; height: 18px; fill: #38bdf8; transition: fill 0.3s, transform 0.3s; }
+  .btn:hover svg { fill: #0284c7; transform: rotate(5deg); }
 
-  .title .en {
-    font-family: 'Georgia', serif; 
-    font-style: italic;
-    transform: rotate(-3deg); 
-  }
+  /* 简介 */
+  .description { font-size: 1.15rem; line-height: 1.8; color: #475569; text-align: center; margin-bottom: 40px; }
+  .kaomoji { display: inline-block; margin-left: 8px; font-family: 'Courier New', monospace; color: #0284c7; font-weight: bold; transition: 0.3s; }
+  .kaomoji:hover { transform: translateY(-5px) scale(1.15); color: #38bdf8; text-shadow: 0 0 15px rgba(56, 189, 248, 0.8); }
 
-  .title .emoji {
-    font-size: 4rem;
-    display: inline-block;
-    animation: float 3s ease-in-out infinite;
-    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif; 
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-8px) rotate(10deg); }
-  }
-
-  .title .zh {
-    font-size: 2.8rem;
-    font-weight: 700;
-    color: #0284c7;
-  }
-
-  /* 粉色渐变线 */
-  .underline {
-    width: 60%;
-    height: 4px;
-    background: linear-gradient(90deg, transparent 0%, #ffb6c1 50%, transparent 100%);
-    border-radius: 2px;
-    margin-bottom: 35px; 
-    box-shadow: 0 0 12px rgba(255, 182, 193, 0.5);
-  }
-
-  /* ================= 中间操作区 ================= */
-  .action-area {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; 
-    width: 100%;
-    max-width: 880px; /* 加宽以容纳四个按钮 */
-    margin-bottom: 35px;
-  }
-
-  /* 我的小作品：纯文本 */
-  .my-works {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1.35rem; 
-    font-weight: 700;
-    color: #0369a1; 
-    user-select: none;
-  }
-
-  .my-works::before {
-    content: '✨';
-    font-size: 1.2rem;
-    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
-  }
-
-  /* 右侧按钮组 */
-  .right-buttons {
-    display: flex;
-    align-items: center;
-    gap: 12px; /* 按钮间距 */
-  }
-
-  /* 胶囊按钮通用样式 */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    background: #ffffff;
-    backdrop-filter: blur(10px); 
-    border: 1px solid rgba(255, 255, 255, 0.5); 
-    border-radius: 50px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #0369a1;
-    text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: 0 4px 15px rgba(3, 105, 161, 0.1);
-    white-space: nowrap;
-  }
-
-  .btn:hover {
-    transform: translateY(-3px);
-    border-color: #38bdf8;
-    color: #0284c7;
-    box-shadow: 0 10px 25px rgba(56, 189, 248, 0.3);
-  }
-
-  .btn svg {
-    width: 18px;
-    height: 18px;
-    fill: #38bdf8;
-    transition: fill 0.3s, transform 0.3s;
-  }
-
-  .btn:hover svg {
-    fill: #0284c7;
-    transform: rotate(5deg);
-  }
-
-  /* ================= 底部简介区 ================= */
-  .description {
-    font-size: 1.15rem;
-    line-height: 1.8;
-    color: #475569;
-    text-align: center; 
-    letter-spacing: 1px; 
-    margin-bottom: 40px;
-  }
-
-  .kaomoji {
-    display: inline-block;
-    margin-left: 8px;
-    font-family: 'Courier New', Courier, monospace;
-    color: #0284c7;
-    font-weight: bold;
-    cursor: default;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-
-  .kaomoji:hover {
-    transform: translateY(-5px) scale(1.15);
-    color: #38bdf8;
-    text-shadow: 0 0 15px rgba(56, 189, 248, 0.8);
-  }
-
-  /* ================= 页脚导航 ================= */
-  .footer-links {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    font-size: 14px;
-  }
-  
-  .footer-links a {
-    color: #0284c7;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.2s;
-    padding: 8px 16px;
-    border-radius: 20px;
-  }
-  
-  .footer-links a:hover {
-    color: #fff;
-    background: #38bdf8;
-    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
-  }
-
-  .footer-text {
-    color: #64748b;
-    font-size: 13px;
-  }
-  .footer-text a {
-    padding: 0; 
-    font-size: 13px;
-    color: #0284c7;
-    font-weight: 600;
-  }
+  /* 页脚 */
+  .footer-links { display: flex; flex-direction: column; align-items: center; gap: 12px; font-size: 14px; }
+  .footer-links a { color: #0284c7; text-decoration: none; font-weight: 600; transition: 0.2s; padding: 8px 16px; border-radius: 20px; }
+  .footer-links a:hover { color: #fff; background: #38bdf8; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4); }
+  .footer-text { color: #64748b; font-size: 13px; }
+  .footer-text a { padding: 0; font-size: 13px; color: #0284c7; font-weight: 600; }
   .footer-text a:hover { background: transparent; color: #38bdf8; box-shadow: none; text-decoration: underline;}
 
-  /* ================= 极简反馈按钮 ================= */
-  .feedback-link {
+  /* ================= 悬浮二维码终极放大版 ================= */
+  .feedback-area {
+    position: relative;
     margin-top: 24px;
-    font-size: 12.5px;
-    color: #94a3b8; /* 低调的浅灰色 */
+    display: flex;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  .feedback-link {
+    font-size: 14px; /* 文字稍微放大一点呼应大图 */
+    color: #0284c7;
+    font-weight: 700;
     text-decoration: none;
-    padding: 6px 14px;
-    border-radius: 20px;
-    transition: all 0.2s ease;
-    user-select: none;
-    display: inline-block;
+    padding: 12px 28px;
+    border-radius: 30px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(3, 105, 161, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.8);
   }
 
   .feedback-link:hover {
-    color: #0284c7; /* 悬停时变为主题蓝 */
-    background: rgba(255, 255, 255, 0.6);
+    color: #ffffff;
+    background: #38bdf8;
+    box-shadow: 0 8px 25px rgba(56, 189, 248, 0.4);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15);
   }
 
-  /* ================= 响应式适配 ================= */
+  /* 悬浮面板 */
+  .qrcode-popup {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(0px) scale(0.95);
+    background: rgba(255, 255, 255, 1); /* 纯白背景，让二维码更清晰 */
+    border: 1px solid rgba(255, 255, 255, 1);
+    border-radius: 24px; /* 圆角更大 */
+    padding: 20px; /* 内边距加大 */
+    box-shadow: 0 20px 40px rgba(3, 105, 161, 0.25), 0 0 0 1px rgba(0,0,0,0.05); /* 阴影加深加厚 */
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 999999;
+  }
+
+  /* 底部小三角变大 */
+  .qrcode-popup::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 10px; 
+    border-style: solid;
+    border-color: #ffffff transparent transparent transparent;
+  }
+
+  /* 核心修改：直接放大到 280px */
+  .qrcode-popup img {
+    width: 280px;
+    height: 280px;
+    border-radius: 12px;
+    display: block;
+    object-fit: contain;
+  }
+
+  /* 悬浮显示逻辑 */
+  .feedback-area:hover .qrcode-popup {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-15px) scale(1);
+    pointer-events: auto;
+  }
+
+  /* 手机端隐藏二维码 */
   @media (max-width: 860px) {
     .title { font-size: 2.8rem; flex-wrap: wrap; gap: 8px; }
     .title .emoji { font-size: 2.8rem; }
     .title .zh { font-size: 2rem; }
-    
-    .action-area {
-      flex-direction: column;
-      gap: 25px;
-    }
-    
-    .right-buttons {
-      flex-direction: column;
-      width: 100%;
-      gap: 12px;
-    }
-    
+    .action-area { flex-direction: column; gap: 25px; }
+    .right-buttons { flex-direction: column; width: 100%; gap: 12px; }
     .btn { width: 100%; justify-content: center; padding: 12px 20px; font-size: 1rem;}
-    
     .description { font-size: 1rem; }
+    .qrcode-popup { display: none !important; }
   }
 </style>
 </head>
 <body>
 
   <div class="container">
-    <!-- 标题区域 -->
     <div class="title-wrap">
       <h1 class="title">
         <span class="en">sweet</span>
         <span class="emoji">🍉</span>
         <span class="zh">的小站</span>
       </h1>
-      <!-- 粉色渐变线 -->
       <div class="underline"></div>
     </div>
 
-    <!-- 操作区 -->
     <div class="action-area">
-      <!-- 左侧：我的小作品 -->
       <span class="my-works">我的小作品</span>
-
-      <!-- 右侧：按钮组 -->
       <div class="right-buttons">
-        <!-- 新标签页 -->
         <a href="https://sweetwatermelons.github.io/newtab.html" target="_blank" class="btn">
-          <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
-          新标签页
+          <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg> 新标签页
         </a>
-        
-        <!-- 密码生成器 -->
         <a href="https://sweetwatermelons.github.io/password.html" target="_blank" class="btn">
-          <svg viewBox="0 0 24 24"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
-          密码生成器
+          <svg viewBox="0 0 24 24"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg> 密码生成器
         </a>
-
-        <!-- 抽奖大转盘 -->
         <a href="https://sweetwatermelons.github.io/luckywheel.html" target="_blank" class="btn">
-          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 7.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5S6 9.83 6 9s.67-1.5 1.5-1.5zm0 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5-4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-          抽奖转盘
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 7.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5S6 9.83 6 9s.67-1.5 1.5-1.5zm0 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5-4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg> 抽奖转盘
         </a>
-
-        <!-- 像素风谷歌小恐龙 -->
         <a href="https://sweetwatermelons.github.io/dino.html" target="_blank" class="btn pixel-dino-btn">
-          <svg viewBox="0 0 24 24" width="18" height="18" style="image-rendering: pixelated; shape-rendering: crispEdges;">
-            <path fill="#38bdf8" d="M3 18h2v-4H3v4zm0-6h2v-2H3v2zm2 2h2v-2H5v2zm2-4h2V8H7v2zm2 2h2v-2H9v2zm2-6h2V4h-2v2zm2 2h2V8h-2v2zm2 2h2v-2h-2v2zm2 2h2v-2h-2v2zm0 2h4v-2h-4v2zm0 2h2v-2h-2v2zM3 20h14v-2H3v2z"/>
-          </svg>
-          像素小恐龙
+          <svg viewBox="0 0 24 24" width="18" height="18" style="image-rendering: pixelated; shape-rendering: crispEdges;"><path fill="#38bdf8" d="M3 18h2v-4H3v4zm0-6h2v-2H3v2zm2 2h2v-2H5v2zm2-4h2V8H7v2zm2 2h2v-2H9v2zm2-6h2V4h-2v2zm2 2h2V8h-2v2zm2 2h2v-2h-2v2zm2 2h2v-2h-2v2zm0 2h4v-2h-4v2zm0 2h2v-2h-2v2zM3 20h14v-2H3v2z"/></svg> 像素小恐龙
         </a>
       </div>
     </div>
 
-    <!-- 底部：简介文字 -->
     <p class="description">
       喜欢神秘的东西qwq，顺便搞一点小代码~
       <span class="kaomoji">(˘•ω•˘)◞⁺✧</span>
     </p>
 
-    <!-- 最底部：链接 -->
     <div class="footer-links">
       <a href="https://github.com/sweetwatermelons" target="_blank">欢迎进入我的GitHub主页</a>
       <div class="footer-text">
@@ -337,8 +192,14 @@
         <a href="https://github.com/sweetwatermelons/sweetwatermelons.github.io" target="_blank">点击进入仓库</a>
       </div>
       
-      <!-- 新增：极简反馈按钮 -->
-      <a href="https://f.kdocs.cn/ksform/w/write/BP5mPjyw/" target="_blank" class="feedback-link">👆 点击反馈</a>
+      <!-- 悬浮区域 -->
+      <div class="feedback-area">
+        <a href="https://f.kdocs.cn/ksform/w/write/BP5mPjyw/" target="_blank" class="feedback-link">👆 点击反馈</a>
+        
+        <div class="qrcode-popup">
+          <img src="https://cdn.luogu.com.cn/upload/image_hosting/uxmnhg24.webp" alt="问卷二维码">
+        </div>
+      </div>
       
     </div>
 
