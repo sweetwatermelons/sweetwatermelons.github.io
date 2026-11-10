@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>提交成功</title>
+<style>
+  :root {
+    --bg-grad: radial-gradient(1200px 600px at 10% -10%, #e0e7ff 0%, transparent 60%),
+               radial-gradient(900px 500px at 110% 10%, #fae8ff 0%, transparent 55%),
+               #f3f3f3;
+    --card: rgba(255, 255, 255, 0.65);
+    --card-border: rgba(255, 255, 255, 0.8);
+    --text: #1a1a1a;
+    --text-soft: #5f6368;
+    --text-mute: #80868b;
+    --accent: #0067c0;
+    --accent-soft: rgba(0, 103, 192, 0.1);
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 0 1px rgba(0,0,0,0.1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  
+  body {
+    font-family: 'Segoe UI', 'Microsoft YaHei', -apple-system, sans-serif;
+    background: var(--bg-grad);
+    background-attachment: fixed;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    overflow-x: hidden;
+  }
+
+  /* 呼吸感背景 */
+  body::before {
+    content: '';
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.4) 0%, transparent 60%);
+    animation: pulse 8s ease-in-out infinite alternate;
+    z-index: -1;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(1.1); opacity: 1; }
+  }
+
+  .success-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(40px) saturate(180%);
+    border-radius: 24px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    animation: slideUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  @keyframes slideUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 动态打勾动画 */
+  .icon-wrap {
+    width: 96px;
+    height: 96px;
+    background: var(--accent-soft);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    position: relative;
+  }
+
+  .icon-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    animation: ripple 2s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite;
+  }
+
+  @keyframes ripple {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  .checkmark {
+    width: 52px;
+    height: 52px;
+    stroke: var(--accent);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+  }
+  
+  .checkmark path {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: drawCheck 0.8s 0.3s ease-out forwards;
+  }
+
+  @keyframes drawCheck {
+    to { stroke-dashoffset: 0; }
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  p {
+    font-size: 15px;
+    color: var(--text-soft);
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  .action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+  }
+
+  /* 返回首页大按钮（带倒计时进度条） */
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 103, 192, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.15);
+    animation: countdown 10s linear forwards;
+    transform-origin: left;
+    z-index: 0;
+  }
+
+  @keyframes countdown {
+    0% { transform: scaleX(0); }
+    100% { transform: scaleX(1); }
+  }
+
+  .btn-text {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 103, 192, 0.4);
+  }
+
+  .btn-primary:active { transform: translateY(0); }
+
+  /* 四个项目网格 */
+  .sub-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* 👈 重点修改：将灰色文字改成了高对比度的深色 */
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.8);
+    color: var(--text); 
+    border: 1px solid var(--card-border);
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 12px 10px;
+    gap: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  }
+
+  .btn-secondary:hover {
+    background: #ffffff;
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 103, 192, 0.15);
+  }
+
+  /* SVG 图标统一样式 */
+  .btn-secondary svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    opacity: 0.9;
+  }
+
+  .footer-tip {
+    margin-top: 28px;
+    font-size: 12px;
+    color: var(--text-mute);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .footer-tip svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+  }
+
+  #countdown-num {
+    font-weight: 700;
+    font-size: 16px;
+    color: #fff;
+    display: inline-block;
+    min-width: 14px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="success-card">
+  <div class="icon-wrap">
+    <svg class="checkmark" viewBox="0 0 52 52">
+      <path d="M14 27 L22 35 L38 19" />
+    </svg>
+  </div>
+
+  <h1>提交成功！</h1>
+  <p>
+    非常感谢你的反馈 🎉<br>
+    你的每一条建议我都会认真查看，<br>
+    它们将成为我持续优化的最大动力。
+  </p>
+
+  <div class="action-group">
+    <!-- 返回首页主按钮 -->
+    <a href="https://sweetwatermelons.github.io/" id="redirectBtn" class="btn btn-primary">
+      <span class="btn-text">
+        返回首页 ( <span id="countdown-num">10</span> s )
+      </span>
+    </a>
+
+    <!-- 四个子项目按钮（配上了你截图里的同款蓝色图标） -->
+    <div class="sub-actions">
+      
+      <!-- ☰ 新标签页 -->
+      <a href="https://sweetwatermelons.github.io/newtab.html" class="btn btn-secondary">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="5" width="18" height="3" rx="1.5"></rect>
+          <rect x="3" y="10.5" width="18" height="3" rx="1.5"></rect>
+          <rect x="3" y="16" width="18" height="3" rx="1.5"></rect>
+        </svg>
+        新标签页
+      </a>
+
+      <!-- 🔑 密码生成器 -->
+      <a href="https://sweetwatermelons.github.io/password.html" class="btn btn-secondary">
+        <svg viewBox="0 0 24 24">
+          <path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"></path>
+        </svg>
+        密码生成器
+      </a>
+
+      <!-- 🎲 抽奖转盘 -->
+      <a href="https://sweetwatermelons.github.io/luckywheel.html" class="btn btn-secondary">
+        <svg viewBox="0 0 24 24">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 6C8.33 6 9 6.67 9 7.5S8.33 9 7.5 9 6 8.33 6 7.5 6.67 6 7.5 6zm0 12C6.67 18 6 17.33 6 16.5S6.67 15 7.5 15s1.5.67 1.5 1.5S8.33 18 7.5 18zm4.5-6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm4.5 6c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9C15.67 9 15 8.33 15 7.5S15.67 6 16.5 6s1.5.67 1.5 1.5S17.33 9 16.5 9z"></path>
+        </svg>
+        抽奖转盘
+      </a>
+
+      <!-- 👾 像素小恐龙 -->
+      <a href="https://sweetwatermelons.github.io/dino.html" class="btn btn-secondary">
+        <svg viewBox="0 0 24 24">
+          <path d="M6 5h8v2h2v2h2v2h-2v2h-2v2h-2v2h-2v2H8v-2H6v-4H4v-2H2V9h2V7h2V5zm2 4v2h2V9H8z"></path>
+        </svg>
+        像素小恐龙
+      </a>
+
+    </div>
+  </div>
+
+  <div class="footer-tip">
+    <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    感谢你的支持 · 功德 +1 🙏
+  </div>
+</div>
+
+<script>
+  // 10秒倒计时逻辑
+  let timeLeft = 10;
+  const countdownNum = document.getElementById('countdown-num');
+  const targetUrl = 'https://sweetwatermelons.github.io/';
+
+  const timer = setInterval(() => {
+    timeLeft--;
+    countdownNum.textContent = timeLeft;
+
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      window.location.href = targetUrl;
+    }
+  }, 1000);
+
+  // 防冲突：点击任意按钮就取消倒计时，防止跳转打架
+  const allButtons = document.querySelectorAll('a.btn');
+  allButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      clearInterval(timer);
+      countdownNum.textContent = '0';
+    });
+  });
+</script>
+
+</body>
+</html>
