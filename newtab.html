@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>新标签页</title>
 <!-- 高精度农历库 -->
 <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.js"></script>
@@ -159,7 +159,8 @@
   .suggestions.show { display:block; }
   @keyframes pop { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
   .sug-item { display:flex; align-items:center; gap:12px; padding:12px 20px; cursor:pointer; font-size:14px; color:var(--text-soft); transition:background .12s; }
-  .sug-item:hover { background:var(--hover); color:var(--text); }
+  .sug-item:hover,
+  .sug-item.active { background:var(--hover); color:var(--text); }
   .sug-item .sug-icon { font-size:15px; opacity:.7; width:18px; text-align:center; }
   .sug-item .sug-text { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .sug-item .sug-hint { font-size:11px; color:var(--text-mute); }
@@ -413,7 +414,15 @@
   .notepad-container { display: flex; flex-direction: column; height: 100%; gap: 10px; }
   .notepad-btn { background: transparent; border: none; border-radius: 6px; width: 32px; height: 32px; display: grid; place-items: center; cursor: pointer; color: var(--text); font-size: 15px; transition: 0.2s; }
   .notepad-btn:hover { background: var(--hover); color: var(--accent); }
-  .notepad-btn.active { background: var(--accent-soft); color: var(--accent); }
+  /* 格式按钮（B/I/U/S）不做选中态高亮，点一下即执行 */
+  .notepad-btn[data-cmd="bold"], .notepad-btn[data-cmd="italic"],
+  .notepad-btn[data-cmd="underline"], .notepad-btn[data-cmd="strikeThrough"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+  .notepad-btn[data-cmd="bold"]:focus, .notepad-btn[data-cmd="italic"]:focus,
+  .notepad-btn[data-cmd="underline"]:focus, .notepad-btn[data-cmd="strikeThrough"]:focus {
+    outline: none; box-shadow: none; background: transparent; color: var(--text);
+  }
   .notepad-editor { flex: 1; width: 100%; min-height: 120px; outline: none; font-family: inherit; font-size: 14px; line-height: 1.6; color: var(--text); overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; }
   .notepad-editor[placeholder]:empty::before { content: attr(placeholder); color: var(--text-mute); cursor: text; }
 
@@ -713,19 +722,63 @@
   }
   .mp-time.right { text-align: right; }
   .mp-progress-bar {
-    flex: 1; height: .3em; background: var(--divider); border-radius: .3em;
-    position: relative; cursor: pointer;
+    flex: 1; 
+    height: .3em; 
+    background: var(--divider); 
+    border-radius: .3em;
+    position: relative; 
+    cursor: pointer;
+    touch-action: none; 
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  /* 👇 增加一个透明的超大热区，这样你不需要精准点中细细的线也能拖拽 */
+  .mp-progress-bar::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    bottom: -12px;
+    left: 0;
+    right: 0;
+    /* 强制清除边框，防止 offset 差异 */
+    border: none !important;
+    outline: none !important;
+  }
+  /* 如果你需要让蓝色进度条的两端也是圆的，给 fill 单独加圆角即可 */
+  .mp-progress-bar .mp-progress-fill {
+    border-radius: .3em;
+  }
+  /* 拖拽时取消过渡，让圆点严格跟手，不产生延迟感 */
+  .mp-progress-bar.dragging {
+    cursor: grabbing;
+  }
+  .mp-progress-bar.dragging .mp-progress-fill,
+  .mp-progress-bar.dragging .mp-progress-thumb {
+    transition: none !important; 
   }
   .mp-progress-fill {
-    position: absolute; left: 0; top: 0; height: 100%; width: 0%;
-    background: var(--accent); border-radius: .3em;
+    position: absolute; 
+    left: 0; 
+    top: 0; 
+    height: 100%; 
+    width: 0%;
+    background: var(--accent); 
+    border-radius: .3em;
     transition: width .1s linear;
+    pointer-events: none; /* 👈 别挡着我抓轨道 */
   }
   .mp-progress-thumb {
-    position: absolute; top: 50%; transform: translate(-50%, -50%);
-    width: .8em; height: .8em; background: var(--text); border-radius: 50%;
-    box-shadow: 0 .12em .35em rgba(0,0,0,.15);
-    left: 0%; transition: left .1s linear;
+    position: absolute; 
+    top: 50%; 
+    transform: translate(-50%, -50%);
+    width: 12px; 
+    height: 12px; 
+    background: var(--text); 
+    border-radius: 50%;
+    left: 0%; 
+    z-index: 10; 
+    pointer-events: none; /* 👈 核心中的核心：鼠标穿透圆点，直接抓底下的进度条！ */
   }
 
   /* 控制按钮 */
@@ -1230,7 +1283,10 @@
           <button class="notepad-btn" data-cmd="italic" title="斜体 (Ctrl+I)" style="font-style: italic;">I</button>
           <button class="notepad-btn" data-cmd="underline" title="下划线 (Ctrl+U)" style="text-decoration: underline;">U</button>
           <button class="notepad-btn" data-cmd="strikeThrough" title="删除线" style="text-decoration: line-through;">S</button>
-          <button class="font-menu-btn" id="fontMenuBtn" title="切换选中文字的字体">字体▼</button>
+          <button class="font-menu-btn" id="fontMenuBtn" title="切换选中文字的字体">
+            <span id="currentFontName">字体</span>
+            <span class="font-arrow">▼</span>
+          </button>
           <button class="font-size-btn reset-size" id="fontSizeReset" title="重置字号">Aa</button>
           <button class="font-size-btn" id="fontSizeMinus" title="缩小字号">A-</button>
           <button class="font-size-btn" id="fontSizePlus" title="放大字号">A+</button>
@@ -1289,9 +1345,18 @@
 
         <!-- 收藏面板 -->
         <div class="mp-fav-panel" id="mp-favPanel">
-          <div class="mp-fav-header">
-            <span>⭐ 我的收藏</span>
-            <button class="mp-fav-close" id="mp-favClose" aria-label="关闭">✕</button>
+          <div class="mp-fav-header" style="padding: .8em 1em;">
+            <span style="white-space:nowrap; font-size:1.1em;">⭐ 我的收藏</span>
+            <div style="display:flex;align-items:center;gap:.5em;flex:1;margin:0 1em;position:relative;">
+              <!-- 独立的放大镜图标，绝对定位悬浮在左侧 -->
+              <span style="position:absolute;left:1em;top:50%;transform:translateY(-50%);font-size:1.1em;opacity:0.6;pointer-events:none;">🔍</span>
+              <!-- 输入框增加左侧 padding，给图标留出空间 -->
+              <input type="text" id="mp-favSearch" placeholder="搜索歌名 / 歌手" autocomplete="off"
+                style="flex:1;min-width:0;background:var(--bg);border:1px solid var(--divider);
+                border-radius:2em;padding:.65em 1.2em .65em 2.8em;font-size:1em;color:var(--text);outline:none;transition:all .2s;box-shadow:inset 0 2px 4px rgba(0,0,0,0.02);">
+              <button class="mp-fav-close" id="mp-favSearchClear" title="清空" style="display:none; font-size:1.1em;">✕</button>
+            </div>
+            <button class="mp-fav-close" id="mp-favClose" aria-label="关闭" style="font-size:1.3em;">✕</button>
           </div>
           <div class="mp-fav-list" id="mp-favList"></div>
         </div>
@@ -1363,12 +1428,12 @@
               </svg>
             </button>
           </div>
-          <button class="mp-volume-btn" id="mp-muteToggle" aria-label="静音">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 9.5v5h3.5L13 19V5L7.5 9.5z" fill="currentColor" stroke="none"/>
-              <path d="M16.5 8.8a4.6 4.6 0 0 1 0 6.4"/><path d="M19 6.2a8.2 8.2 0 0 1 0 11.6"/>
-            </svg>
-          </button>
+          <div class="mp-volume-wrap">
+            <button class="mp-volume-btn" id="mp-muteToggle" aria-label="静音">
+              <!-- 图标由 JS 动态替换 -->
+            </button>
+            <input type="range" id="mp-volumeSlider" class="mp-volume-slider" min="0" max="1" step="0.05" value="1">
+          </div>
         </div>
         
         <!-- 播放器内轻提示 -->
@@ -1618,6 +1683,8 @@
 <div class="widget-ctxmenu" id="widgetCtxMenu">
   <div class="ctx-item" data-action="top"><span class="ctx-icon">⬆️</span>置于顶层</div>
   <div class="ctx-item" data-action="bottom"><span class="ctx-icon">⬇️</span>置于底层</div>
+  <div class="ctx-divider" style="height:1px; background:var(--divider); margin:4px 0;"></div>
+  <div class="ctx-item" data-action="hide"><span class="ctx-icon">👁️‍🗨️</span>隐藏此组件</div>
 </div>
 
 <!-- 记事本浮层（放 body 末尾避免被 .widget 的 overflow:hidden + backdrop-filter 裁剪） -->
@@ -1866,7 +1933,7 @@
   }
 
   function iconToEmoji(code) {
-    const c = parseInt(code);
+    const c = parseInt(code, 10) || 0;
     if (c === 100) return '☀️';
     if (c >= 101 && c <= 103) return '⛅';
     if (c === 104) return '☁️';
@@ -2026,6 +2093,7 @@
 
   // ================= 主搜索 =================
   const searchInput = $('#searchInput'), searchBtn = $('#searchBtn'), suggestions = $('#suggestions');
+  let sugActiveIndex = -1;   // 建议项当前高亮索引，-1 表示无
   
   const defaultEngines = [
     { name: '百度',   url: 'https://www.baidu.com/s?wd=', icon: '🌐' },
@@ -2127,45 +2195,66 @@
     return null;
   }
 
-  function doSearch() {
+  // 更稳的打开方式：模拟 <a> 点击，对弹窗拦截器更友好
+  function openUrlSafe(url) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    try {
+      a.click();
+    } catch (e) {
+      window.open(url, '_blank');
+    }
+    setTimeout(() => a.remove(), 0);
+  }
+
+ function doMainSearch() {
     const q = searchInput.value.trim();
     if (!q) return;
+    
+    let targetUrl = '';
     const direct = detectUrl(q);
     if (direct) {
-      window.open(direct, '_blank');
+      targetUrl = direct;
     } else {
-      const defEng = getDefaultEngine();
+      const defEng = getDefaultEngine() || defaultEngines[0];
       let finalUrl = defEng.url;
       if (finalUrl.includes('%s')) {
         finalUrl = finalUrl.replace(/%s/g, encodeURIComponent(q));
       } else {
         finalUrl = finalUrl + encodeURIComponent(q);
       }
-      window.open(finalUrl, '_blank');
+      targetUrl = finalUrl;
     }
+
+    // 和「点搜索按钮」完全一致的打开方式
+    window.open(targetUrl, '_blank', 'noopener,noreferrer');
+
     suggestions.classList.remove('show');
+    suggestions.innerHTML = '';
     searchInput.value = '';
+    sugActiveIndex = -1;
   }
-  searchBtn.addEventListener('click', doSearch);
-  searchInput.addEventListener('keydown', e => { 
-    if (e.key === 'Enter') doSearch(); 
-    if (e.key === 'Escape') {
-      searchInput.value = '';
-      searchInput.blur();
-      suggestions.classList.remove('show');
-    }
+  searchBtn.addEventListener('click', doMainSearch);
+  searchInput.addEventListener('keydown', e => {
+    if (e.isComposing || e.keyCode === 229) return;
+    if (e.key === 'Enter') { doMainSearch(); }
   });
   
   searchInput.addEventListener('input', () => {
+    sugActiveIndex = -1;
     const q = searchInput.value.trim();
-    if (!q) { suggestions.classList.remove('show'); return; }
+    if (!q) { suggestions.classList.remove('show'); suggestions.innerHTML = ''; return; }
     suggestions.innerHTML = '';
     const direct = detectUrl(q);
     if (direct) {
       const div = document.createElement('div');
       div.className = 'sug-item';
       div.innerHTML = `<span class="sug-icon">🔗</span><span class="sug-text">${escapeHtml(direct)}</span><span class="sug-hint">打开网址</span>`;
-      div.addEventListener('click', () => { window.open(direct, '_blank'); suggestions.classList.remove('show'); searchInput.value = ''; });
+      div.addEventListener('click', () => { openUrlSafe(direct); suggestions.classList.remove('show'); suggestions.innerHTML = ''; searchInput.value = ''; sugActiveIndex = -1; });
       suggestions.appendChild(div);
     }
     engines.forEach(eng => {
@@ -2179,9 +2268,11 @@
         let finalUrl = eng.url;
         if (finalUrl.includes('%s')) finalUrl = finalUrl.replace(/%s/g, encodeURIComponent(q));
         else finalUrl = finalUrl + encodeURIComponent(q);
-        window.open(finalUrl, '_blank'); 
+        openUrlSafe(finalUrl); 
         suggestions.classList.remove('show'); 
+        suggestions.innerHTML = '';
         searchInput.value = ''; 
+        sugActiveIndex = -1;
       });
       suggestions.appendChild(div);
     });
@@ -2642,8 +2733,14 @@
       grid.appendChild(div);
     }
   }
-  $('#calPrevBtn').addEventListener('click', () => { currentCalDate.setMonth(currentCalDate.getMonth() - 1); renderCalendar(currentCalDate); });
-  $('#calNextBtn').addEventListener('click', () => { currentCalDate.setMonth(currentCalDate.getMonth() + 1); renderCalendar(currentCalDate); });
+  $('#calPrevBtn').addEventListener('click', () => {
+    currentCalDate = new Date(currentCalDate.getFullYear(), currentCalDate.getMonth() - 1, 1);
+    renderCalendar(currentCalDate);
+  });
+  $('#calNextBtn').addEventListener('click', () => {
+    currentCalDate = new Date(currentCalDate.getFullYear(), currentCalDate.getMonth() + 1, 1);
+    renderCalendar(currentCalDate);
+  });
   $('#calTodayBtn').addEventListener('click', () => { currentCalDate = new Date(); renderCalendar(currentCalDate); });
   renderCalendar(currentCalDate);
 
@@ -2682,11 +2779,13 @@
       try {
         if (name === '春节') {
           // 正月初一
-          return new Date(Lunar.fromYmd(year, 1, 1).getSolar().toYmd());
+          const s = Lunar.fromYmd(year, 1, 1).getSolar();
+          return new Date(s.getYear(), s.getMonth() - 1, s.getDay());
         }
         if (name === '中秋节') {
           // 八月十五
-          return new Date(Lunar.fromYmd(year, 8, 15).getSolar().toYmd());
+          const s = Lunar.fromYmd(year, 8, 15).getSolar();
+          return new Date(s.getYear(), s.getMonth() - 1, s.getDay());
         }
       } catch (e) {
         console.warn('农历节日推算失败:', name, year, e);
@@ -2704,7 +2803,8 @@
 
       // 1) 优先从硬编码表里找今天及以后的最近一个日期
       for (const dStr of dates) {
-        const d = new Date(dStr);
+        const [yy, mm, dd] = dStr.split('-').map(Number);
+        const d = new Date(yy, mm - 1, dd);
         if (d >= today) { nextDate = d; break; }
       }
 
@@ -2759,6 +2859,8 @@
     }
   }
   renderHolidays();
+  // 每小时刷新一次，跨天时天数会更新
+  setInterval(renderHolidays, 60 * 60 * 1000);
 
   // ================= 世界时钟 =================
   function renderWorldClock() {
@@ -2872,7 +2974,10 @@
       [startM, endM] = [endM, startM];
     }
 
-    const isOvernight = nightShift && (endH * 60 + endM) <= (startH * 60 + startM);
+    const startMin = startH * 60 + startM;
+    const endMin = endH * 60 + endM;
+    // 白班 start == end 视为 24 小时班，不当作 overnight；夜班 end <= start 视为跨天
+    const isOvernight = nightShift && endMin < startMin;
 
     // 判断某个「班次开始日」是否为上班日
     const isWorkdayStart = (d) => !!workDays[d.getDay()];
@@ -2881,7 +2986,7 @@
     function shiftOf(baseDate) {
       const s = new Date(baseDate); s.setHours(startH, startM, 0, 0);
       const e = new Date(baseDate); e.setHours(endH, endM, 0, 0);
-      if (isOvernight) e.setDate(e.getDate() + 1);
+      if (isOvernight || (!nightShift && startH * 60 + startM === endH * 60 + endM)) e.setDate(e.getDate() + 1);
       return { s, e };
     }
 
@@ -3086,13 +3191,27 @@
 
     if (!json || !json[base]) {
       exchangeMeta.textContent = '汇率获取失败，请稍后重试';
+      exchangeResult.textContent = '--';
       exchangeLoading = false;
+      // 如果页面已经有旧数据，就保留旧数据；如果没有，3秒后自动重试一次
+      if (!exchangeRatesCache) {
+        setTimeout(() => fetchExchangeRates(), 3000);
+      }
       return;
+    }
+
+    // 👇 过滤掉脏数据，只保留有效的数字，防止页面显示 NaN
+    const cleanData = {};
+    for (const key in json[base]) {
+      const val = json[base][key];
+      if (typeof val === 'number' && isFinite(val) && val > 0) {
+        cleanData[key] = val;
+      }
     }
 
     exchangeRatesCache = {
       base: base,
-      data: json[base],
+      data: cleanData,
       date: json.date || '未知',
     };
     exchangeLoading = false;
@@ -3535,9 +3654,8 @@
     btn.addEventListener('mousedown', (e) => {
       e.preventDefault(); const cmd = btn.dataset.cmd; notepadEditor.focus();
       document.execCommand(cmd, false, null);
-      if (cmd === 'bold' || cmd === 'italic' || cmd === 'underline' || cmd === 'strikeThrough') {
-        btn.classList.toggle('active', document.queryCommandState(cmd));
-      }
+      // 加粗/斜体/下划线/删除线为"点一下执行一次"的命令按钮，不保留任何选中高亮
+      btn.classList.remove('active');
       saveNotepad();
     });
   });
@@ -3668,12 +3786,28 @@
   }
   $('#insertImageBtn').addEventListener('mousedown', (e) => {
     e.preventDefault(); e.stopPropagation();
+    if (npImgInput._clicking) return;
+    npImgInput._clicking = true;
+
     npImgInput.value = '';
+    const unlock = () => { npImgInput._clicking = false; };
+
     npImgInput.onchange = () => {
+      unlock();
       const f = npImgInput.files[0];
       if (f) insertImageFromBlob(f);
     };
+
     npImgInput.click();
+
+    // 用户直接关闭文件选择框时不会触发 change，用较短兜底 + window focus 兜底
+    const timer = setTimeout(unlock, 600);
+    const onFocus = () => {
+      clearTimeout(timer);
+      setTimeout(unlock, 300);
+      window.removeEventListener('focus', onFocus);
+    };
+    window.addEventListener('focus', onFocus);
   });
   // 插入表格（表格选择器）
   const tablePicker = document.createElement('div');
@@ -3751,95 +3885,171 @@
     moreToolsPanel.classList.remove('show');
   });
 
-  // ===== 查找替换 =====
-  const findPanel = $('#findPanel');
-  const findInput = $('#findInput');
-  const replaceInput = $('#replaceInput');
-  const findCount = $('#findCount');
+   // ===== 查找替换 =====
+  const findPanel   = $('#findPanel');
+  const findInput   = $('#findInput');
+  const replaceInput= $('#replaceInput');
+  const findCount   = $('#findCount');
+
+  // 每项：{ node, start, end, range }
   let findMatches = [];
   let findIdx = -1;
 
+  /* ---------- 清除高亮与缓存 ---------- */
   function clearFindHighlights() {
     if (window.CSS && CSS.highlights) {
-      try { CSS.highlights.delete('np-find'); } catch(e) {}
+      try { CSS.highlights.delete('np-find'); } catch (e) {}
     }
-    findMatches = []; findIdx = -1;
+    findMatches = [];
+    findIdx = -1;
     findCount.textContent = '';
-    if (!document.hasFocus() || (document.activeElement !== findInput && document.activeElement !== replaceInput)) {
+    if (document.activeElement !== findInput && document.activeElement !== replaceInput) {
       const sel = window.getSelection();
       if (sel && sel.rangeCount) sel.removeAllRanges();
     }
   }
-  function collectFindMatches(keyword) {
-    clearFindHighlights();
-    if (!keyword) return;
-    // 使用 TreeWalker 遍历文本节点，记录 range
-    const walker = document.createTreeWalker(notepadEditor, NodeFilter.SHOW_TEXT, null);
-    const ranges = [];
+
+  /* ---------- 一次性画全部高亮 ---------- */
+  function paintHighlights() {
+    if (!(window.CSS && CSS.highlights && typeof Highlight !== 'undefined')) return;
+    try {
+      CSS.highlights.set('np-find', new Highlight(...findMatches.map(m => m.range)));
+    } catch (e) {}
+  }
+
+  /* ---------- 收集所有匹配（精确到文本节点 + 偏移） ---------- */
+  function collectFindMatches(keyword, keepIdx) {
+    const oldAnchor = (keepIdx && findIdx >= 0 && findMatches[findIdx]) ? findMatches[findIdx] : null;
+    const oldIdx = findIdx;
+
+    if (window.CSS && CSS.highlights) {
+      try { CSS.highlights.delete('np-find'); } catch (e) {}
+    }
+    findMatches = [];
+
+    if (!keyword) {
+      findIdx = -1;
+      findCount.textContent = '';
+      return;
+    }
+
+    const walker = document.createTreeWalker(notepadEditor, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const v = node.nodeValue;
+        if (!v || !v.length) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+
     let node;
     while ((node = walker.nextNode())) {
       const text = node.nodeValue;
       let start = 0, pos;
       while ((pos = text.indexOf(keyword, start)) !== -1) {
-        const r = document.createRange();
-        r.setStart(node, pos);
-        r.setEnd(node, pos + keyword.length);
-        ranges.push(r);
+        const range = document.createRange();
+        range.setStart(node, pos);
+        range.setEnd(node, pos + keyword.length);
+        findMatches.push({ node, start: pos, end: pos + keyword.length, range });
         start = pos + keyword.length;
       }
     }
-    findMatches = ranges;
-    if (ranges.length) {
-      findIdx = 0;
-      if (window.CSS && CSS.highlights && typeof Highlight !== 'undefined') {
-        try {
-          const hl = new Highlight(...ranges);
-          CSS.highlights.set('np-find', hl);
-        } catch(e) {}
-      }
-      findCount.textContent = `1 / ${ranges.length}`;
-      scrollToMatch(0);
-    } else {
+
+    if (!findMatches.length) {
+      findIdx = -1;
       findCount.textContent = '无结果';
+      return;
     }
+
+    // 恢复索引
+    let restoredIdx = 0;
+    if (keepIdx && oldAnchor) {
+      const i = findMatches.findIndex(m => m.node === oldAnchor.node && m.start === oldAnchor.start);
+      if (i >= 0) restoredIdx = i;
+      else if (oldIdx >= 0) restoredIdx = Math.min(oldIdx, findMatches.length - 1);
+    }
+    findIdx = restoredIdx;
+
+    paintHighlights();
+    findCount.textContent = `${findIdx + 1} / ${findMatches.length}`;
+    scrollToMatch(findIdx, true);
   }
-  function scrollToMatch(i) {
-    if (!findMatches[i]) return;
+
+  /* ---------- 滚动到第 i 个匹配 ---------- */
+  function scrollToMatch(i, alsoSelect) {
+    const m = findMatches[i];
+    if (!m) return;
     findIdx = i;
     findCount.textContent = `${i + 1} / ${findMatches.length}`;
-    const rect = findMatches[i].getBoundingClientRect();
-    const panelRect = notepadEditor.getBoundingClientRect();
-    if (rect.top < panelRect.top || rect.bottom > panelRect.bottom) {
-      const targetTop = rect.top - panelRect.top + notepadEditor.scrollTop - notepadEditor.clientHeight / 2;
-      notepadEditor.scrollTo({ top: targetTop, behavior: 'smooth' });
+
+    const range = document.createRange();
+    range.setStart(m.node, m.start);
+    range.setEnd(m.node, m.end);
+
+    if (alsoSelect) {
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
     }
-    // 选中该 range
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(findMatches[i]);
-    // 高亮当前项（CSS 中无法区分当前项，用 outline 通过临时标记）
+
+    const r = range.getBoundingClientRect();
+    const box = notepadEditor.getBoundingClientRect();
+    const lineH = parseFloat(getComputedStyle(notepadEditor).lineHeight) || 20;
+
+    if (r.top < box.top) {
+      notepadEditor.scrollTop -= (box.top - r.top) + lineH;
+    } else if (r.bottom > box.bottom) {
+      notepadEditor.scrollTop += (r.bottom - box.bottom) + lineH;
+    }
   }
-  // 通用：把 fixed 浮层定位到触发按钮下方（右对齐或左对齐）
+
+  /* ---------- 通用：fixed 浮层定位 ---------- */
   function positionFixedPanel(panel, anchorBtn, align = 'right') {
     if (!panel || !anchorBtn) return;
+
+    // —— 关键修复：position:fixed 元素若被带 transform 的祖先（.widget 卡片）
+    //    或 body 的 zoom（小/大字号）接管包含块，设置值不再等于屏幕坐标，
+    //    面板会被推到视口之外（表现为"点了没反应、菜单弹不出来"）。
+    //    这里先做一次两点校准，实测出 设置值 → 实际屏幕坐标 的映射，再反向求值。
+    const prevLeft = panel.style.left, prevTop = panel.style.top;
+    const prevTrans = panel.style.transition;
+    panel.style.transition = 'none';
+
+    panel.style.left = '0px'; panel.style.top = '0px';
+    const p0 = panel.getBoundingClientRect();
+    panel.style.left = '100px'; panel.style.top = '100px';
+    const p1 = panel.getBoundingClientRect();
+
+    let kx = (p1.left - p0.left) / 100;
+    let ky = (p1.top - p0.top) / 100;
+    if (!isFinite(kx) || Math.abs(kx) < 0.01) kx = 1;
+    if (!isFinite(ky) || Math.abs(ky) < 0.01) ky = 1;
+
     const r = anchorBtn.getBoundingClientRect();
-    const panelW = panel.offsetWidth || 300;
-    const panelH = panel.offsetHeight || 160;
+    // 面板的屏幕尺寸（calibrate 时若面板未显示可能为 0，回退到 offsetWidth）
+    const panelW = p0.width || panel.offsetWidth || 220;
+    const panelH = p0.height || panel.offsetHeight || 160;
     const margin = 6;
+
     let left = align === 'right' ? (r.right - panelW) : r.left;
     let top = r.bottom + margin;
-    // 水平不出屏
+
     if (left < 8) left = 8;
     if (left + panelW > window.innerWidth - 8) left = window.innerWidth - panelW - 8;
-    // 下方空间不足则翻到按钮上方
     if (top + panelH > window.innerHeight - 8) {
       top = r.top - panelH - margin;
       if (top < 8) top = 8;
     }
-    panel.style.left = left + 'px';
-    panel.style.top = top + 'px';
+
+    panel.style.left = ((left - p0.left) / kx) + 'px';
+    panel.style.top = ((top - p0.top) / ky) + 'px';
+
+    // 先落到目标位置再恢复过渡，避免出现"从 0,0 滑过去"的闪烁
+    void panel.offsetWidth;
+    panel.style.transition = prevTrans || '';
+    if (!prevLeft && !prevTop) { /* 首次定位，保留当前值 */ }
   }
 
+  /* ---------- 打开 / 关闭查找面板 ---------- */
   function openFindPanel() {
     findPanel.classList.add('show');
     const sel = window.getSelection();
@@ -3847,19 +4057,27 @@
       const txt = sel.toString().trim();
       if (txt && txt.length < 60) findInput.value = txt;
     }
-    // 定位到 🔍 按钮下方（右对齐）
     positionFixedPanel(findPanel, $('#findReplaceBtn'), 'right');
     findInput.focus();
     if (findInput.value) collectFindMatches(findInput.value);
   }
+
   $('#findReplaceBtn').addEventListener('mousedown', (e) => {
     e.preventDefault(); e.stopPropagation();
-    if (findPanel.classList.contains('show')) findPanel.classList.remove('show');
-    else openFindPanel();
+    if (findPanel.classList.contains('show')) {
+      findPanel.classList.remove('show');
+      clearFindHighlights();
+    } else {
+      openFindPanel();
+    }
   });
-  $('#findCloseBtn').addEventListener('click', () => { findPanel.classList.remove('show'); clearFindHighlights(); });
 
-  // 窗口缩放 / 页面滚动 / 卡片拖动时，重新定位已打开的 fixed 浮层，使其跟随按钮
+  $('#findCloseBtn').addEventListener('click', () => {
+    findPanel.classList.remove('show');
+    clearFindHighlights();
+  });
+
+  /* ---------- 窗口缩放 / 滚动时重新定位浮层 ---------- */
   function repositionOpenPanels() {
     if (findPanel.classList.contains('show')) {
       positionFixedPanel(findPanel, $('#findReplaceBtn'), 'right');
@@ -3870,69 +4088,170 @@
     if (moreToolsPanel.classList.contains('show')) {
       positionFixedPanel(moreToolsPanel, moreToolsBtn, 'left');
     }
+    if (fontDropdown.classList.contains('show')) {
+      positionFixedPanel(fontDropdown, fontMenuBtn, 'left');
+    }
   }
   window.addEventListener('resize', repositionOpenPanels);
   window.addEventListener('scroll', repositionOpenPanels, true);
-  // 卡片拖动/缩放会改变按钮位置，用 MutationObserver 监听 style 变化兜底
   (function(){
     const notepadWidget = document.querySelector('.widget[data-id="notepad"]');
     if (!notepadWidget) return;
     const mo = new MutationObserver(() => repositionOpenPanels());
     mo.observe(notepadWidget, { attributes: true, attributeFilter: ['style'] });
   })();
-  let findInputTimer;
-  findInput.addEventListener('input', () => {
+
+/* ---------- 回车立即搜索（像浏览器地址栏一样） ---------- */
+let findInputTimer;
+findInput.addEventListener('input', () => {
+  clearTimeout(findInputTimer);
+  if (!findInput.value) {
+    clearFindHighlights();
+    return;
+  }
+  findInputTimer = setTimeout(() => {
+    if (findInput.value) collectFindMatches(findInput.value);
+  }, 150);
+});
+
+/* 👇👇👇 新增：查找框的回车立即搜索 👇👇👇 */
+findInput.addEventListener('keydown', (e) => {
+  if (e.isComposing || e.keyCode === 229) return; 
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const kw = findInput.value;
+    if (!kw) { clearFindHighlights(); return; }
+    
+    clearTimeout(findInputTimer); 
+    
+    // 判断是否需要重新搜索
+    const needCollect = !findMatches.length || findMatches[0].range.toString() !== kw;
+    
+    if (needCollect) {
+      collectFindMatches(kw); 
+      return; 
+    }
+    
+    // 关键词没变，跳下一个 / 上一个
+    if (e.shiftKey) {
+      scrollToMatch((findIdx - 1 + findMatches.length) % findMatches.length, true);
+    } else {
+      scrollToMatch((findIdx + 1) % findMatches.length, true);
+    }
+    return;
+  }
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    findPanel.classList.remove('show');
+    clearFindHighlights();
+  }
+});
+
+
+
+/* ---------- 替换框键盘：Enter 替换并跳下一个 / Ctrl+Enter 全部替换 / Esc 关闭 ---------- */
+replaceInput.addEventListener('keydown', (e) => {
+  if (e.isComposing || e.keyCode === 229) return;
+
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const kw = findInput.value;
+    if (!kw) return;
+    
     clearTimeout(findInputTimer);
-    findInputTimer = setTimeout(() => {
-      clearFindHighlights();
-      if (findInput.value) collectFindMatches(findInput.value);
-    }, 200);
-  });
+    
+    // 兜底：如果匹配列表为空或不是当前关键词，先同步收集一次
+    if (!findMatches.length || findMatches[0].range.toString() !== kw) {
+      collectFindMatches(kw);
+      if (!findMatches.length) return; 
+    }
+
+    // Ctrl+Enter 全部替换
+    if (e.ctrlKey || e.metaKey) {
+      $('#replaceAllBtn').click();
+      return;
+    }
+    
+    // 普通回车：替换当前并跳下一个
+    replaceMatch();
+    if (findMatches.length) {
+      scrollToMatch(findIdx, true);
+    }
+    return;
+  }
+  
+  // ESC 关闭查找面板
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    findPanel.classList.remove('show');
+    clearFindHighlights();
+  }
+});
+
+  /* ---------- 下一个 / 上一个 ---------- */
   $('#findNextBtn').addEventListener('click', () => {
     if (!findMatches.length) { collectFindMatches(findInput.value); return; }
-    scrollToMatch((findIdx + 1) % findMatches.length);
+    scrollToMatch((findIdx + 1) % findMatches.length, true);
   });
   $('#findPrevBtn').addEventListener('click', () => {
     if (!findMatches.length) { collectFindMatches(findInput.value); return; }
-    scrollToMatch((findIdx - 1 + findMatches.length) % findMatches.length);
+    scrollToMatch((findIdx - 1 + findMatches.length) % findMatches.length, true);
   });
+
+  /* ---------- 替换单处：文本节点 splice，不破坏 DOM ---------- */
   function replaceMatch() {
     if (!findMatches.length) { collectFindMatches(findInput.value); return; }
-    const range = findMatches[findIdx];
-    if (!range) return;
-    const oldIdx = findIdx;
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-    document.execCommand('insertText', false, replaceInput.value);
+    const m = findMatches[findIdx];
+    if (!m) return;
+
+    const rep = replaceInput.value;
+    const node = m.node;
+    const text = node.nodeValue;
+    const before = text.slice(0, m.start);
+    const after  = text.slice(m.end);
+
+    // 一次写回，仅改文本内容
+    node.nodeValue = before + rep + after;
+
     saveNotepad();
-    collectFindMatches(findInput.value);
-    if (findMatches.length) scrollToMatch(Math.min(oldIdx, findMatches.length - 1));
+    // 重新收集，keepIdx=true 保持索引尽量不跳
+    collectFindMatches(findInput.value, true);
     findInput.focus();
   }
   $('#replaceOneBtn').addEventListener('click', replaceMatch);
+
+  /* ---------- 替换全部：按节点分组，从后往前替换，一次写回 ---------- */
   $('#replaceAllBtn').addEventListener('click', () => {
     const kw = findInput.value;
     if (!kw) { toast('请输入查找内容'); return; }
     if (!findMatches.length) collectFindMatches(kw);
     if (!findMatches.length) { toast('没有可替换的内容'); return; }
     if (!confirm(`确定要替换全部 ${findMatches.length} 处吗？`)) return;
+
     const count = findMatches.length;
     const rep = replaceInput.value;
-    for (let i = findMatches.length - 1; i >= 0; i--) {
-      const r = findMatches[i];
-      r.deleteContents();
-      r.insertNode(document.createTextNode(rep));
-    }
+
+    // 按文本节点聚合：{ node, hits: [{start,end}] }
+    const byNode = new Map();
+    findMatches.forEach(m => {
+      if (!byNode.has(m.node)) byNode.set(m.node, []);
+      byNode.get(m.node).push({ start: m.start, end: m.end });
+    });
+
+    // 每个节点从后往前改，前面的偏移不受影响
+    byNode.forEach((hits, node) => {
+      hits.sort((a, b) => b.start - a.start);
+      let txt = node.nodeValue;
+      for (const h of hits) {
+        txt = txt.slice(0, h.start) + rep + txt.slice(h.end);
+      }
+      node.nodeValue = txt;
+    });
+
     saveNotepad();
+    // 清空匹配缓存（keyword 可能已不存在，重新扫一遍以刷新状态）
     collectFindMatches(kw);
     toast(`✨ 已替换 ${count} 处`);
-  });
-  // 点击外部关闭查找面板
-  document.addEventListener('click', (e) => {
-    if (!findPanel.contains(e.target) && e.target !== $('#findReplaceBtn') && !e.target.closest('#findReplaceBtn')) {
-      // 保留面板，不自动关闭；用户可手动关闭
-    }
   });
   // ===== 字体菜单（128 种，支持搜索）=====
   const FONT_LIST = [
@@ -4077,10 +4396,63 @@
   // 全局变量，用来暂存选区
   let savedFontRange = null;
 
+  // 常见中文字体 → 拼音（首字母 + 全拼），用于拼音搜索
+  const FONT_PINYIN = {
+    '微软雅黑': 'weiruan yahei wryh',
+    '微软雅黑 Light': 'weiruan yahei light wryh',
+    '微软雅黑 UI': 'weiruan yahei ui wryh',
+    '宋体': 'songti st',
+    '新宋体': 'xinsongti xst',
+    '黑体': 'heiti ht',
+    '楷体': 'kaiti kt',
+    '楷体_GB2312': 'kaiti gb2312 kt',
+    '仿宋': 'fangsong fs',
+    '仿宋_GB2312': 'fangsong gb2312 fs',
+    '等线': 'dengxian dx',
+    '等线 Light': 'dengxian light dx',
+    '幼圆': 'youyuan yy',
+    '隶书': 'lishu ls',
+    '华文行楷': 'huawen xingkai hwxk',
+    '华文楷体': 'huawen kaiti hwkt',
+    '华文宋体': 'huawen songti hwst',
+    '华文仿宋': 'huawen fangsong hwfs',
+    '华文细黑': 'huawen xihei hwxh',
+    '华文中宋': 'huawen zhongsong hwzs',
+    '华文彩云': 'huawen caiyun hwcy',
+    '华文琥珀': 'huawen hupo hwhp',
+    '华文隶书': 'huawen lishu hwls',
+    '华文新魏': 'huawen xinwei hwxw',
+    '华文黑体': 'huawen heiti hwht',
+    '华文圆体': 'huawen yuanti hwyt',
+    '方正舒体': 'fangzheng shuti fzst',
+    '方正姚体': 'fangzheng yaoti fzyt',
+    '方正楷体': 'fangzheng kaiti fzkt',
+    '方正书宋': 'fangzheng shusong fzss',
+    '标楷体': 'biaokaiti bkt',
+    '细明体': 'ximingti xmt',
+    '新细明体': 'xinximingti xxmt',
+    '微软正黑体': 'weiruan zhengheiti wrzht',
+    '苹方': 'pingfang pf',
+    '苹方 繁体': 'pingfang fanti pf',
+    '苹方 港体': 'pingfang gangti pf',
+    '冬青黑体': 'dongqing heiti dqht',
+    '冬青明朝': 'dongqing mingchao dqmc',
+    '娃娃体': 'wawati wwt',
+    '翩翩体': 'pianpianti ppt',
+    '手札体': 'shouzhati szt',
+    '圆体': 'yuanti yt',
+  };
+
   function renderFontList(keyword) {
     const kw = (keyword || '').trim().toLowerCase();
     const filtered = kw
-      ? FONT_LIST.filter(f => f.name.toLowerCase().includes(kw) || f.font.toLowerCase().includes(kw))
+      ? FONT_LIST.filter(f => {
+          if (f.name.toLowerCase().includes(kw)) return true;
+          if (f.font.toLowerCase().includes(kw)) return true;
+          const py = FONT_PINYIN[f.name];
+          if (py && py.toLowerCase().includes(kw)) return true;
+          return false;
+        })
       : FONT_LIST;
     if (!filtered.length) {
       fontListEl.innerHTML = '<div class="font-empty">没有匹配的字体</div>';
@@ -4121,6 +4493,10 @@
             sel.removeAllRanges();
             sel.addRange(range);
             saveNotepad();
+            
+            const curNameEl = document.getElementById('currentFontName');
+            if (curNameEl) curNameEl.textContent = f.name;
+            
             toast(`✨ 已应用字体：${f.name}`);
           } else {
             // 【情况 2：没选中文字，只有光标】
@@ -4135,6 +4511,11 @@
             sel.removeAllRanges();
             sel.addRange(newRange);
             saveNotepad();
+
+            // 👇 补上：光标模式下也更新按钮文字
+            const curNameEl = document.getElementById('currentFontName');
+            if (curNameEl) curNameEl.textContent = f.name;
+
             toast(`✨ 已设为 ${f.name} 字体`);
           }
         }
@@ -4147,11 +4528,11 @@
   }
   renderFontList('');
 
-  fontMenuBtn.addEventListener('mousedown', (e) => {
-    e.preventDefault(); // 阻止默认行为，保住选区
+  // ================= 字体菜单：按钮点击（唯一入口） =================
+  fontMenuBtn.addEventListener('click', (e) => {
+    e.preventDefault();
     e.stopPropagation();
-    
-    // 打开菜单时，暂存当前的选区
+
     const sel = window.getSelection();
     if (sel.rangeCount > 0 && notepadEditor.contains(sel.anchorNode)) {
       savedFontRange = sel.getRangeAt(0).cloneRange();
@@ -4159,17 +4540,33 @@
 
     const willShow = !fontDropdown.classList.contains('show');
     fontDropdown.classList.toggle('show');
+
     if (willShow) {
       fontSearchInput.value = '';
       renderFontList('');
+      // 先显示再测量，定位到按钮下方
+      positionFixedPanel(fontDropdown, fontMenuBtn, 'left');
     }
   });
+
+  // ================= 点击外部关闭（只在这个地方关闭） =================
   document.addEventListener('click', (e) => {
-    if (!fontDropdown.contains(e.target) && e.target !== fontMenuBtn) {
+    // 如果点击的不是菜单内部，也不是按钮本身，才关闭
+    if (!fontDropdown.contains(e.target) && !fontMenuBtn.contains(e.target)) {
       fontDropdown.classList.remove('show');
     }
   });
-  fontSearchInput.addEventListener('input', () => renderFontList(fontSearchInput.value));
+  // 中文输入法兼容：compositionend 时也触发一次搜索
+  let fontSearchComposing = false;
+  fontSearchInput.addEventListener('compositionstart', () => { fontSearchComposing = true; });
+  fontSearchInput.addEventListener('compositionend', () => {
+    fontSearchComposing = false;
+    renderFontList(fontSearchInput.value);
+  });
+  fontSearchInput.addEventListener('input', () => {
+    if (fontSearchComposing) return;   // 输入法组词中不搜，等 compositionend
+    renderFontList(fontSearchInput.value);
+  });
   
   // 允许点击搜索框进行打字搜索
   fontSearchInput.addEventListener('mousedown', (e) => {
@@ -4426,9 +4823,9 @@
     
     items.forEach((it) => {
       const c = it.conf;
-      // 基于默认配置里的“意图宽度”判断宽卡片，避免反复整理漂移，也不污染持久化配置
+      // 用绝对宽度阈值判断宽卡片，避免窗口缩放导致 colW 变化后判定漂移
       const defW = (defaultConfig[it.id] && defaultConfig[it.id].w) || c.w;
-      const isWide = defW > colW * 1.4;
+      const isWide = defW >= 600;
       let w = isWide ? gridW : Math.max(minW, Math.min(colW, c.w));
       let spanCols = isWide ? cols : 1;
       
@@ -4463,7 +4860,7 @@
     ctxTargetWidget = w;
     const id = w.dataset.id, conf = widgetConfig[id];
     if (!conf) return;
-    const menuW = 170, menuH = 90;
+    const menuW = 170, menuH = 135;
     let px = e.clientX, py = e.clientY;
     if (px + menuW > window.innerWidth) px = window.innerWidth - menuW - 8;
     if (py + menuH > window.innerHeight) py = window.innerHeight - menuH - 8;
@@ -4478,6 +4875,15 @@
     if (!conf) return;
     if (action === 'top') {
       zCounter += 1; conf.z = zCounter; ctxTargetWidget.style.zIndex = conf.z;
+    } else if (action === 'hide') {
+      // 隐藏组件并保存状态
+      conf.visible = false;
+      saveConfig();
+      applyWidgetState();
+      toast(`👁️‍🗨️ 已隐藏「${conf.name}」`);
+      ctxMenu.classList.remove('show'); 
+      ctxTargetWidget = null;
+      return; // 提前结束，不执行底部的保存逻辑
     } else if (action === 'bottom') {
       const othersZ = [];
       Object.entries(widgetConfig).forEach(([k, c]) => { if (k !== id && c.visible && typeof c.z === 'number') othersZ.push(c.z); });
@@ -4717,10 +5123,10 @@
   }
   $('#exportBtn').addEventListener('click', (e) => {
     e.stopPropagation();
-    const pwd = prompt('请设置一个加密密码（推荐设置，不设密码文件将无隐私，设置密码后请妥善保管密码！！！）：');
+    const pwd = prompt('请设置一个加密密码（推荐设置，不设密码文件将无隐私，设置密码后请妥善保管密码）：');
     if (pwd === null) return;
-    const currentEngines = window.engines || engines || [];
-    const currentDefEngine = window.defaultEngineName || defaultEngineName || '百度';
+    const currentEngines = (Array.isArray(engines) && engines.length) ? engines : defaultEngines.slice();
+    const currentDefEngine = (currentEngines.find(e => e.name === defaultEngineName) ? defaultEngineName : currentEngines[0].name);
     const editorEl = document.getElementById('notepadEditor');
     const data = {
       config: widgetConfig, shortcuts: shortcuts, todos: todos,
@@ -4729,7 +5135,38 @@
       fontSize: currentFontSize, engines: currentEngines, defaultEngine: currentDefEngine,
       city: currentCity, cityHistory: cityHistory, workStart: workStartTime, workEnd: workEndTime, workDays: workDays, nightShift: nightShift,
       customBg: store.get('nt_custom_bg', ''), bgType: store.get('nt_bg_type', 'default'), bgValue: store.get('nt_bg_value', ''),
-      mpFavorites: store.get('nt_mp_favorites', [])
+      mpFavorites: store.get('nt_mp_favorites', []),
+      
+      // ====== 新增：全量状态备份 ======
+      // 1. 计时器状态
+      timerState: {
+        total: timerTotal,
+        left: timerLeft,
+        original: timerOriginal,
+        isRunning: isRunning
+      },
+      // 2. 音乐播放器状态（当前歌曲、进度、列表）
+      musicState: {
+        currentTrack: mp.currentTrack,
+        playContext: mp.playContext,
+        currentTime: mp.audio.currentTime,
+        volume: mp.audio.volume,
+        isMuted: mp.isMuted
+      },
+      // 3. 换算工具状态
+      toolState: {
+        unitconvCategory: unitconvCategory,
+        exchangeFrom: exchangeFrom.value,
+        exchangeTo: exchangeTo.value,
+        exchangeAmount: exchangeAmount.value
+      },
+      // 4. 其他杂项缓存
+      jokeCache: store.get('nt_joke_cache', null),
+      otherCaches: {
+        fontSize: currentFontSize,
+        theme: document.documentElement.getAttribute('data-theme'),
+        lastQuoteIdx: lastQuote
+      }
     };
     let fileContent = JSON.stringify(data);
     if (pwd.trim() !== '') { fileContent = "🔒LOCKED_DATA🔒" + encryptData(fileContent, pwd); }
@@ -4752,7 +5189,26 @@
       document.body.style.backgroundSize = 'cover'; document.body.style.backgroundPosition = 'center';
       document.body.style.backgroundRepeat = 'no-repeat'; document.body.style.backgroundAttachment = 'fixed';
       document.body.style.backgroundColor = 'transparent'; document.body.classList.add('has-custom-bg');
-      applyTheme('dark');
+      // 根据图片平均亮度决定主题（用一个隐藏 canvas 采样）
+      try {
+        const _img = new Image();
+        _img.onload = () => {
+          const c = document.createElement('canvas');
+          c.width = 32; c.height = 32;
+          const cx = c.getContext('2d');
+          cx.drawImage(_img, 0, 0, 32, 32);
+          const px = cx.getImageData(0, 0, 32, 32).data;
+          let sum = 0;
+          for (let i = 0; i < px.length; i += 4) {
+            sum += (px[i] * 299 + px[i+1] * 587 + px[i+2] * 114) / 1000;
+          }
+          const avg = sum / (px.length / 4);
+          applyTheme(avg >= 150 ? 'light' : 'dark');
+        };
+        _img.src = bgValue;
+      } catch (e) {
+        applyTheme('dark');
+      }
     } else if (bgType === 'color' && bgValue) {
       document.body.style.backgroundImage = 'none'; document.body.style.backgroundColor = bgValue;
       bgColorPicker.value = bgValue;
@@ -4850,8 +5306,20 @@
           if (data.notepad !== undefined) { store.set('nt_notepad', data.notepad); notepadEditor.innerHTML = data.notepad; }
           if (data.theme) { applyTheme(data.theme); }
           if (data.fontSize) { currentFontSize = data.fontSize; applyFontSize(currentFontSize); }
-          if (data.engines && Array.isArray(data.engines)) { engines = data.engines; store.set('nt_engines_list', engines); }
-          if (data.defaultEngine) { defaultEngineName = data.defaultEngine; store.set('nt_default_engine', defaultEngineName); }
+          if (data.engines && Array.isArray(data.engines) && data.engines.length) {
+            engines = data.engines;
+            store.set('nt_engines_list', engines);
+          }
+          if (data.defaultEngine && engines.some(e => e.name === data.defaultEngine)) {
+            defaultEngineName = data.defaultEngine;
+          } else if (engines.length) {
+            defaultEngineName = engines[0].name;
+          } else {
+            engines = defaultEngines.slice();
+            defaultEngineName = engines[0].name;
+            store.set('nt_engines_list', engines);
+          }
+          store.set('nt_default_engine', defaultEngineName);
           if (typeof renderEngineSelect === 'function') renderEngineSelect();
           if (data.city) { currentCity = data.city; store.set('nt_city', currentCity); fetchAllWeather(currentCity.id); }
           if (Array.isArray(data.cityHistory)) { cityHistory = data.cityHistory.slice(0, 6); } else { cityHistory = []; }
@@ -4861,6 +5329,50 @@
           if (data.workDays) { workDays = data.workDays; store.set('nt_workDays', workDays); document.querySelectorAll('.work-day').forEach(cb => { const di = parseInt(cb.value); if (typeof workDays[di] !== 'boolean') workDays[di] = (di >= 1 && di <= 5); cb.checked = workDays[di]; }); }
           if (typeof data.nightShift === 'boolean') { nightShift = data.nightShift; store.set('nt_nightShift', nightShift); if (typeof applyNightShiftUI === 'function') applyNightShiftUI(); }
           if (typeof updateWorkTime === 'function') updateWorkTime();
+
+          // ====== 新增：恢复全量状态 ======
+          // 1. 恢复计时器
+          if (data.timerState) {
+            timerTotal = data.timerState.total || 25 * 60;
+            timerLeft = data.timerState.left || timerTotal;
+            timerOriginal = data.timerState.original || timerTotal;
+            updateInputsFromLeft();
+            updateTimerCircle();
+            if (data.timerState.isRunning && timerLeft > 0) {
+              // 如果之前是运行状态，直接触发开始按钮
+              setTimeout(() => btnStartTimer.click(), 500);
+            }
+          }
+          
+          // 2. 恢复音乐播放状态
+          if (data.musicState && data.musicState.currentTrack) {
+            // 写入本地，页面刷新后会自动读取
+            store.set('nt_mp_last_play', {
+              track: data.musicState.currentTrack,
+              time: data.musicState.currentTime || 0
+            });
+          }
+
+          // 3. 恢复换算工具状态
+          if (data.toolState) {
+            if (data.toolState.unitconvCategory) {
+              unitconvCategory = data.toolState.unitconvCategory;
+              store.set('nt_unitconv_cat', unitconvCategory);
+              renderUnitconvCategories();
+              renderUnitconvUnits();
+            }
+            if (data.toolState.exchangeFrom) exchangeFrom.value = data.toolState.exchangeFrom;
+            if (data.toolState.exchangeTo) exchangeTo.value = data.toolState.exchangeTo;
+            if (data.toolState.exchangeAmount) exchangeAmount.value = data.toolState.exchangeAmount;
+            renderExchangeResult();
+            renderUnitconvResult();
+          }
+
+          // 4. 恢复其他缓存
+          if (data.jokeCache) store.set('nt_joke_cache', data.jokeCache);
+          if (data.otherCaches && data.otherCaches.lastQuoteIdx !== undefined) {
+            lastQuote = data.otherCaches.lastQuoteIdx;
+          }
           if (Array.isArray(data.mpFavorites)) {
             store.set('nt_mp_favorites', data.mpFavorites);
           }
@@ -4872,8 +5384,11 @@
             store.set('nt_bg_type', 'default'); store.set('nt_bg_value', '');
           }
           applyCustomBg();
-          toast('✨ 配置导入成功！页面即将刷新...');
-          setTimeout(() => location.reload(), 1500);
+          toast('✨ 配置导入成功！');
+          // 因为已经用 JS 动态恢复了 DOM 和状态，不需要强制刷新页面
+          // 如果非要刷新（比如背景图没加载），加个判断
+          if (data.bgType) applyCustomBg();
+          // setTimeout(() => location.reload(), 1500);
         } catch (err) { console.error(err); toast('❌ 解析失败，文件可能已损坏'); }
       };
       reader.readAsText(file);
@@ -5118,16 +5633,15 @@
       // 按源决定歌词怎么存：
       // - 网易云：有可重拉的 lrcUrl（fetchDetails 里被置 null，这里补回），不存 lrc 省空间
       // - QQ/酷我/JOOX：没有 lrcUrl，歌词是直接拿的文本，必须存 lrc，否则二次播放拉不回来
-      let savedLrcUrl = t.lrcUrl;
+      // 收藏只存元数据 + 音频地址，歌词一律不存全文，播放时按需重新拉
+      let savedLrcUrl = t.lrcUrl || null;
       let savedLrc = null;
       if (t.source === 'netease') {
         if (!savedLrcUrl && t.songid) {
           savedLrcUrl = `https://api.qijieya.cn/meting/?server=netease&type=lrc&id=${encodeURIComponent(t.songid)}`;
         }
-      } else {
-        savedLrcUrl = null;
-        savedLrc = t.lrc || null;   // QQ/酷我/JOOX 存文本
       }
+      // QQ/酷我/JOOX：不存 lrc，播放时 fetchDetails 会按 songid 重新拉
       mp.favorites.unshift({
         uid: t.uid, source: t.source, songid: t.songid,
         qqMid: t.qqMid, jooxIdx: t.jooxIdx,
@@ -5150,16 +5664,31 @@
     if (panel && panel.classList.contains('active')) renderFavList();
   }
 
-  function renderFavList() {
+  let favRenderLimit = 100;
+  let favSearchKw = '';
+  function renderFavList(resetLimit) {
     const list = document.getElementById('mp-favList');
     if (!list) return;
-    const prevScroll = list.scrollTop;   // 保存滚动位置
+    const prevScroll = list.scrollTop;
+    if (resetLimit) favRenderLimit = 100;
     if (!mp.favorites.length) {
       list.innerHTML = '<div class="empty">还没有收藏，播放歌曲时点 ⭐ 收藏吧</div>';
-      list.scrollTop = 0;   // 空列表时归零，保持行为一致
+      list.scrollTop = 0;
       return;
     }
-    list.innerHTML = mp.favorites.map(t => {
+    // 按关键词过滤（歌名 / 歌手，不区分大小写）
+    const kw = favSearchKw.trim().toLowerCase();
+    const filtered = kw
+      ? mp.favorites.filter(t =>
+          (t.title || '').toLowerCase().includes(kw) ||
+          (t.artist || '').toLowerCase().includes(kw))
+      : mp.favorites;
+    if (!filtered.length) {
+      list.innerHTML = '<div class="empty">没有匹配的收藏</div>';
+      return;
+    }
+    const slice = filtered.slice(0, favRenderLimit);
+    list.innerHTML = slice.map(t => {
       const isActive = mp.currentTrack && mp.currentTrack.uid === t.uid;
       return `
         <div class="mp-fav-item ${isActive ? 'active-track' : ''}" data-uid="${mpEsc(t.uid)}">
@@ -5198,7 +5727,20 @@
         }
       });
     });
-    list.scrollTop = prevScroll;   // 恢复滚动位置
+    list.scrollTop = prevScroll;
+
+    // 还有更多 → 追加“加载更多”
+    if (filtered.length > favRenderLimit) {
+      const more = document.createElement('div');
+      more.className = 'mp-fav-load-more';
+      more.style.cssText = 'text-align:center;padding:10px;color:var(--accent);cursor:pointer;font-size:.8em;';
+      more.textContent = `加载更多（还有 ${filtered.length - favRenderLimit} 首）`;
+      more.addEventListener('click', () => {
+        favRenderLimit += 100;
+        renderFavList();
+      });
+      list.appendChild(more);
+    }
   }
   
   function updateTrackUI(t) {
@@ -5234,24 +5776,30 @@
     document.getElementById('mp-totalTime').textContent = '00:00';
   }
 
+  let playToken = 0;
   async function playTrack(t, context) {
     if (!t) return;
+    const myToken = ++playToken;
     mp.currentTrack = t;
     if (context && context.length) mp.playContext = context;
     updateTrackUI(t);
     resetProgress();
     mpShowToast('加载中…');
-    // 给一个 10 秒的超时兜底，防止网络极差时卡死
     const playTimeout = setTimeout(() => { mpShowToast('加载较慢，请稍候…'); }, 10000);
     try {
       await fetchDetails(t);
       clearTimeout(playTimeout);
+      if (myToken !== playToken) return;   // 期间用户又点了别的歌，放弃本次
       updateTrackUI(t);
       if (!t.audioUrl) { mpShowToast('这首歌暂无可用音源'); return; }
-      mp.audio.pause(); mp.audio.src = t.audioUrl;
+      mp.audio.pause(); 
+      mp.audio.src = t.audioUrl;
+      mp.audio.currentTime = 0; // 👈 强制重置进度
       await mp.audio.play();
+      if (myToken !== playToken) return;   // play 期间又被切歌
       setPlayingUI(true);
     } catch (err) {
+      if (myToken !== playToken) return;
       if (err && err.name === 'NotAllowedError') { setPlayingUI(false); return; }
       console.error(err); setPlayingUI(false); mpShowToast('播放失败，试试其他歌曲');
     }
@@ -5311,6 +5859,7 @@
     if (!kw) { mpShowToast('请输入关键词'); return; }
     if (mp.searching) return;
     mp.searching = true; mp.searchResults = [];
+    mp.playContext = [];   // 新搜索开始时清空播放列表，避免指向已废弃的旧数组
     document.getElementById('mp-favPanel').classList.remove('active');
     const box = document.getElementById('mp-searchResults');
     box.innerHTML = '<div class="loading">正在搜索…</div>'; box.classList.add('active');
@@ -5377,41 +5926,253 @@
   document.getElementById('mp-nextBtn').addEventListener('click', () => playNext('next'));
   document.getElementById('mp-downloadBtn').addEventListener('click', downloadCurrent);
 
+  /* ================= 进度条（重写版） =================
+     核心：UI 位置只接受 0~1 比例，一律用百分比写入 left / width。
+     页面 body 上有 zoom(0.9 / 1.0 / 1.15)，getBoundingClientRect() 返回的是
+     缩放后的视觉像素，而 style.left 里的 px 是缩放前的布局像素，二者不同源，
+     一旦用 "px = 比例 × rect.width" 去写 left，就必然产生 (1-zoom) 的固定比例误差，
+     进度越靠后偏得越远 —— 这就是"越拖越跟手不上一路拉远"的根因。
+     百分比定位的性能与 zoom 无关，从根上规避。========================= */
   const progressBar = document.getElementById('mp-progressBar');
+  const progressFill = document.getElementById('mp-progressFill');
+  const progressThumb = document.getElementById('mp-progressThumb');
+  const currentTimeEl = document.getElementById('mp-currentTime');
   let dragging = false;
-  progressBar.addEventListener('pointerdown', e => {
-    if (!mp.audio.duration || !isFinite(mp.audio.duration)) return;
-    dragging = true; progressBar.setPointerCapture(e.pointerId);
-    const rect = progressBar.getBoundingClientRect();
-    mp.audio.currentTime = ((e.clientX - rect.left) / rect.width) * mp.audio.duration;
-  });
-  progressBar.addEventListener('pointermove', e => {
-    if (!dragging || !mp.audio.duration || !isFinite(mp.audio.duration)) return;
-    const rect = progressBar.getBoundingClientRect();
-    let p = (e.clientX - rect.left) / rect.width;
-    p = Math.min(1, Math.max(0, p));
-    mp.audio.currentTime = p * mp.audio.duration;
-  });
-  progressBar.addEventListener('pointerup', () => { dragging = false; });
-  progressBar.addEventListener('pointercancel', () => { dragging = false; });
+  let dragRatio = 0;
+  let seekTarget = null;      // 松手后等待音频真正 seek 到位的目标时间
+  let seekDeadline = 0;       // 兜底超时，防止不支持 seek 的音源把 UI 永久锁死
 
-  document.getElementById('mp-muteToggle').addEventListener('click', () => {
-    mp.isMuted = !mp.isMuted; mp.audio.muted = mp.isMuted;
-    const btn = document.getElementById('mp-muteToggle');
-    btn.innerHTML = mp.isMuted
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L13 19V5L7.5 9.5z" fill="currentColor" stroke="none"/><path d="M16.5 8.8a4.6 4.6 0 0 1 0 6.4"/><path d="M19 6.2a8.2 8.2 0 0 1 0 11.6"/><line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="1.8"/></svg>'
-      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L13 19V5L7.5 9.5z" fill="currentColor" stroke="none"/><path d="M16.5 8.8a4.6 4.6 0 0 1 0 6.4"/><path d="M19 6.2a8.2 8.2 0 0 1 0 11.6"/></svg>';
+  function mpDurationOK() {
+    return !!mp.audio.duration && isFinite(mp.audio.duration) && mp.audio.duration > 0;
+  }
+
+  // 唯一的 UI 写入口：只接受 0~1 的比例，百分比定位，跨 zoom 精确
+  function setProgressUI(ratio) {
+    if (ratio < 0) ratio = 0;
+    if (ratio > 1) ratio = 1;
+    progressFill.style.width = (ratio * 100) + '%';
+    progressThumb.style.left = (ratio * 100) + '%';
+    if (currentTimeEl && mpDurationOK()) {
+      currentTimeEl.textContent = mpFmt(ratio * mp.audio.duration);
+    }
+  }
+
+  // 指针位置 -> 0~1 比例（用比例做运算，与缩放/DPR 完全无关）
+  function ratioFromClientX(clientX) {
+    const rect = progressBar.getBoundingClientRect();
+    if (!rect.width) return 0;
+    let r = (clientX - rect.left) / rect.width;
+    if (r < 0) r = 0;
+    if (r > 1) r = 1;
+    return r;
+  }
+
+  progressBar.addEventListener('pointerdown', e => {
+    if (!mpDurationOK()) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    dragging = true;
+    mpRestorePending = false;   // 用户已主动拖拽，视为放弃自动恢复，立刻放开高频记录
+    mpDirty = true;
+    progressBar.classList.add('dragging');
+    dragRatio = ratioFromClientX(e.clientX);
+    setProgressUI(dragRatio);
+
+    // 指针捕获：拖到窗口外也不会丢事件、不会卡在半路
+    try { progressBar.setPointerCapture(e.pointerId); } catch (_) {}
+
+    const onMove = ev => {
+      if (!dragging) return;
+      dragRatio = ratioFromClientX(ev.clientX);
+      setProgressUI(dragRatio);   // 纯 UI，不碰 currentTime，避免拖动中反复 seek 拖慢
+    };
+
+    const onUp = ev => {
+      if (!dragging) return;
+      dragging = false;
+      progressBar.classList.remove('dragging');
+      progressBar.removeEventListener('pointermove', onMove);
+      progressBar.removeEventListener('pointerup', onUp);
+      progressBar.removeEventListener('pointercancel', onUp);
+      try { progressBar.releasePointerCapture(ev.pointerId); } catch (_) {}
+
+      if (typeof ev.clientX === 'number' && ev.type !== 'pointercancel') {
+        dragRatio = ratioFromClientX(ev.clientX);
+      }
+      setProgressUI(dragRatio);
+
+      const target = dragRatio * mp.audio.duration;
+      seekTarget = target;
+      seekDeadline = Date.now() + 1500;
+      mp.audio.currentTime = target;
+
+      // 拖拽结束立刻把落点写进本地（不等定时器，防止拖完马上刷新丢失）
+      mpDirty = true;
+      mpFlushProgress(true);
+    };
+
+    progressBar.addEventListener('pointermove', onMove);
+    progressBar.addEventListener('pointerup', onUp);
+    progressBar.addEventListener('pointercancel', onUp);
+  });
+
+  // 音频真正 seek 完成时立刻解锁（比定时器可靠）
+  mp.audio.addEventListener('seeked', () => { seekTarget = null; });
+
+  /* ================= 播放进度高频记录（≈0.01 秒一次） =================
+     旧实现只在 timeupdate（约 4Hz）里 Math.floor(t) % 5 === 0 时写一次，
+     拖拽进度条更是一次都不记 —— 刷新后位置永远落后，拖到的地方全丢。
+     新实现：
+       1) 独立 10ms 定时器采样，播放 / 暂停 / 拖拽（含未松手）全都记录；
+       2) 内存中始终保存 0.01 秒精度的最新位置；
+       3) localStorage 落盘同样按 10ms 一次（只写轻量对象 {u,t,at}），
+          并在 seek / 暂停 / 播放 / 页面隐藏 / 关闭时强制写；
+       4) 拖拽期间音频不动，进度按指针比例换算 —— 所以"只拖不播"照样在记。
+     currentTime 是连续的真实时间基准，即使后台标签页把定时器节流到 1s，
+     采到的值依然精确，不会漂移累积。
+     ================================================================= */
+  const MP_POS_KEY = 'nt_mp_progress';        // 轻量位置：{u, t, at}
+  const MP_PROGRESS_KEY = 'nt_mp_last_play';  // 完整记录：{track, time, at}
+  const MP_SAMPLE_MS = 10;                    // 0.01 秒采样一次
+  const MP_FLUSH_MS = 10;                     // 落盘间隔 = 与采样同频，真正 0.01 秒写一次
+  let mpLastPos = -1;
+  let mpLastFlushAt = 0;
+  let mpDirty = false;
+  let mpSavedFullKey = null;
+  let mpRestorePending = false;   // 恢复上次进度期间冻结写入，防止 0 覆盖存档
+
+  function mpTrackKey(t) {
+    if (!t) return '';
+    return t.audioUrl || t.songid || t.id || t.name || '';
+  }
+
+  function mpRound2(t) {
+    if (!isFinite(t) || t < 0) t = 0;
+    return Math.round(t * 100) / 100;
+  }
+
+  // 当前逻辑进度：拖拽中以指针位置为准（拖拽过程并不会 seek 音频）
+  function mpLogicalTime() {
+    if (dragging && mpDurationOK()) return mpRound2(dragRatio * mp.audio.duration);
+    return mpRound2(mp.audio.currentTime || 0);
+  }
+
+  function mpFlushProgress(force) {
+    if (mpRestorePending || !mp.currentTrack) return;
+    if (!force && !mpDirty) return;
+
+    const t = mpLogicalTime();
+    const u = mpTrackKey(mp.currentTrack);
+
+    // 高频只写这一个轻量对象（歌曲标识 + 时间），开销极小
+    store.set(MP_POS_KEY, { u, t, at: Date.now() });
+
+    // 整条记录（含歌曲对象与歌词）只在切歌 / 强制落盘时更新
+    if (force || u !== mpSavedFullKey) {
+      store.set(MP_PROGRESS_KEY, { track: mp.currentTrack, time: t, at: Date.now() });
+      mpSavedFullKey = u;
+    }
+
+    mpLastPos = t;
+    mpLastFlushAt = Date.now();
+    mpDirty = false;
+  }
+
+  function mpSampleTick() {
+    if (mpRestorePending || !mp.currentTrack) return;
+    // 暂停、未拖拽、也没有待落盘增量时直接空转返回
+    if (mp.audio.paused && !dragging && !mpDirty) return;
+
+    const t = mpLogicalTime();
+    if (t !== mpLastPos) { mpLastPos = t; mpDirty = true; }
+
+    if (mpDirty && Date.now() - mpLastFlushAt >= MP_FLUSH_MS) mpFlushProgress(false);
+  }
+  setInterval(mpSampleTick, MP_SAMPLE_MS);
+
+  // 关键时机立即落盘
+  mp.audio.addEventListener('seeking', () => { mpDirty = true; });
+  mp.audio.addEventListener('seeked', () => mpFlushProgress(true));
+  mp.audio.addEventListener('pause', () => mpFlushProgress(true));
+  mp.audio.addEventListener('play', () => { mpRestorePending = false; mpDirty = true; });
+  mp.audio.addEventListener('ended', () => mpFlushProgress(true));
+  mp.audio.addEventListener('emptied', () => { mpSavedFullKey = null; });
+
+  // 页面隐藏 / 关闭：把最后一刻的位置写死（切后台、直接关标签页都不丢）
+  document.addEventListener('visibilitychange', () => { if (document.hidden) mpFlushProgress(true); });
+  window.addEventListener('pagehide', () => mpFlushProgress(true));
+  window.addEventListener('beforeunload', () => mpFlushProgress(true));
+
+  // 提取图标，方便复用
+  const ICON_VOL_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L13 19V5L7.5 9.5z" fill="currentColor" stroke="none"/><path d="M16.5 8.8a4.6 4.6 0 0 1 0 6.4"/><path d="M19 6.2a8.2 8.2 0 0 1 0 11.6"/></svg>';
+  const ICON_VOL_MUTE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L13 19V5L7.5 9.5z" fill="currentColor" stroke="none"/><path d="M16.5 8.8a4.6 4.6 0 0 1 0 6.4"/><path d="M19 6.2a8.2 8.2 0 0 1 0 11.6"/><line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="1.8"/></svg>';
+
+  const mpVolumeSlider = document.getElementById('mp-volumeSlider');
+  const mpMuteBtn = document.getElementById('mp-muteToggle');
+
+  // 初始化图标（如果是静音状态）
+  mp.audio.volume = parseFloat(store.get('nt_volume', '1')); // 读取持久化音量
+  mpVolumeSlider.value = mp.isMuted ? 0 : mp.audio.volume;
+  mpMuteBtn.innerHTML = mp.isMuted ? ICON_VOL_MUTE : ICON_VOL_ON;
+
+  // 1. 拖拽滑块事件
+  mpVolumeSlider.addEventListener('input', (e) => {
+    const v = parseFloat(e.target.value);
+    mp.audio.volume = v;
+    if (v > 0 && mp.isMuted) {
+      mp.isMuted = false;
+      mp.audio.muted = false;
+      mpMuteBtn.innerHTML = ICON_VOL_ON;
+    }
+    if (v === 0) {
+      mp.isMuted = true;
+      mp.audio.muted = true;
+      mpMuteBtn.innerHTML = ICON_VOL_MUTE;
+    }
+  });
+
+  // 2. 点击图标静音/取消静音
+  mpMuteBtn.addEventListener('click', () => {
+    mp.isMuted = !mp.isMuted; 
+    mp.audio.muted = mp.isMuted;
+    
+    // 联动滑块位置
+    if (mp.isMuted) {
+      mpVolumeSlider.value = 0;
+      mpMuteBtn.innerHTML = ICON_VOL_MUTE;
+    } else {
+      // 如果之前音量为0，取消静音时给个默认 50% 的声音
+      if (mp.audio.volume === 0) {
+        mp.audio.volume = 0.5;
+      }
+      mpVolumeSlider.value = mp.audio.volume;
+      mpMuteBtn.innerHTML = ICON_VOL_ON;
+    }
+    
     mpShowToast(mp.isMuted ? '已静音' : '取消静音');
   });
 
   // 监听播放进度更新时间和歌词
   mp.audio.addEventListener('timeupdate', () => {
-    if (!mp.audio.duration || !isFinite(mp.audio.duration)) return;
-    const p = (mp.audio.currentTime / mp.audio.duration) * 100;
-    document.getElementById('mp-progressFill').style.width = p + '%';
-    document.getElementById('mp-progressThumb').style.left = p + '%';
-    document.getElementById('mp-currentTime').textContent = mpFmt(mp.audio.currentTime);
+    if (!mpDurationOK()) return;
+
+    // 松手后：等音频真正 seek 到目标附近再交还控制权，期间 UI 保持不动，
+    // 避免"松手一瞬间圆点被旧时间拉回去"的假不跟手。
+    if (seekTarget !== null) {
+      if (Math.abs(mp.audio.currentTime - seekTarget) < 0.35 || Date.now() > seekDeadline) {
+        seekTarget = null;
+      }
+    }
+
+    // 拖拽中 / seek 未完成：UI 完全由指针驱动，timeupdate 不得插手
+    if (!dragging && seekTarget === null) {
+      setProgressUI(mp.audio.currentTime / mp.audio.duration);
+      currentTimeEl.textContent = mpFmt(mp.audio.currentTime);
+    }
     document.getElementById('mp-totalTime').textContent = mpFmt(mp.audio.duration);
+
+    // 进度保存已改由 10ms 高频采样负责（mpSampleTick），此处不再写盘
 
     // 歌词同步
     if (mp.lyricLines && mp.lyricLines.length > 0) {
@@ -5429,7 +6190,7 @@
       }
     }
   });
-  
+
   mp.audio.addEventListener('loadedmetadata', () => { document.getElementById('mp-totalTime').textContent = mpFmt(mp.audio.duration); });
   mp.audio.addEventListener('play', () => setPlayingUI(true));
   mp.audio.addEventListener('pause', () => setPlayingUI(false));
@@ -5461,15 +6222,76 @@
     const willShow = !panel.classList.contains('active');
     panel.classList.toggle('active');
     if (willShow) {
-      renderFavList();
+      renderFavList(true);
       document.getElementById('mp-searchResults').classList.remove('active');
     }
   });
   document.getElementById('mp-favClose').addEventListener('click', () => {
     document.getElementById('mp-favPanel').classList.remove('active');
+    // 关闭时清空搜索词，下次打开是完整列表
+    favSearchKw = '';
+    if (mpFavSearch) mpFavSearch.value = '';
+    if (mpFavSearchClear) mpFavSearchClear.style.display = 'none';
   });
 
+  // ===== 收藏搜索框 =====
+  const mpFavSearch = document.getElementById('mp-favSearch');
+  const mpFavSearchClear = document.getElementById('mp-favSearchClear');
+  if (mpFavSearch) {
+    mpFavSearch.addEventListener('input', () => {
+      favSearchKw = mpFavSearch.value;
+      favRenderLimit = 100;
+      mpFavSearchClear.style.display = favSearchKw ? 'block' : 'none';
+      renderFavList();
+    });
+    mpFavSearchClear.addEventListener('click', () => {
+      mpFavSearch.value = '';
+      favSearchKw = '';
+      favRenderLimit = 100;
+      mpFavSearchClear.style.display = 'none';
+      renderFavList();
+      mpFavSearch.focus();
+    });
+  }
+
   resetProgress(); updatePlayIcon();
+
+  // 👇 新增：网页刷新后，自动恢复上一次听到的那一秒（记录精度 0.01 秒）
+  const lastPlay = store.get('nt_mp_last_play', null);
+  const lastPos = store.get('nt_mp_progress', null);
+  if (lastPlay && lastPlay.track) {
+    // 高频位置与整条记录属于同一首歌时，以高频位置为准（更精确、更新）
+    const resumeTime = (lastPos && lastPos.u === mpTrackKey(lastPlay.track) && isFinite(lastPos.t))
+      ? lastPos.t
+      : (isFinite(lastPlay.time) ? lastPlay.time : 0);
+
+    mpRestorePending = true;   // 恢复完成前冻结记录，避免把 0 写回去覆盖存档
+    setTimeout(() => {
+      // 恢复歌曲
+      mp.currentTrack = lastPlay.track;
+      updateTrackUI(lastPlay.track);
+      mp.audio.src = lastPlay.track.audioUrl;
+      
+      // 等音频加载完元数据后，跳到指定进度
+      mp.audio.addEventListener('loadedmetadata', function seekOnce() {
+        if (resumeTime > 0 && resumeTime < mp.audio.duration) {
+          mp.audio.currentTime = resumeTime;
+        }
+        mp.audio.removeEventListener('loadedmetadata', seekOnce);
+        // 恢复完成，放开高频记录
+        mpRestorePending = false;
+        mpLastPos = mpRound2(mp.audio.currentTime || 0);
+        mpLastFlushAt = Date.now();
+        mpDirty = false;
+      });
+
+      // 兜底：音源异常拿不到 metadata 时也要放开记录
+      setTimeout(() => { mpRestorePending = false; }, 1500);
+
+      // 提示用户点击播放
+      mpShowToast('已恢复上次进度，点击播放键继续');
+    }, 1000);
+  }
 
 })();
 </script>
@@ -5629,17 +6451,44 @@
     color: inherit;
   }
 
-  /* ===== 字体菜单：搜索框 + 滚动列表 ===== */
+  /* ===== 字体菜单（折叠动画版） ===== */
   .font-dropdown {
-    width: 220px !important;
-    max-height: 320px !important;
-    padding: 6px !important;
-    overflow: hidden !important;
-    display: none;
+    position: fixed;   /* 改为 fixed，脱离 .widget 的 overflow:hidden 裁剪 */
+    top: 0;
+    left: 0;
+    margin-top: 0;
+    background: var(--card);
+    backdrop-filter: blur(40px) saturate(150%);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    padding: 8px;
+
+    /* 动画核心 */
+    display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
+    z-index: 1000000;
+    width: 220px;
+    max-height: 320px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none;
   }
-  .font-dropdown.show { display: flex; }
+
+  /* 展开状态 */
+  .font-dropdown.show { 
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .font-dropdown::-webkit-scrollbar { width: 4px; }
+  .font-dropdown::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
+  
   .font-search-input {
     width: 100%;
     background: var(--input-bg);
@@ -5677,13 +6526,7 @@
     flex-shrink: 0;
   }
   .font-list .font-item:hover { background: var(--hover); color: var(--accent); }
-  .font-empty {
-    padding: 20px 8px;
-    text-align: center;
-    font-size: 12px;
-    color: var(--text-mute);
-  }
-
+  .font-empty { padding: 20px 8px; text-align: center; font-size: 12px; color: var(--text-mute); }
   /* =======================================================
      2. 修复 ? 气泡的错位与专属白条
      ======================================================= */
@@ -5740,8 +6583,13 @@
   }
   .mp-fav-close {
     background: none; border: none; cursor: pointer;
-    color: var(--text-mute); font-size: 1em; padding: .2em .4em;
-    border-radius: 50%;
+    color: var(--text-mute); font-size: 1.2em; padding: .2em .4em;
+    border-radius: 50%; flex-shrink: 0;
+  }
+  /* 搜索框里的清空按钮稍微小一点 */
+  #mp-favSearchClear {
+    font-size: 1em;
+    padding: 0;
   }
   .mp-fav-close:hover { background: var(--hover); color: var(--accent); }
   .mp-fav-list { flex: 1; overflow-y: auto; padding: .3em 0; }
@@ -5764,6 +6612,49 @@
     border-radius: 50%; flex-shrink: 0;
   }
   .mp-fav-del:hover { color: var(--danger); }
+  /* 字体按钮文字+小三角 */
+  .font-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .font-arrow {
+    font-size: 9px;
+    opacity: 0.6;
+    transform: scaleY(0.8);
+    margin-top: 1px;
+  }
+    /* ===== 音量滑块 ===== */
+  .mp-volume-wrap {
+    display: flex;
+    align-items: center;
+    gap: .4em;
+  }
+  .mp-volume-slider {
+    width: 75px;    -webkit-appearance: none;
+    appearance: none;
+	background: transparent;
+    cursor: pointer;
+  }
+  /* 滑轨 */
+  .mp-volume-slider::-webkit-slider-runnable-track {
+    width: 100%; height: 4px;
+    background: var(--divider);
+    border-radius: 2px;
+  }
+  /* 滑块圆点 */
+  .mp-volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--text);
+    margin-top: -3px;
+    transition: transform 0.1s, background 0.2s;
+  }
+  .mp-volume-slider:hover::-webkit-slider-thumb {
+    background: var(--accent);
+    transform: scale(1.2);
+  }
 </style>
 </body>
 </html>
