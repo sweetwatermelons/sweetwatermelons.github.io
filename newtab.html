@@ -201,6 +201,7 @@
     backdrop-filter: blur(30px) saturate(150%);
     display: flex; flex-direction: column; position: absolute;
     left: 0; top: 0; width: 320px; height: 240px;
+    max-width: 100%;
     box-sizing: border-box; transition: box-shadow 0.2s, border-color 0.2s;
     overflow: hidden; user-select: none; /* 👈 防止拖动时选中文字 */
   }
@@ -249,7 +250,7 @@
   .we-item { text-align: center; font-size: 13px; display: flex; flex-direction: column; gap: 6px;}
   .we-item .label { color: var(--text-mute); font-size: 11px; font-weight: 500;}
   .we-item .val { font-weight: 600; color: var(--text); font-size: 14px;}
-  .hourly-container { display: flex; overflow-x: auto; gap: 16px; padding-bottom: 8px; scrollbar-width: thin; padding-top: 8px; border-bottom: 1px solid var(--divider); align-items: flex-start; }
+  .hourly-container { display: flex; overflow-x: auto; min-width: 0; max-width: 100%; width: 100%; gap: 16px; padding-bottom: 8px; scrollbar-width: thin; padding-top: 8px; border-bottom: 1px solid var(--divider); align-items: flex-start; }
   .hourly-container::-webkit-scrollbar { height: 4px; }
   .hourly-container::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
   .hourly-item { min-width: 44px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -590,6 +591,26 @@
   }
   .mp-search-clear.visible { display: flex; }
   .mp-search-clear svg { width: .85em; height: .85em; }
+  /* 迷你搜索按钮：移动端无回车键时点它搜索 */
+  .mp-search-go {
+    flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+    width: 1.85em; height: 1.85em; margin-left: .35em; padding: 0;
+    border: none; border-radius: 50%; cursor: pointer;
+    background: var(--accent); color: #fff;
+    -webkit-tap-highlight-color: transparent;
+    transition: filter .15s, transform .12s, opacity .15s;
+  }
+  .mp-search-go:hover { filter: brightness(1.08); }
+  .mp-search-go:active { transform: scale(.9); }
+  .mp-search-go:focus { outline: none; }
+  .mp-search-go svg,
+  .mp-search-bar .mp-search-go svg {
+    width: .95em; height: .95em; margin: 0; color: #fff; stroke-width: 2.4;
+  }
+  /* 窄卡片（移动端）下略缩小，保证输入框还有空间 */
+  @media (max-width: 420px) {
+    .mp-search-go { width: 1.7em; height: 1.7em; margin-left: .25em; }
+  }
 
   /* 搜索结果面板 */
   .mp-search-results {
@@ -1275,32 +1296,41 @@
       <div class="widget-header"><div class="widget-title"><span class="dot"></span> 迷你记事本</div></div>
       <div class="notepad-container">
         <div class="notepad-toolbar">
-          <button class="notepad-btn" id="btnUndo" title="撤销 (Ctrl+Z)">↩️</button>
-          <button class="notepad-btn" id="btnRedo" title="重做 (Ctrl+Y)">↪️</button>
-
-          <span class="np-sep"></span>
-          <button class="notepad-btn" data-cmd="bold" title="加粗 (Ctrl+B)" style="font-weight:bold;">B</button>
-          <button class="notepad-btn" data-cmd="italic" title="斜体 (Ctrl+I)" style="font-style: italic;">I</button>
-          <button class="notepad-btn" data-cmd="underline" title="下划线 (Ctrl+U)" style="text-decoration: underline;">U</button>
-          <button class="notepad-btn" data-cmd="strikeThrough" title="删除线" style="text-decoration: line-through;">S</button>
-          <button class="font-menu-btn" id="fontMenuBtn" title="切换选中文字的字体">
-            <span id="currentFontName">字体</span>
-            <span class="font-arrow">▼</span>
-          </button>
-          <button class="font-size-btn reset-size" id="fontSizeReset" title="重置字号">Aa</button>
-          <button class="font-size-btn" id="fontSizeMinus" title="缩小字号">A-</button>
-          <button class="font-size-btn" id="fontSizePlus" title="放大字号">A+</button>
-          <button class="notepad-btn" id="insertTableBtn" title="插入表格">▦</button>
-          <button class="notepad-btn" id="insertImageBtn" title="插入图片">🖼️</button>
-          <button class="notepad-btn" id="findReplaceBtn" title="查找替换 (Ctrl+F)">🔍</button>
-
-          <!-- 更多（折叠不常用功能） -->
-          <button class="notepad-btn" id="moreToolsBtn" title="更多工具">⋯</button>
-
-          <span class="np-sep"></span>
-          <button class="font-size-btn" id="exportWordBtn" title="导出为 Word 文档" style="font-size: 14px;">📥</button>
-          <button class="font-size-btn" id="exportTxtBtn" title="导出为 TXT 纯文本" style="font-size: 14px;">📄</button>
-          <button class="font-size-btn" id="importTxtBtn" title="导入 TXT纯文本 / Word 文档" style="font-size: 14px;">📂</button>
+          <!-- 剪贴板 -->
+          <div class="np-grp">
+            <button class="notepad-btn" id="btnUndo" title="撤销 (Ctrl+Z)" aria-label="撤销"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-4"/></svg></button>
+            <button class="notepad-btn" id="btnRedo" title="重做 (Ctrl+Y)" aria-label="重做"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h4"/></svg></button>
+          </div>
+          <!-- 字体 -->
+          <div class="np-grp">
+            <button class="notepad-btn np-fmt" data-cmd="bold" title="加粗 (Ctrl+B)" aria-label="加粗"><b>B</b></button>
+            <button class="notepad-btn np-fmt" data-cmd="italic" title="斜体 (Ctrl+I)" aria-label="斜体"><i>I</i></button>
+            <button class="notepad-btn np-fmt" data-cmd="underline" title="下划线 (Ctrl+U)" aria-label="下划线"><u>U</u></button>
+            <button class="notepad-btn np-fmt" data-cmd="strikeThrough" title="删除线" aria-label="删除线"><s>S</s></button>
+            <button class="font-menu-btn" id="fontMenuBtn" title="切换选中文字的字体">
+              <span id="currentFontName">字体</span>
+              <svg class="np-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="np-size-grp">
+              <button class="font-size-btn" id="fontSizeMinus" title="缩小字号">A<span class="np-sup">−</span></button>
+              <button class="font-size-btn" id="fontSizePlus" title="放大字号">A<span class="np-sup">+</span></button>
+              <button class="font-size-btn reset-size" id="fontSizeReset" title="重置字号">Aa</button>
+            </div>
+          </div>
+          <!-- 插入与编辑 -->
+          <div class="np-grp">
+            <button class="notepad-btn" id="insertTableBtn" title="插入表格" aria-label="插入表格"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10M15 10v10"/></svg></button>
+            <button class="notepad-btn" id="insertImageBtn" title="插入图片" aria-label="插入图片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m4 18 5-5 4 4 3-3 4 4"/></svg></button>
+            <button class="notepad-btn" id="findReplaceBtn" title="查找替换 (Ctrl+F)" aria-label="查找替换"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.6-4.6"/></svg></button>
+            <!-- 更多（折叠不常用功能） -->
+            <button class="notepad-btn" id="moreToolsBtn" title="更多工具" aria-label="更多工具"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/></svg></button>
+          </div>
+          <!-- 文件 -->
+          <div class="np-grp">
+            <button class="font-size-btn" id="exportWordBtn" title="导出为 Word 文档（.docx，可直接用 Word/WPS 打开）" aria-label="导出为 Word"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M4 20h16"/></svg></button>
+            <button class="font-size-btn" id="exportTxtBtn" title="导出为 TXT 纯文本（.txt，不含图片与表格）" aria-label="导出为 TXT"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></button>
+            <button class="font-size-btn" id="importTxtBtn" title="导入 TXT / DOCX 文档（老版 .doc 需先另存为 .docx）" aria-label="导入文件"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button>
+          </div>
 
           <div class="font-dropdown" id="fontDropdown">
             <input type="text" class="font-search-input" id="fontSearchInput" placeholder="搜索字体…" autocomplete="off">
@@ -1332,10 +1362,15 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/>
           </svg>
-          <input type="text" id="mp-searchInput" placeholder="全网搜歌，按回车搜索，若播放失败请尝试其他歌曲" autocomplete="off">
+          <input type="text" id="mp-searchInput" placeholder="全网搜歌，点右侧按钮或按回车搜索" autocomplete="off">
           <button class="mp-search-clear" id="mp-searchClear" aria-label="清空">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="m6 6 12 12M18 6 6 18"/>
+            </svg>
+          </button>
+          <button class="mp-search-go" id="mp-searchGo" aria-label="搜索" title="搜索">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/>
             </svg>
           </button>
         </div>
@@ -1385,6 +1420,14 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 3.5v10.5"/><path d="m7.5 10 4.5 4.5L16.5 10"/><path d="M4.5 19.5h15"/>
               </svg>
+            </button>
+            <!-- 退出：关闭当前歌曲信息，回到初始界面（卡片保留） -->
+            <button class="mp-exit-btn" id="mp-exitBtn" aria-label="关闭当前歌曲，返回初始界面" title="关闭当前歌曲，返回初始界面">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/>
+                <path d="M10 8l-4 4 4 4"/><path d="M6 12h9"/>
+              </svg>
+              <span>退出</span>
             </button>
           </div>
         </div>
@@ -1560,23 +1603,29 @@
             <li style="display: flex; align-items: flex-start; gap: 10px;">
               <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">迷你记事本</span>
               <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
-                <strong>① 富文本：</strong>支持<strong>加粗 B、斜体 I、下划线 U、删除线 S</strong>；选中文字后可切换字体（微软雅黑/宋体/楷体/黑体/仿宋/华文行楷等 13 种）、放大 A+、缩小 A-、重置 Aa。点「⋯」更多工具还可设置<strong>字体颜色、背景高亮、上下标、段落对齐、列表、缩进、插入链接 / 分隔线</strong>。<br>
-                <strong>② 表格 / 图片：</strong>「▦」插入表格（最大 6×8）；「🖼️」插入本地图片（自动压缩到最长边 1200px，单张限 3MB）。<br>
-                <strong>③ 查找替换：</strong>点「🔍」或 Ctrl+F 弹出查找替换面板，支持上一个 / 下一个 / 替换 / 全部替换。<br>
-                <strong>④ 撤销重做：</strong>↩️ 撤销、↪️ 重做，也支持 Ctrl+Z / Ctrl+Y。<br>
-                <strong>⑤ 导出：</strong>📥 导出为 <strong>Word（.doc）</strong>，📄 导出为 <strong>TXT</strong>，文件名自动带日期；空内容会提示「记事本还是空的」。<br>
-                <strong>⑥ 导入：</strong>📂 从本地导入 TXT 或 .docx，会询问「追加到末尾」还是「覆盖现有内容」。<br>
-                <strong>⑦ 自动保存：</strong>输入停顿 500ms 后自动存入本地；粘贴时去除外部样式（仅保留纯文字和换行）。
+                <strong>① 工具栏（Word 风格）：</strong>按功能分四组——撤销 ↩ / 重做 ↪｜<strong>B 加粗、I 斜体、U 下划线、S 删除线</strong> + 字体下拉｜A+ 增大、A- 缩小、Aa 重置｜▦ 表格、🖼️ 图片、🔍 查找替换、⋯ 更多工具｜📥 导出 Word、📄 导出 TXT、📂 导入。<br>
+                <strong>② 字体 / 字号：</strong>字体下拉共 <strong>125 种</strong>字体，支持中文名、英文名、拼音搜索；A+ 每次 +2px、A- 每次 -2px、Aa 恢复 14px。反复调整只替换字号，<strong>不会层层嵌套</strong>。<br>
+                <strong>③ 更多工具（⋯）：</strong>字体颜色、背景高亮、上标 / 下标、左 / 中 / 右 / 两端对齐、有序与无序列表、增减缩进、插入链接、插入分隔线、清除格式，面板在执行后保持展开，方便连续操作。<br>
+                <strong>④ 表格 / 图片：</strong>「▦」悬停选择行列插入表格（最大 <strong>6×8</strong>）；「🖼️」插入本地图片（单张限 <strong>3MB</strong>，自动压缩到最长边 1200px，超出会提示）。<br>
+                <strong>⑤ 查找替换：</strong>点「🔍」或 Ctrl+F 打开面板，支持上一个 / 下一个 / 单处替换 / 全部替换；全部替换后会提示替换处数，可按 Ctrl+Z 撤销。<br>
+                <strong>⑥ 撤销重做：</strong>↩ / ↪ 或 Ctrl+Z / Ctrl+Y；除打字外，<strong>字体、字号、表格、图片、颜色、替换等格式操作同样可撤销</strong>（最多保留 100 步历史）。<br>
+                <strong>⑦ 导出：</strong>📥 导出 <strong>Word（.docx）</strong>、📄 导出 <strong>TXT</strong>，文件名自动带日期；内容为空时会提示「记事本还是空的」。<br>
+                <span style="color:#bbb;">· <strong>.docx</strong> 是标准 Office 文档格式，Word / WPS / 手机 Office 都能<strong>直接打开</strong>，标题、加粗、斜体、颜色、表格、图片、链接、分隔线都会保留，导出的文件也能再导入回来；<br>· <strong>TXT</strong> 只保存纯文字（图片与表格带不过去，会先提示），适合贴到别处当纯文本用。</span><br>
+                <strong>⑧ 导入：</strong>📂 支持 <strong>TXT</strong> 与 <strong>.docx</strong> 两种文件，导入 .docx 会保留标题、加粗、表格与图片；<strong>老版 .doc 不支持</strong>（会提示先用 Word「另存为 .docx」再导入），单个文件上限 <strong>20MB</strong>；写入前会询问「追加到末尾」还是「覆盖现有内容」。<br>
+                <strong>⑨ 自动保存：</strong>停止输入 500ms 后自动存入浏览器本地；粘贴时去除外部样式，仅保留纯文字与换行。
               </span>
             </li>
 
             <li style="display: flex; align-items: flex-start; gap: 10px;">
               <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">音乐播放器</span>
               <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
-                <strong>① 搜歌播放：</strong>在卡片内搜索框输入歌名按回车，自动聚合全网（网易/QQ/酷我/JOOX）音源，点击结果即可播放。<br>
-                <strong>② 下载：</strong>点击歌曲名右侧的<strong>下载图标📥</strong>即可保存音频。<br>
-                <strong>③ 控制：</strong>支持进度条拖动、上一首/下一首、静音切换。<br>
-                <strong>④ 歌词：</strong>封面下方会实时滚动单行歌词，卡片本身可拖动和缩放，完全与布局系统融合。
+                <strong>① 搜歌播放：</strong>搜索框输入歌名后，<strong>点右侧圆形放大镜按钮</strong>或按回车即可搜索（手机上没有回车键，用按钮更方便）；自动聚合<strong>网易 / QQ / 酷我 / JOOX</strong> 音源，每条结果标注来源，点击即可播放；点 × 清空输入并收起结果。<br>
+                <strong>② 退出：</strong>点右上角「⤺ 退出」= <strong>关闭当前歌曲</strong>：暂停播放，歌名 / 封面 / 歌词 / 进度全部复位，回到「搜索一首歌开始吧」的初始界面，<strong>卡片本身保留、不会消失</strong>。退出同时清除该曲的播放位置记忆，下次打开是干净的初始状态。<br>
+                <strong>③ 收藏：</strong>⭐ 收藏当前歌曲，点列表图标打开收藏面板，支持搜索收藏、单条删除、点击播放。<br>
+                <strong>④ 下载：</strong>点右上角 📥 下载当前歌曲音频；无可下载音源会提示。<br>
+                <strong>⑤ 控制：</strong>播放 / 暂停、上一首 / 下一首、音量滑块与静音切换；进度条可拖动定位，并<strong>按 0.1 秒精度记录</strong>播放位置，刷新页面后自动回到上次听到的地方。<br>
+                <strong>⑥ 歌词：</strong>封面下方解析 LRC 歌词并实时单行滚动，纯音乐显示「♪ 纯音乐，请欣赏」。<br>
+                <strong>⑦ 布局：</strong>卡片可拖动标题栏移动、可缩放，与整体布局系统融合。
               </span>
             </li>
 
@@ -1585,7 +1634,8 @@
               <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
                 <strong>① 主题：</strong>右上角 🌙/☀️ 按钮切换深色/浅色，首次访问会跟随系统偏好。<br>
                 <strong>② 字号：</strong>木鱼上方「🔍 字号」按钮循环切换<strong>小 / 中 / 大</strong>三档，整站等比缩放（0.9 / 1.0 / 1.15），自动保存。<br>
-                <strong>③ 背景：</strong>木鱼上方「🖼️ 背景设置」可<strong>上传图片</strong>（自动压缩到最长边 2560px，限 4MB 内）或选择<strong>纯色背景</strong>（自动根据亮度切换深浅主题和文字颜色），也可「恢复默认渐变」。
+                <strong>③ 背景：</strong>木鱼上方「🖼️ 背景设置」可<strong>上传图片</strong>（自动压缩到最长边 2560px，限 4MB 内）或选择<strong>纯色背景</strong>（自动根据亮度切换深浅主题和文字颜色），也可「恢复默认渐变」。<br>
+                <strong>④ 节日背景：</strong>元旦、春节、劳动节、中秋节、国庆节当天<strong>首次打开</strong>会自动换上当天专属背景，并按图片亮度自动配好深浅主题；提示条里点「换回我的背景」即可还原，还原后再点「恢复节日背景」又能切回。<strong>同一天第二次打开不会重复替换</strong>，你自己的背景也不会被覆盖，更不会被写进配置导出。<br>
               </span>
             </li>
 
@@ -1593,7 +1643,7 @@
               <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">数据备份</span>
               <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
                 <strong>① 导出：</strong>点击木鱼上方「📤 导出」，会提示设置加密密码（可留空不加密）。设置密码后文件经<strong>多层混淆处理</strong>（5 轮 XOR + 位置洗牌 + 自定义字母表 Base64 + 外壳包装，<u>非密码学级加密</u>，仅防随手查看，请勿存敏感数据；<code>file://</code> 下同样可用），导出为「配置.txt」，包含卡片布局、快捷方式、待办、笔记、主题、字号、引擎、城市、打工设置、背景等全部数据。<br>
-                <strong>② 导入：</strong>点击「📥 导入」选择配置 txt，若是加密文件会要求输入密码，解密成功并确认覆盖后自动应用并刷新页面；密码错误或文件损坏会明确提示。
+                <strong>② 导入：</strong>点击「📥 导入」选择配置 txt，若是加密文件会要求输入密码，解密成功并确认覆盖后<strong>立即生效、无需刷新页面</strong>；旧版配置里没有的组件会自动用默认布局补齐，不会让卡片消失；密码错误或文件损坏会明确提示。
               </span>
             </li>
 
@@ -1983,7 +2033,7 @@
           const currentHour = new Date().getHours();
           hourlyData.hourly.forEach((h) => {
             const timeStr = h.fxTime.split('T')[1].substring(0, 5);
-            const hHour = parseInt(timeStr.split(':')[0]);
+            const hHour = parseInt(timeStr.split(':')[0], 10);
             const hEmoji = iconToEmoji(h.icon);
             const div = document.createElement('div');
             div.className = 'hourly-item';
@@ -2024,12 +2074,15 @@
     }
   }
 
+  let citySearchToken = 0;
   async function searchCity(keyword) {
     if (!keyword) return;
+    const myTok = ++citySearchToken;
     cityList.innerHTML = `<div class="city-tip">搜索中...</div>`;
     try {
       const res = await fetch(`https://${API_HOST}/geo/v2/city/lookup?location=${encodeURIComponent(keyword)}&key=${QWEATHER_KEY}&number=10`);
       const data = await res.json();
+      if (myTok !== citySearchToken) return;   // 已有更新的搜索，丢弃这次结果
       if (data.code === '200' && data.location && data.location.length > 0) {
         cityList.innerHTML = '';
         data.location.forEach(loc => {
@@ -2050,6 +2103,7 @@
         cityList.innerHTML = `<div class="city-tip">未找到该城市</div>`;
       }
     } catch (e) {
+      if (myTok !== citySearchToken) return;   // 已有更新的搜索，丢弃这次结果
       cityList.innerHTML = `<div class="city-tip">未找到该城市</div>`;
     }
   }
@@ -2291,7 +2345,9 @@
   function iconUrlOf(sc) {
     if (sc.icon && /^https?:\/\//i.test(sc.icon)) return sc.icon;
     try {
-      const host = new URL(sc.url).hostname;
+      const raw = /^[a-z][a-z0-9+.\-]*:\/\//i.test(sc.url) ? sc.url : 'https://' + sc.url;
+      const host = new URL(raw).hostname;
+      if (!host || (host.indexOf('.') === -1 && host !== 'localhost')) return '';
       return `https://favicon.im/${host}?larger=true`;
     } catch(e) { return ''; }
   }
@@ -2531,7 +2587,11 @@
     if (!name) { toast('请输入名称'); mName.focus(); return; }
     if (!url) { toast('请输入网址'); mUrl.focus(); return; }
     if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-    try { new URL(url); } catch(e) { toast('网址格式不正确'); return; }
+    let _parsed = null;
+    try { _parsed = new URL(url); } catch(e) { toast('网址格式不正确'); return; }
+    if (!_parsed.hostname || (_parsed.hostname.indexOf('.') === -1 && _parsed.hostname !== 'localhost')) {
+      toast('网址格式不正确，请填写完整域名，例如 example.com'); mUrl.focus(); return;
+    }
     shortcuts.push({ name, url, icon });
     store.set('nt_shortcuts', shortcuts);
     renderShortcuts();
@@ -2615,7 +2675,7 @@
     inputS.value = String(s).padStart(2, '0');
   }
   function getInputSeconds() {
-    return (parseInt(inputH.value) || 0) * 3600 + (parseInt(inputM.value) || 0) * 60 + (parseInt(inputS.value) || 0);
+    return (parseInt(inputH.value, 10) || 0) * 3600 + (parseInt(inputM.value, 10) || 0) * 60 + (parseInt(inputS.value, 10) || 0);
   }
   function stopTimer() {
     clearInterval(timerInt); isRunning = false;
@@ -2644,7 +2704,7 @@
       } else if (Math.abs(inputSec - timerLeft) > 1) {
         timerTotal = inputSec; timerLeft = inputSec;
       }
-      if (timerTotal <= 0) return;
+      if (timerTotal <= 0) { toast('请先设置计时时长，再点开始'); return; }
       timerOriginal = timerTotal;
       isRunning = true; btnStartTimer.textContent = '暂停'; btnStartTimer.classList.remove('primary');
       timerInt = setInterval(() => {
@@ -2746,14 +2806,14 @@
 
   // ================= 节日 =================
   const HOLIDAY_DATES = {
-    '元旦': ['2023-01-01', '2024-01-01', '2025-01-01', '2026-01-01', '2027-01-01', '2028-01-01'],
-    '春节': ['2023-01-22', '2024-02-10', '2025-01-29', '2026-02-17', '2027-02-06', '2028-01-26'],
-    '劳动节': ['2023-05-01', '2024-05-01', '2025-05-01', '2026-05-01', '2027-05-01', '2028-05-01'],
-    '国庆节': ['2023-10-01', '2024-10-01', '2025-10-01', '2026-10-01', '2027-10-01', '2028-10-01'],
-    '中秋节': ['2023-09-29', '2024-09-17', '2025-10-06', '2026-09-25', '2027-09-15', '2028-10-03']
+    '元旦': ['2023-01-01', '2024-01-01', '2025-01-01', '2026-01-01', '2027-01-01', '2028-01-01', '2029-01-01', '2030-01-01', '2031-01-01', '2032-01-01', '2033-01-01', '2034-01-01', '2035-01-01', '2036-01-01', '2037-01-01', '2038-01-01', '2039-01-01', '2040-01-01'],
+    '春节': ['2023-01-22', '2024-02-10', '2025-01-29', '2026-02-17', '2027-02-06', '2028-01-26', '2029-02-13', '2030-02-03', '2031-01-23', '2032-02-11', '2033-01-31', '2034-02-19', '2035-02-08', '2036-01-28', '2037-02-15', '2038-02-04', '2039-01-24', '2040-02-12'],
+    '劳动节': ['2023-05-01', '2024-05-01', '2025-05-01', '2026-05-01', '2027-05-01', '2028-05-01', '2029-05-01', '2030-05-01', '2031-05-01', '2032-05-01', '2033-05-01', '2034-05-01', '2035-05-01', '2036-05-01', '2037-05-01', '2038-05-01', '2039-05-01', '2040-05-01'],
+    '国庆节': ['2023-10-01', '2024-10-01', '2025-10-01', '2026-10-01', '2027-10-01', '2028-10-01', '2029-10-01', '2030-10-01', '2031-10-01', '2032-10-01', '2033-10-01', '2034-10-01', '2035-10-01', '2036-10-01', '2037-10-01', '2038-10-01', '2039-10-01', '2040-10-01'],
+    '中秋节': ['2023-09-29', '2024-09-17', '2025-10-06', '2026-09-25', '2027-09-15', '2028-10-03', '2029-09-22', '2030-09-12', '2031-10-01', '2032-09-19', '2033-09-08', '2034-09-27', '2035-09-16', '2036-10-04', '2037-09-24', '2038-09-13', '2039-10-02', '2040-09-20']
   };
   // 数据覆盖的最后一年：超出此年份后改用规则推算兜底
-  const HOLIDAY_DATA_LAST_YEAR = 2028;
+  const HOLIDAY_DATA_LAST_YEAR = 2040;
 
   // 固定公历节日规则：month 从 1 开始
   const FIXED_SOLAR_HOLIDAYS = {
@@ -2924,7 +2984,7 @@
   });
   const workDayCheckboxes = document.querySelectorAll('.work-day');
   workDayCheckboxes.forEach(cb => {
-    const dayIndex = parseInt(cb.value);
+    const dayIndex = parseInt(cb.value, 10);
     if (typeof workDays[dayIndex] !== 'boolean') workDays[dayIndex] = (dayIndex >= 1 && dayIndex <= 5);
     cb.checked = workDays[dayIndex];
     cb.addEventListener('change', () => {
@@ -3157,13 +3217,16 @@
     exchangeMeta.textContent = `1 ${from.toUpperCase()} ≈ ${rate.toLocaleString('zh-CN', { maximumFractionDigits: 6 })} ${to.toUpperCase()} · 数据日期 ${exchangeRatesCache.date}`;
   }
 
+  let npExchangeReqId = 0, npExchangeRetry = 0, npExchangeRetryTimer = null;
   async function fetchExchangeRates(force = false) {
     // force=true 时允许打断上一次请求
     if (exchangeLoading && !force) return;
+    if (npExchangeRetryTimer) { clearTimeout(npExchangeRetryTimer); npExchangeRetryTimer = null; }
     if (exchangeAbortCtrl) {
       try { exchangeAbortCtrl.abort(); } catch(e) {}
       exchangeAbortCtrl = null;
     }
+    const reqId = ++npExchangeReqId;   // 请求令牌：旧请求晚回来也不会覆盖新结果
     exchangeLoading = true;
     exchangeMeta.textContent = '正在获取汇率…';
 
@@ -3175,30 +3238,37 @@
 
     let json = null;
     for (const url of mirrors) {
+      let timer = null;
       try {
         exchangeAbortCtrl = new AbortController();
-        const timer = setTimeout(() => exchangeAbortCtrl && exchangeAbortCtrl.abort(), 8000);
-        const res = await fetch(url, { signal: exchangeAbortCtrl.signal });
-        clearTimeout(timer);
+        const ctrl = exchangeAbortCtrl;
+        timer = setTimeout(() => ctrl.abort(), 8000);
+        const res = await fetch(url, { signal: ctrl.signal });
         if (!res.ok) { console.warn('exchange fetch fail:', url, res.status); continue; }
         json = await res.json();
         break;
       } catch (e) {
+        if (reqId !== npExchangeReqId) return;   // 已被更新的请求接管，别再往下走
         console.warn('exchange fetch error:', url, e.message);
+      } finally {
+        if (timer) clearTimeout(timer);          // 失败路径同样要清掉超时定时器
       }
     }
+    if (reqId !== npExchangeReqId) return;       // 期间又发起了新请求 → 本次结果作废
     exchangeAbortCtrl = null;
 
     if (!json || !json[base]) {
       exchangeMeta.textContent = '汇率获取失败，请稍后重试';
       exchangeResult.textContent = '--';
       exchangeLoading = false;
-      // 如果页面已经有旧数据，就保留旧数据；如果没有，3秒后自动重试一次
-      if (!exchangeRatesCache) {
-        setTimeout(() => fetchExchangeRates(), 3000);
+      // 有旧数据就保留旧数据；完全没有缓存时最多重试 3 次（旧实现每 3 秒无限重试，离线时一直在发包）
+      if (!exchangeRatesCache && npExchangeRetry < 3) {
+        npExchangeRetry++;
+        npExchangeRetryTimer = setTimeout(() => { npExchangeRetryTimer = null; fetchExchangeRates(); }, 3000 * npExchangeRetry);
       }
       return;
     }
+    npExchangeRetry = 0;
 
     // 👇 过滤掉脏数据，只保留有效的数字，防止页面显示 NaN
     const cleanData = {};
@@ -3486,25 +3556,22 @@
     tsResult.textContent = new Date().toLocaleString('zh-CN');
   });
   $('#tsConvBtn').addEventListener('click', () => {
-    let val = tsInput.value.trim();
-    if (!val) return;
-    // 尝试当作时间戳解析（10位秒，13位毫秒）
-    if (/^\d+$/.test(val)) {
-      let ts = parseInt(val);
-      if (val.length <= 10) ts *= 1000;
-      const d = new Date(ts);
-      if (!isNaN(d.getTime())) {
-        tsResult.textContent = `北京时间: ${d.toLocaleString('zh-CN')}\nISO格式: ${d.toISOString()}`;
-        return;
-      }
+    const val = tsInput.value.trim();
+    if (!val) { tsResult.textContent = '请先输入时间戳或日期'; return; }
+    // 纯数字（允许负号）：≤10 位按秒级处理，11 位及以上按毫秒级处理
+    if (/^-?\d+$/.test(val)) {
+      const rawNum = Number(val);
+      const digits = String(Math.abs(rawNum)).length;
+      const ms = digits <= 10 ? rawNum * 1000 : rawNum;
+      const d = new Date(ms);
+      if (isNaN(d.getTime())) { tsResult.textContent = '时间戳超出可表示范围'; return; }
+      tsResult.textContent = '本地时间: ' + d.toLocaleString('zh-CN') + '\nISO 格式: ' + d.toISOString();
+      return;
     }
-    // 尝试当作日期字符串解析
-    const d = new Date(val);
-    if (!isNaN(d.getTime())) {
-      tsResult.textContent = `秒级时间戳: ${Math.floor(d.getTime() / 1000)}\n毫秒级时间戳: ${d.getTime()}`;
-    } else {
-      tsResult.textContent = '格式无法识别';
-    }
+    // 非纯数字：当成日期字符串解析
+    const d2 = new Date(val);
+    if (isNaN(d2.getTime())) { tsResult.textContent = '格式无法识别'; return; }
+    tsResult.textContent = '秒级时间戳: ' + Math.floor(d2.getTime() / 1000) + '\n毫秒级时间戳: ' + d2.getTime();
   });
   // 初始化一次当前时间
   $('#tsNowBtn').click();
@@ -3592,7 +3659,22 @@
     if (historyStack.length > 100) historyStack.shift(); 
     historyIndex = historyStack.length - 1; 
   }
-  function saveNotepad() { store.set('nt_notepad', notepadEditor.innerHTML); }
+  let npSaveWarnAt = 0;
+  function saveNotepad() {
+    const html = notepadEditor.innerHTML;
+    // localStorage 有大容量上限（约 5MB），图片多的笔记很容易写满；
+    // 旧实现只 console.warn，用户以为已保存，刷新后内容丢失 → 这里必须明确告知
+    if (!store.set('nt_notepad', html) && Date.now() - npSaveWarnAt > 30000) {
+      npSaveWarnAt = Date.now();
+      toast('⚠️ 本地空间不足，笔记未能保存！请先「📥 导出 Word」备份，再删掉部分图片', {
+        actionText: '立即导出',
+        onAction: () => { const b = $('#exportWordBtn'); if (b) b.click(); }
+      });
+    }
+    // 字体/字号/表格/图片等格式操作不会触发 input 事件，这里补一次历史记录，保证 Ctrl+Z 能回退
+    clearTimeout(historyTimer);
+    historyTimer = setTimeout(() => { pushHistory(); }, 300);
+  }
   notepadEditor.addEventListener('paste', (e) => {
     e.preventDefault();
     const cd = (e.originalEvent || e).clipboardData;
@@ -3614,6 +3696,11 @@
   });
   let saveTimer;
   let isComposing = false;
+  // 输入到保存之间有 500ms 防抖：若在这 500ms 内关页面 / 切到后台被杀，最后一次编辑会丢
+  const flushNotepad = () => { if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; } saveNotepad(); };
+  window.addEventListener('pagehide', flushNotepad);
+  window.addEventListener('beforeunload', flushNotepad);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushNotepad(); });
   notepadEditor.addEventListener('compositionstart', () => { isComposing = true; });
   notepadEditor.addEventListener('compositionend', () => {
     isComposing = false;
@@ -3774,14 +3861,20 @@
         }
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const ctx2d = canvas.getContext('2d');
+        // JPEG 没有透明通道，透明 GIF/PNG 直接转换会把透明区画成黑块 → 先铺白底
+        ctx2d.fillStyle = '#fff';
+        ctx2d.fillRect(0, 0, w, h);
+        ctx2d.drawImage(img, 0, 0, w, h);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
         notepadEditor.focus();
         document.execCommand('insertHTML', false, `<img src="${dataUrl}" alt="图片" style="max-width:100%;border-radius:6px;margin:4px 0;">`);
         saveNotepad(); toast('🖼️ 图片已插入');
       };
+      img.onerror = () => toast('❌ 这张图片无法解码，换一张试试');
       img.src = ev.target.result;
     };
+    reader.onerror = () => toast('❌ 图片读取失败，请重试');
     reader.readAsDataURL(blob);
   }
   $('#insertImageBtn').addEventListener('mousedown', (e) => {
@@ -4078,7 +4171,11 @@
   });
 
   /* ---------- 窗口缩放 / 滚动时重新定位浮层 ---------- */
-  function repositionOpenPanels() {
+  function anyNotepadPanelOpen() {
+    return findPanel.classList.contains('show') || tablePicker.classList.contains('show') ||
+      moreToolsPanel.classList.contains('show') || fontDropdown.classList.contains('show');
+  }
+  function repositionOpenPanelsNow() {
     if (findPanel.classList.contains('show')) {
       positionFixedPanel(findPanel, $('#findReplaceBtn'), 'right');
     }
@@ -4092,12 +4189,23 @@
       positionFixedPanel(fontDropdown, fontMenuBtn, 'left');
     }
   }
+  // 拖动卡片 / 滚动 / 窗口缩放会高频触发；positionFixedPanel 内部要读布局做校准，
+  // 逐次调用会引发大量强制重排（拖动时明显掉帧）→ 用 rAF 合并成每帧最多一次
+  let repositionRaf = null;
+  function repositionOpenPanels() {
+    if (repositionRaf) return;
+    repositionRaf = requestAnimationFrame(() => {
+      repositionRaf = null;
+      repositionOpenPanelsNow();
+    });
+  }
   window.addEventListener('resize', repositionOpenPanels);
   window.addEventListener('scroll', repositionOpenPanels, true);
   (function(){
     const notepadWidget = document.querySelector('.widget[data-id="notepad"]');
     if (!notepadWidget) return;
-    const mo = new MutationObserver(() => repositionOpenPanels());
+    // 卡片被拖动时 style 每帧都在变，只有面板打开时才需要重定位
+    const mo = new MutationObserver(() => { if (anyNotepadPanelOpen()) repositionOpenPanels(); });
     mo.observe(notepadWidget, { attributes: true, attributeFilter: ['style'] });
   })();
 
@@ -4226,7 +4334,6 @@ replaceInput.addEventListener('keydown', (e) => {
     if (!kw) { toast('请输入查找内容'); return; }
     if (!findMatches.length) collectFindMatches(kw);
     if (!findMatches.length) { toast('没有可替换的内容'); return; }
-    if (!confirm(`确定要替换全部 ${findMatches.length} 处吗？`)) return;
 
     const count = findMatches.length;
     const rep = replaceInput.value;
@@ -4251,9 +4358,9 @@ replaceInput.addEventListener('keydown', (e) => {
     saveNotepad();
     // 清空匹配缓存（keyword 可能已不存在，重新扫一遍以刷新状态）
     collectFindMatches(kw);
-    toast(`✨ 已替换 ${count} 处`);
+    toast(`✨ 已替换 ${count} 处，可按 Ctrl+Z 撤销`);
   });
-  // ===== 字体菜单（128 种，支持搜索）=====
+  // ===== 字体菜单（125 种，支持搜索）=====
   const FONT_LIST = [
     /* ---------- 中文 · Windows 常见 ---------- */
     { name: '微软雅黑',            font: 'Microsoft YaHei',        fb: 'sans-serif' },
@@ -4581,6 +4688,60 @@ replaceInput.addEventListener('keydown', (e) => {
     }
   });
   // 字号调整（A+ / A- / Aa）
+  // 清理片段内遗留的 font-size 内联样式与空 span，避免 A+/A- 反复嵌套出多层 span
+  function npCleanSizeStyles(frag) {
+    Array.from(frag.querySelectorAll('[style]')).forEach(el => {
+      el.style.fontSize = '';
+      if (!el.getAttribute('style') || !el.style.cssText.trim()) el.removeAttribute('style');
+    });
+    Array.from(frag.querySelectorAll('span')).forEach(sp => {
+      if (!sp.attributes.length && !sp.className) {
+        const p = sp.parentNode;
+        while (sp.firstChild) p.insertBefore(sp.firstChild, sp);
+        p.removeChild(sp);
+      }
+    });
+  }
+  function npApplyFontSize(newSize) {
+    notepadEditor.focus();
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return false;
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return false;
+    // 若选区落在已设置字号的 span 内部，则以整个 span 作为替换范围，避免反复叠加出多层嵌套 span
+    let host = range.commonAncestorContainer;
+    if (host.nodeType === 3) host = host.parentElement;
+    let sizeSpan = null;
+    let n = host;
+    while (n && n !== notepadEditor) {
+      if (n.nodeType === 1 && n.style && n.style.fontSize) { sizeSpan = n; break; }
+      n = n.parentElement;
+    }
+    let exRange = range;
+    let useWholeSpan = false;
+    if (sizeSpan && range.intersectsNode(sizeSpan)) {
+      exRange = document.createRange();
+      exRange.selectNodeContents(sizeSpan);
+      useWholeSpan = true;
+    }
+    const frag = exRange.extractContents();
+    npCleanSizeStyles(frag);
+    const span = document.createElement('span');
+    span.style.fontSize = newSize + 'px';
+    span.appendChild(frag);
+    if (useWholeSpan && sizeSpan && sizeSpan.parentNode) {
+      // 原 span 内容已全部取出，用新 span 原地替换，层级不再增长
+      sizeSpan.parentNode.insertBefore(span, sizeSpan);
+      sizeSpan.parentNode.removeChild(sizeSpan);
+    } else {
+      exRange.insertNode(span);
+    }
+    sel.removeAllRanges();
+    const newRange = document.createRange();
+    newRange.selectNodeContents(span);
+    sel.addRange(newRange);
+    return true;
+  }
   function changeFontSize(delta) {
     notepadEditor.focus();
     const sel = window.getSelection();
@@ -4596,16 +4757,8 @@ replaceInput.addEventListener('keydown', (e) => {
     let newSize = Math.max(10, Math.min(100, currentSize + delta));
 
     if (!range.collapsed) {
-      // 选中了文字
-      const span = document.createElement('span');
-      span.style.fontSize = newSize + 'px';
-      span.appendChild(range.extractContents());
-      range.insertNode(span);
-      
-      sel.removeAllRanges();
-      const newRange = document.createRange();
-      newRange.selectNodeContents(span);
-      sel.addRange(newRange);
+      // 选中了文字：先清掉旧的字号包裹，再套一层新字号
+      npApplyFontSize(newSize);
     } else {
       // 没选中文字（仅光标）
       const span = document.createElement('span');
@@ -4627,58 +4780,1167 @@ replaceInput.addEventListener('keydown', (e) => {
     e.preventDefault(); e.stopPropagation(); notepadEditor.focus();
     const selection = window.getSelection(); if (!selection.rangeCount) return;
     const range = selection.getRangeAt(0); if (range.collapsed) return;
-    const span = document.createElement('span'); span.style.fontSize = '14px';
-    span.appendChild(range.extractContents()); range.insertNode(span);
-    selection.removeAllRanges(); const newRange = document.createRange();
-    newRange.selectNodeContents(span); selection.addRange(newRange);
+    npApplyFontSize(14);
     saveNotepad();
   });
-  // 导出 Word（增强：内联样式，表格/图片保留）
-  $('#exportWordBtn').addEventListener('click', () => {
-    const htmlContent = notepadEditor.innerHTML, plainText = notepadEditor.innerText;
-    if (!plainText.trim() && !htmlContent.includes('<img') && !htmlContent.includes('<table')) {
-      toast('❌ 记事本还是空的，没有内容可以导出哦'); return;
+  // ================= 记事本导出 DOCX：真 OOXML（零依赖，自实现 ZIP） =================
+
+  const NPDocx = (function () {
+
+    var XML_DECL = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+
+    var NS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" ' +
+
+             'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ' +
+
+             'xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" ' +
+
+             'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ' +
+
+             'xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"';
+
+
+
+    /* ---------- CRC32 + 最小 ZIP（store，无压缩） ---------- */
+
+    var CRC_TABLE = (function () {
+
+      var t = new Uint32Array(256);
+
+      for (var i = 0; i < 256; i++) {
+
+        var c = i;
+
+        for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+
+        t[i] = c >>> 0;
+
+      }
+
+      return t;
+
+    })();
+
+    function crc32(bytes) {
+
+      var c = 0xFFFFFFFF;
+
+      for (var i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+
+      return (c ^ 0xFFFFFFFF) >>> 0;
+
     }
-    const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset="utf-8"><title>我的记事本</title><style>body { font-family: 'Microsoft YaHei', sans-serif; font-size: 14px; line-height: 1.6; } table { border-collapse: collapse; } td, th { border: 1px solid #666; padding: 6px 10px; } img { max-width: 100%; } hr { border: none; border-top: 1px solid #999; } a { color: #0067c0; }</style></head><body>`;
-    const footer = "</body></html>";
-    const blob = new Blob(['\ufeff', header + htmlContent + footer], { type: 'application/msword' });
-    const url = URL.createObjectURL(blob); const a = document.createElement('a');
-    a.href = url; a.download = `记事本导出_${new Date().toISOString().slice(0, 10)}.doc`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-    toast('✅ 已成功导出为 Word 文档！');
+
+    var encoder = new TextEncoder();
+
+    function bytesOf(str) { return encoder.encode(str); }
+
+    function concatAll(list) {
+
+      var total = 0, i;
+
+      for (i = 0; i < list.length; i++) total += list[i].length;
+
+      var out = new Uint8Array(total), off = 0;
+
+      for (i = 0; i < list.length; i++) { out.set(list[i], off); off += list[i].length; }
+
+      return out;
+
+    }
+
+    function zip(files) {
+
+      var d = new Date();
+
+      var dosTime = ((d.getHours() & 31) << 11) | ((d.getMinutes() & 63) << 5) | ((d.getSeconds() / 2) | 0);
+
+      var dosDate = (((d.getFullYear() - 1980) & 127) << 9) | (((d.getMonth() + 1) & 15) << 5) | (d.getDate() & 31);
+
+      var locals = [], centrals = [], offset = 0;
+
+      files.forEach(function (f) {
+
+        var name = bytesOf(f.name), data = f.data, crc = crc32(data);
+
+        var lh = new Uint8Array(30 + name.length), dv = new DataView(lh.buffer);
+
+        dv.setUint32(0, 0x04034b50, true);
+
+        dv.setUint16(4, 20, true);
+
+        dv.setUint16(6, 0x0800, true);   // UTF-8 文件名
+
+        dv.setUint16(8, 0, true);        // 存储
+
+        dv.setUint16(10, dosTime, true);
+
+        dv.setUint16(12, dosDate, true);
+
+        dv.setUint32(14, crc, true);
+
+        dv.setUint32(18, data.length, true);
+
+        dv.setUint32(22, data.length, true);
+
+        dv.setUint16(26, name.length, true);
+
+        dv.setUint16(28, 0, true);
+
+        lh.set(name, 30);
+
+        locals.push(lh, data);
+
+
+
+        var cd = new Uint8Array(46 + name.length), dv2 = new DataView(cd.buffer);
+
+        dv2.setUint32(0, 0x02014b50, true);
+
+        dv2.setUint16(4, 20, true);
+
+        dv2.setUint16(6, 20, true);
+
+        dv2.setUint16(8, 0x0800, true);
+
+        dv2.setUint16(10, 0, true);
+
+        dv2.setUint16(12, dosTime, true);
+
+        dv2.setUint16(14, dosDate, true);
+
+        dv2.setUint32(16, crc, true);
+
+        dv2.setUint32(20, data.length, true);
+
+        dv2.setUint32(24, data.length, true);
+
+        dv2.setUint16(28, name.length, true);
+
+        dv2.setUint16(30, 0, true);
+
+        dv2.setUint16(32, 0, true);
+
+        dv2.setUint16(34, 0, true);
+
+        dv2.setUint16(36, 0, true);
+
+        dv2.setUint32(38, 0, true);
+
+        dv2.setUint32(42, offset, true);
+
+        cd.set(name, 46);
+
+        centrals.push(cd);
+
+        offset += lh.length + data.length;
+
+      });
+
+      var cdBuf = concatAll(centrals);
+
+      var eocd = new Uint8Array(22), dv3 = new DataView(eocd.buffer);
+
+      dv3.setUint32(0, 0x06054b50, true);
+
+      dv3.setUint16(4, 0, true);
+
+      dv3.setUint16(6, 0, true);
+
+      dv3.setUint16(8, files.length, true);
+
+      dv3.setUint16(10, files.length, true);
+
+      dv3.setUint32(12, cdBuf.length, true);
+
+      dv3.setUint32(16, offset, true);
+
+      dv3.setUint16(20, 0, true);
+
+      return concatAll(locals.concat([cdBuf, eocd]));
+
+    }
+
+
+
+    /* ---------- 工具 ---------- */
+
+    function esc(s) {
+
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+        .replace(/"/g, '&quot;').replace(/\u0000/g, '');
+
+    }
+
+    function hex2(n) { return ('0' + Math.max(0, Math.min(255, Math.round(n))).toString(16)).slice(-2).toUpperCase(); }
+
+    function colorToHex(v) {
+
+      if (!v) return '';
+
+      v = String(v).trim();
+
+      if (!v || v === 'transparent' || v === 'none') return '';
+
+      var m;
+
+      if ((m = /^#([0-9a-f]{3})$/i.exec(v))) {
+
+        var h = m[1];
+
+        return (h[0] + h[0] + h[1] + h[1] + h[2] + h[2]).toUpperCase();
+
+      }
+
+      if ((m = /^#([0-9a-f]{6})$/i.exec(v))) return m[1].toUpperCase();
+
+      if ((m = /^rgba?\(([^)]+)\)$/i.exec(v))) {
+
+        var p = m[1].split(',').map(function (x) { return parseFloat(x); });
+
+        if (p.length >= 4 && p[3] === 0) return '';
+
+        return hex2(p[0]) + hex2(p[1]) + hex2(p[2]);
+
+      }
+
+      // 命名色：借浏览器归一化
+
+      try {
+
+        var probe = document.createElement('span');
+
+        probe.style.color = v;
+
+        if (!probe.style.color) return '';
+
+        document.body.appendChild(probe);
+
+        var norm = getComputedStyle(probe).color;
+
+        probe.remove();
+
+        return colorToHex(norm);
+
+      } catch (e) { return ''; }
+
+    }
+
+    function pxToHalfPt(px) { return Math.max(8, Math.min(400, Math.round(px * 1.5))); }
+
+    function jcOf(el) {
+
+      var ta = (el.style && el.style.textAlign) || '';
+
+      if (!ta) return '';
+
+      if (ta === 'center') return 'center';
+
+      if (ta === 'right') return 'right';
+
+      if (ta === 'justify') return 'both';
+
+      if (ta === 'left') return 'left';
+
+      return '';
+
+    }
+
+
+
+    /* ---------- 媒体 / 关系 ---------- */
+
+    var MEDIA, RELS, ridSeq, imgSeq, docPrSeq;
+
+    function resetCtx() { MEDIA = []; RELS = []; ridSeq = 100; imgSeq = 0; docPrSeq = 1; }
+
+    function addMedia(src) {
+
+      var m = /^data:image\/(png|jpe?g|gif);base64,([\s\S]+)$/i.exec(src || '');
+
+      if (!m) return null;
+
+      var ext = m[1].toLowerCase();
+
+      if (ext === 'jpg') ext = 'jpeg';
+
+      var bin;
+
+      try { bin = atob(m[2].replace(/\s+/g, '')); } catch (e) { return null; }
+
+      var arr = new Uint8Array(bin.length);
+
+      for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+
+      imgSeq++;
+
+      var name = 'image' + imgSeq + '.' + ext;
+
+      var rid = 'rId' + (ridSeq++);
+
+      MEDIA.push({ name: 'word/media/' + name, data: arr });
+
+      RELS.push({ id: rid, target: 'media/' + name, type: 'image', external: false });
+
+      return { rid: rid, name: name };
+
+    }
+
+
+
+    /* ---------- 行内样式 ---------- */
+
+    function styleFrom(el, inherited) {
+
+      var s = {};
+
+      for (var k in inherited) if (Object.prototype.hasOwnProperty.call(inherited, k)) s[k] = inherited[k];
+
+      var tag = el.tagName ? el.tagName.toLowerCase() : '';
+
+      if (tag === 'b' || tag === 'strong') s.bold = true;
+
+      if (tag === 'i' || tag === 'em' || tag === 'cite') s.italic = true;
+
+      if (tag === 'u' || tag === 'ins') s.underline = true;
+
+      if (tag === 's' || tag === 'strike' || tag === 'del') s.strike = true;
+
+      if (tag === 'sup') s.vertAlign = 'superscript';
+
+      if (tag === 'sub') s.vertAlign = 'subscript';
+
+      if (tag === 'code' || tag === 'kbd' || tag === 'samp') s.font = 'Consolas';
+
+      if (tag === 'mark') s.shd = 'FFFF00';
+
+      if (tag === 'font') {
+
+        var fc = colorToHex(el.getAttribute('color'));
+
+        if (fc) s.color = fc;
+
+        if (el.getAttribute('face')) s.font = el.getAttribute('face');
+
+      }
+
+      var cs = el.style;
+
+      if (cs) {
+
+        if (cs.fontWeight) {
+
+          var fw = String(cs.fontWeight);
+
+          if (fw === 'bold' || fw === 'bolder' || parseInt(fw, 10) >= 600) s.bold = true;
+
+        }
+
+        if (cs.fontStyle === 'italic' || cs.fontStyle === 'oblique') s.italic = true;
+
+        var td = cs.textDecoration || cs.textDecorationLine || '';
+
+        if (/underline/.test(td)) s.underline = true;
+
+        if (/line-through/.test(td)) s.strike = true;
+
+        if (cs.fontSize) {
+
+          var px = parseFloat(cs.fontSize);
+
+          if (px > 0) s.sz = pxToHalfPt(px);
+
+        }
+
+        if (cs.color) { var c = colorToHex(cs.color); if (c) s.color = c; }
+
+        if (cs.backgroundColor) { var bg = colorToHex(cs.backgroundColor); if (bg) s.shd = bg; }
+
+        if (cs.fontFamily) {
+
+          var fam = cs.fontFamily.split(',')[0].replace(/["']/g, '').trim();
+
+          if (fam) s.font = fam;
+
+        }
+
+        if (cs.verticalAlign === 'super') s.vertAlign = 'superscript';
+
+        if (cs.verticalAlign === 'sub') s.vertAlign = 'subscript';
+
+      }
+
+      return s;
+
+    }
+
+    function rPrXml(st) {
+
+      var x = '';
+
+      if (st.font) x += '<w:rFonts w:ascii="' + esc(st.font) + '" w:hAnsi="' + esc(st.font) +
+
+        '" w:eastAsia="' + esc(st.font) + '" w:cs="' + esc(st.font) + '"/>';
+
+      if (st.bold) x += '<w:b/><w:bCs/>';
+
+      if (st.italic) x += '<w:i/><w:iCs/>';
+
+      if (st.strike) x += '<w:strike/>';
+
+      if (st.underline) x += '<w:u w:val="single"/>';
+
+      if (st.color) x += '<w:color w:val="' + st.color + '"/>';
+
+      if (st.shd) x += '<w:shd w:val="clear" w:color="auto" w:fill="' + st.shd + '"/>';
+
+      if (st.sz) x += '<w:sz w:val="' + st.sz + '"/><w:szCs w:val="' + st.sz + '"/>';
+
+      if (st.vertAlign) x += '<w:vertAlign w:val="' + st.vertAlign + '"/>';
+
+      return x ? '<w:rPr>' + x + '</w:rPr>' : '';
+
+    }
+
+    function textRun(text, st) {
+
+      if (text === null || text === undefined) return '';
+
+      var str = String(text).replace(/\u00a0/g, ' ');
+
+      if (!str) return '';
+
+      var parts = str.split(/\r\n|\r|\n/);
+
+      var inner = '';
+
+      for (var i = 0; i < parts.length; i++) {
+
+        if (i) inner += '<w:br/>';
+
+        if (parts[i]) inner += '<w:t xml:space="preserve">' + esc(parts[i]) + '</w:t>';
+
+      }
+
+      return inner ? '<w:r>' + rPrXml(st || {}) + inner + '</w:r>' : '';
+
+    }
+
+    function imageRun(imgEl) {
+
+      var info = addMedia(imgEl.getAttribute('src') || '');
+
+      if (!info) return textRun('［图片］', { color: '888888' });
+
+      var w = imgEl.naturalWidth || 400, h = imgEl.naturalHeight || 300;
+
+      var MAXEMU = 5300000;
+
+      var cx = w * 9525, cy = h * 9525;
+
+      if (cx > MAXEMU) { cy = Math.round(cy * MAXEMU / cx); cx = MAXEMU; }
+
+      if (cy > 7200000) { cx = Math.round(cx * 7200000 / cy); cy = 7200000; }
+
+      var id = docPrSeq++;
+
+      return '<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">' +
+
+        '<wp:extent cx="' + cx + '" cy="' + cy + '"/><wp:effectExtent l="0" t="0" r="0" b="0"/>' +
+
+        '<wp:docPr id="' + id + '" name="图片' + id + '"/>' +
+
+        '<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">' +
+
+        '<pic:pic><pic:nvPicPr><pic:cNvPr id="' + id + '" name="' + esc(info.name) + '"/><pic:cNvPicPr/></pic:nvPicPr>' +
+
+        '<pic:blipFill><a:blip r:embed="' + info.rid + '"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>' +
+
+        '<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm>' +
+
+        '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic>' +
+
+        '</a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
+
+    }
+
+
+
+    var BLOCK = { p: 1, div: 1, h1: 1, h2: 1, h3: 1, h4: 1, h5: 1, h6: 1, ul: 1, ol: 1, li: 1,
+
+      table: 1, thead: 1, tbody: 1, tfoot: 1, tr: 1, td: 1, th: 1, hr: 1, blockquote: 1, pre: 1, figure: 1, section: 1, article: 1 };
+
+
+
+    function inlineXml(node, st) {
+
+      var out = '';
+
+      var kids = node.childNodes || [];
+
+      for (var i = 0; i < kids.length; i++) {
+
+        var n = kids[i];
+
+        if (n.nodeType === 3) { out += textRun(n.nodeValue, st); continue; }
+
+        if (n.nodeType !== 1) continue;
+
+        var tag = n.tagName.toLowerCase();
+
+        if (tag === 'script' || tag === 'style') continue;
+
+        if (tag === 'br') { out += '<w:r>' + rPrXml(st) + '<w:br/></w:r>'; continue; }
+
+        if (tag === 'img') { out += imageRun(n); continue; }
+
+        if (tag === 'a') {
+
+          var href = n.getAttribute('href') || '';
+
+          var inner = inlineXml(n, styleFrom(n, st));
+
+          if (/^(https?:\/\/|mailto:)/i.test(href)) {
+
+            var rid = 'rId' + (ridSeq++);
+
+            RELS.push({ id: rid, target: href, type: 'hyperlink', external: true });
+
+            out += '<w:hyperlink r:id="' + rid + '">' + inner + '</w:hyperlink>';
+
+          } else { out += inner; }
+
+          continue;
+
+        }
+
+        if (BLOCK[tag]) {   // 行内位置遇到块级：用换行降级
+
+          out += '<w:r>' + rPrXml(st) + '<w:br/></w:r>' + inlineXml(n, st);
+
+          continue;
+
+        }
+
+        out += inlineXml(n, styleFrom(n, st));
+
+      }
+
+      return out;
+
+    }
+
+
+
+    function paraXml(runs, ctx) {
+
+      ctx = ctx || {};
+
+      var pPr = '';
+
+      if (ctx.style) pPr += '<w:pStyle w:val="' + ctx.style + '"/>';
+
+      pPr += '<w:spacing w:before="0" w:after="100" w:line="300" w:lineRule="auto"/>';
+
+      if (ctx.indent) pPr += '<w:ind w:left="' + ctx.indent + '"' + (ctx.hanging ? ' w:hanging="' + ctx.hanging + '"' : '') + '/>';
+
+      if (ctx.jc) pPr += '<w:jc w:val="' + ctx.jc + '"/>';
+
+      return '<w:p><w:pPr>' + pPr + '</w:pPr>' + (runs || '') + '</w:p>';
+
+    }
+
+
+
+    function tableXml(tbl, ctx) {
+
+      var rows = [], i;
+
+      for (i = 0; i < (tbl.rows ? tbl.rows.length : 0); i++) rows.push(tbl.rows[i]);
+
+      if (!rows.length) return '';
+
+      var colCount = 1;
+
+      rows.forEach(function (r) { if (r.cells.length > colCount) colCount = r.cells.length; });
+
+      var totalTw = 9000, cw = Math.floor(totalTw / colCount);
+
+      var out = '<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/><w:tblBorders>';
+
+      ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].forEach(function (k) {
+
+        out += '<w:' + k + ' w:val="single" w:sz="4" w:space="0" w:color="808080"/>';
+
+      });
+
+      out += '</w:tblBorders><w:tblLook w:val="04A0"/></w:tblPr><w:tblGrid>';
+
+      for (i = 0; i < colCount; i++) out += '<w:gridCol w:w="' + cw + '"/>';
+
+      out += '</w:tblGrid>';
+
+      rows.forEach(function (row) {
+
+        out += '<w:tr>';
+
+        for (var c = 0; c < row.cells.length; c++) {
+
+          var cell = row.cells[c];
+
+          var isTh = cell.tagName.toLowerCase() === 'th';
+
+          var st = isTh ? { bold: true } : {};
+
+          var inner = emitBlock(cell, { st: st });
+
+          if (!inner) inner = paraXml('', {});
+
+          out += '<w:tc><w:tcPr><w:tcW w:w="' + cw + '" w:type="dxa"/>' +
+
+            (isTh ? '<w:shd w:val="clear" w:color="auto" w:fill="F2F2F2"/>' : '') +
+
+            '</w:tcPr>' + inner + '</w:tc>';
+
+        }
+
+        out += '</w:tr>';
+
+      });
+
+      out += '</w:tbl>';
+
+      // 表格后补一个空段落，避免 Word 里表格紧贴下一块
+
+      return out + '<w:p><w:pPr><w:spacing w:after="60"/></w:pPr></w:p>';
+
+    }
+
+
+
+    function listXml(listEl, ctx) {
+
+      var ordered = listEl.tagName.toLowerCase() === 'ol';
+
+      var out = '', n = 1;
+
+      var baseIndent = (ctx.indent || 0) + 420;
+
+      for (var i = 0; i < listEl.children.length; i++) {
+
+        var li = listEl.children[i];
+
+        if (li.tagName.toLowerCase() !== 'li') continue;
+
+        var prefix = ordered ? ((li.getAttribute('value') || n) + '. ') : '• ';
+
+        n++;
+
+        var inner = emitBlock(li, { st: ctx.st || {}, indent: baseIndent, hanging: 300 });
+
+        if (!inner) inner = paraXml('', { indent: baseIndent });
+
+        var idx1 = inner.indexOf('<w:r>'), idx2 = inner.indexOf('<w:r ');
+
+        var idx = idx1;
+
+        if (idx2 >= 0 && (idx < 0 || idx2 < idx)) idx = idx2;
+
+        var prefixRun = textRun(prefix, ctx.st || {});
+
+        if (idx >= 0) inner = inner.slice(0, idx) + prefixRun + inner.slice(idx);
+
+        else inner = paraXml(prefixRun, { indent: baseIndent }) + inner;
+
+        out += inner;
+
+      }
+
+      return out;
+
+    }
+
+
+
+    function emitBlock(rootEl, ctx) {
+
+      ctx = ctx || {};
+
+      var out = '', acc = '';
+
+      var flush = function () {
+
+        if (acc) { out += paraXml(acc, ctx); acc = ''; }
+
+      };
+
+      var kids = rootEl.childNodes || [];
+
+      for (var i = 0; i < kids.length; i++) {
+
+        var n = kids[i];
+
+        if (n.nodeType === 3) {
+
+          var t = n.nodeValue;
+
+          if (!t) continue;
+
+          if (acc === '' && !t.replace(/[\s\u00a0]/g, '')) continue;
+
+          acc += textRun(t, ctx.st || {});
+
+          continue;
+
+        }
+
+        if (n.nodeType !== 1) continue;
+
+        var tag = n.tagName.toLowerCase();
+
+        if (tag === 'script' || tag === 'style') continue;
+
+        if (BLOCK[tag]) {
+
+          flush();
+
+          out += handleBlock(n, ctx);
+
+        } else {
+
+          acc += inlineXml(n, ctx.st || {});
+
+        }
+
+      }
+
+      flush();
+
+      return out;
+
+    }
+
+
+
+    function handleBlock(el, ctx) {
+
+      var tag = el.tagName.toLowerCase();
+
+      if (tag === 'table') return tableXml(el, ctx);
+
+      if (tag === 'ul' || tag === 'ol') return listXml(el, ctx);
+
+      if (tag === 'hr') {
+
+        return '<w:p><w:pPr><w:spacing w:before="80" w:after="120"/><w:pBdr>' +
+
+          '<w:bottom w:val="single" w:sz="6" w:space="1" w:color="999999"/></w:pBdr></w:pPr></w:p>';
+
+      }
+
+      if (tag === 'blockquote') return emitBlock(el, { st: ctx.st, indent: (ctx.indent || 0) + 420 });
+
+      if (tag === 'pre') {
+
+        return paraXml(textRun(el.innerText || el.textContent || '', { font: 'Consolas', sz: 19 }),
+
+          { indent: ctx.indent || 0 });
+
+      }
+
+      if (/^h[1-6]$/.test(tag)) {
+
+        var lvl = Math.min(3, parseInt(tag.charAt(1), 10));
+
+        var runsH = inlineXml(el, styleFrom(el, Object.assign({}, ctx.st, { bold: true })));
+
+        return paraXml(runsH, { style: 'Heading' + lvl, jc: jcOf(el), indent: ctx.indent || 0 });
+
+      }
+
+      var hasBlockKid = false;
+
+      for (var i = 0; i < el.children.length; i++) {
+
+        if (BLOCK[el.children[i].tagName.toLowerCase()]) { hasBlockKid = true; break; }
+
+      }
+
+      if (hasBlockKid) return emitBlock(el, ctx);
+
+      var runs = inlineXml(el, styleFrom(el, ctx.st || {}));
+
+      return paraXml(runs, { jc: jcOf(el), indent: ctx.indent || 0, style: ctx.style });
+
+    }
+
+
+
+    /* ---------- 包结构 ---------- */
+
+    function contentTypesXml() {
+
+      return XML_DECL + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+
+        '<Default Extension="xml" ContentType="application/xml"/>' +
+
+        '<Default Extension="png" ContentType="image/png"/>' +
+
+        '<Default Extension="jpeg" ContentType="image/jpeg"/>' +
+
+        '<Default Extension="jpg" ContentType="image/jpeg"/>' +
+
+        '<Default Extension="gif" ContentType="image/gif"/>' +
+
+        '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+
+        '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>' +
+
+        '</Types>';
+
+    }
+
+    function pkgRelsXml() {
+
+      return XML_DECL + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+
+        '</Relationships>';
+
+    }
+
+    function docRelsXml() {
+
+      var out = XML_DECL + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>';
+
+      RELS.forEach(function (r) {
+
+        var type = r.type === 'image'
+
+          ? 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image'
+
+          : 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink';
+
+        out += '<Relationship Id="' + r.id + '" Type="' + type + '" Target="' + esc(r.target) + '"' +
+
+          (r.external ? ' TargetMode="External"' : '') + '/>';
+
+      });
+
+      return out + '</Relationships>';
+
+    }
+
+    function stylesXml() {
+
+      var head = XML_DECL + '<w:styles ' + NS + '>' +
+
+        '<w:docDefaults><w:rPrDefault><w:rPr>' +
+
+        '<w:rFonts w:ascii="Microsoft YaHei" w:hAnsi="Microsoft YaHei" w:eastAsia="Microsoft YaHei" w:cs="Microsoft YaHei"/>' +
+
+        '<w:sz w:val="21"/><w:szCs w:val="21"/>' +
+
+        '</w:rPr></w:rPrDefault><w:pPrDefault><w:pPr>' +
+
+        '<w:spacing w:after="100" w:line="300" w:lineRule="auto"/>' +
+
+        '</w:pPr></w:pPrDefault></w:docDefaults>' +
+
+        '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>';
+
+      var sizes = { 1: 36, 2: 30, 3: 26 };
+
+      for (var lvl in sizes) {
+
+        head += '<w:style w:type="paragraph" w:styleId="Heading' + lvl + '">' +
+
+          '<w:name w:val="heading ' + lvl + '"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/>' +
+
+          '<w:pPr><w:keepNext/><w:spacing w:before="200" w:after="100"/><w:outlineLvl w:val="' + (lvl - 1) + '"/></w:pPr>' +
+
+          '<w:rPr><w:b/><w:sz w:val="' + sizes[lvl] + '"/><w:szCs w:val="' + sizes[lvl] + '"/></w:rPr></w:style>';
+
+      }
+
+      return head + '</w:styles>';
+
+    }
+
+
+
+    function build(rootEl) {
+
+      resetCtx();
+
+      var bodyXml = emitBlock(rootEl, { st: {} });
+
+      if (!bodyXml) bodyXml = '<w:p/>';
+
+      var docXml = XML_DECL + '<w:document ' + NS + '><w:body>' + bodyXml +
+
+        '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>' +
+
+        '<w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="851" w:footer="992" w:gutter="0"/>' +
+
+        '</w:sectPr></w:body></w:document>';
+
+      var files = [
+
+        { name: '[Content_Types].xml', data: bytesOf(contentTypesXml()) },
+
+        { name: '_rels/.rels', data: bytesOf(pkgRelsXml()) },
+
+        { name: 'word/document.xml', data: bytesOf(docXml) },
+
+        { name: 'word/styles.xml', data: bytesOf(stylesXml()) }
+
+      ];
+
+      if (RELS.length) files.push({ name: 'word/_rels/document.xml.rels', data: bytesOf(docRelsXml()) });
+
+      for (var i = 0; i < MEDIA.length; i++) files.push(MEDIA[i]);
+
+      return new Blob([zip(files)], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+
+    }
+
+
+
+    return { build: build, _zip: zip };
+
+  })();
+
+  // ---------- 记事本导出 / 导入 公共工具 ----------
+  function npDownload(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+  function npDateStamp() {
+    const d = new Date(), p = (n) => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+  function npEscapeHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  // ===== 通用选择弹窗（替代 confirm：让"取消"真正等于取消） =====
+  function npAskChoice(opts) {
+    opts = opts || {};
+    return new Promise((resolve) => {
+      const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const mask = document.createElement('div');
+      mask.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:24px;';
+      const card = document.createElement('div');
+      card.style.cssText = 'width:min(400px,90vw);border-radius:14px;padding:18px;box-shadow:0 18px 48px rgba(0,0,0,.38);' +
+        (dark ? 'background:#1d222c;color:#e8ecf3;border:1px solid rgba(255,255,255,.12);'
+              : 'background:#fff;color:#1a1a1a;border:1px solid rgba(0,0,0,.1);');
+      const titleEl = document.createElement('div');
+      titleEl.textContent = opts.title || '';
+      titleEl.style.cssText = 'font-size:14.5px;font-weight:700;margin-bottom:8px;';
+      const descEl = document.createElement('div');
+      descEl.textContent = opts.desc || '';
+      descEl.style.cssText = 'font-size:12.5px;line-height:1.75;white-space:pre-line;opacity:.85;margin-bottom:14px;';
+      const rowEl = document.createElement('div');
+      rowEl.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;';
+      card.appendChild(titleEl); card.appendChild(descEl); card.appendChild(rowEl);
+      mask.appendChild(card);
+      let settled = false;
+      const finish = (val) => {
+        if (settled) return;
+        settled = true;
+        document.removeEventListener('keydown', onKey, true);
+        if (mask.parentNode) mask.parentNode.removeChild(mask);
+        resolve(val);
+      };
+      function onKey(ev) {
+        if (ev.key === 'Escape') { ev.stopPropagation(); finish(opts.cancelValue); }
+      }
+      (opts.buttons || []).forEach((b) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = b.text;
+        btn.style.cssText = 'border:none;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;' +
+          (b.primary ? 'background:var(--accent,#3b82f6);color:#fff;' : 'background:rgba(127,127,127,.18);color:inherit;');
+        btn.addEventListener('click', (ev) => { ev.stopPropagation(); finish(b.value); });
+        rowEl.appendChild(btn);
+      });
+      mask.addEventListener('mousedown', (ev) => { if (ev.target === mask) finish(opts.cancelValue); });
+      document.addEventListener('keydown', onKey, true);
+      document.body.appendChild(mask);
+    });
+  }
+
+  // ===== 导出前图片归一化：Word 只认 png/jpeg/gif，其余（webp/avif/svg）先转 png =====
+  function npNormalizeImages(root) {
+    const imgs = Array.prototype.slice.call(root.querySelectorAll('img'));
+    return Promise.all(imgs.map((im) => new Promise((resolve) => {
+      const src = im.getAttribute('src') || '';
+      if (/^data:image\/(png|jpe?g|gif);base64,/i.test(src)) { resolve(); return; }
+      if (!src) { resolve(); return; }
+      let done = false;
+      const finish = (url) => {
+        if (done) return;
+        done = true;
+        if (url) im.setAttribute('src', url);
+        resolve();
+      };
+      const probe = new Image();
+      probe.onload = () => {
+        try {
+          const w = probe.naturalWidth || probe.width || 1;
+          const h = probe.naturalHeight || probe.height || 1;
+          const cv = document.createElement('canvas');
+          cv.width = w; cv.height = h;
+          const ctx2d = cv.getContext('2d');
+          ctx2d.fillStyle = '#fff';
+          ctx2d.fillRect(0, 0, w, h);
+          ctx2d.drawImage(probe, 0, 0, w, h);
+          finish(cv.toDataURL('image/png'));
+        } catch (e) { finish(''); }
+      };
+      probe.onerror = () => finish('');
+      try { probe.crossOrigin = 'anonymous'; probe.src = src; } catch (e) { finish(''); }
+    })));
+  }
+
+  // 等副本里的图片真正解码完再生成 docx：脱离文档的 <img> 在解码前 naturalWidth 为 0，
+  // 会让所有图片退化成 400x300 的默认尺寸（比例与大小全错）
+  function npWaitImages(root, timeout) {
+    const imgs = Array.prototype.slice.call(root.querySelectorAll('img'));
+    if (!imgs.length) return Promise.resolve();
+    const all = Promise.all(imgs.map((im) => new Promise((resolve) => {
+      if (im.complete && im.naturalWidth > 0) { resolve(); return; }
+      let done = false;
+      const finish = () => { if (!done) { done = true; resolve(); } };
+      im.addEventListener('load', finish, { once: true });
+      im.addEventListener('error', finish, { once: true });
+      setTimeout(finish, 1200);
+    })));
+    return Promise.race([all, new Promise((resolve) => setTimeout(resolve, timeout || 3000))]);
+  }
+
+  // 导出 Word（真 .docx：OOXML 包，Word / WPS / 手机 Office 均可直接打开，也能再导入回来）
+  $('#exportWordBtn').addEventListener('click', async () => {
+    const plainText = notepadEditor.innerText || '';
+    const hasRich = !!notepadEditor.querySelector('img, table, hr');
+    if (!plainText.trim() && !hasRich) { toast('❌ 记事本还是空的，没有内容可以导出哦'); return; }
+    const btn = $('#exportWordBtn');
+    if (btn && btn.dataset.busy === '1') return;
+    if (btn) btn.dataset.busy = '1';
+    try {
+      // 在副本上处理图片，避免污染编辑区里的原始内容
+      const clone = notepadEditor.cloneNode(true);
+      // 副本挂进隐藏容器：既不影响页面，又能让其中的图片正常继承样式并完成解码
+      const holder = document.createElement('div');
+      holder.style.cssText = 'position:fixed;left:-99999px;top:0;width:820px;opacity:0;pointer-events:none;';
+      holder.appendChild(clone);
+      document.body.appendChild(holder);
+      try {
+        await npNormalizeImages(clone);
+        await npWaitImages(clone);
+        npDownload(NPDocx.build(clone), `记事本导出_${npDateStamp()}.docx`);
+      } finally {
+        holder.remove();
+      }
+      toast('✅ 已导出为 Word 文档（.docx）');
+    } catch (err) {
+      console.error('[docx] export failed', err);
+      toast('❌ 导出失败：' + ((err && err.message) || '未知错误'));
+    } finally {
+      if (btn) btn.dataset.busy = '';
+    }
   });
-  // 导出 TXT
+  // 导出 TXT（纯文字，图片与表格不包含）
   $('#exportTxtBtn').addEventListener('click', () => {
-    const textContent = notepadEditor.innerText;
-    if (!textContent.trim()) { toast('❌ 记事本还是空的，没有内容可以导出哦'); return; }
+    const raw = notepadEditor.innerText;
+    const textContent = raw.replace(/\r\n|\r|\n/g, '\r\n');
+    const richCount = notepadEditor.querySelectorAll('img, table').length;
+    if (!textContent.trim()) {
+      toast(richCount
+        ? '❌ TXT 只能保存纯文字，图片/表格请用 Word 导出'
+        : '❌ 记事本还是空的，没有内容可以导出哦');
+      return;
+    }
     const blob = new Blob(['\ufeff', textContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob); const a = document.createElement('a');
-    a.href = url; a.download = `记事本导出_${new Date().toISOString().slice(0, 10)}.txt`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-    toast('✅ 已成功导出为 TXT 文档！');
+    npDownload(blob, `记事本导出_${npDateStamp()}.txt`);
+    toast(richCount ? '✅ 已导出 TXT（图片与表格未包含，需要保留请用 Word 导出）' : '✅ 已导出为 TXT 文档！');
   });
-  // 导入 TXT / DOCX（保留原逻辑）
+  // 导入 TXT / DOCX（老版 .doc 不支持，需先另存为 .docx）
   $('#importTxtBtn').addEventListener('click', () => {
     const fileInput = document.createElement('input');
-    fileInput.type = 'file'; fileInput.accept = '.txt,text/plain,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    fileInput.type = 'file';
+    fileInput.accept = '.txt,text/plain,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     fileInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0]; if (!file) return;
-      const isDocx = /\.docx$/i.test(file.name);
-      const writeContent = (html) => {
-        const isAppend = confirm('📂 文件读取成功！\n\n点击【确定】：追加到现有内容末尾\n点击【取消】：覆盖现有内容');
-        if (isAppend) notepadEditor.innerHTML += '<br><br>' + html; else notepadEditor.innerHTML = html;
-        notepadEditor.dispatchEvent(new Event('input')); toast('✨ 导入成功！');
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const name = file.name || '';
+      if (/\.doc$/i.test(name)) { toast('❌ 不支持老版 .doc，请用 Word「另存为」.docx 后再导入'); return; }
+      if (file.size > 20 * 1024 * 1024) { toast('❌ 文件超过 20MB，请拆分后再导入'); return; }
+      const isDocx = /\.docx$/i.test(name);
+
+      const writeContent = async (html) => {
+        const body = String(html || '');
+        const plain = body.replace(/<br\s*\/?>/gi, '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+        if (!plain && !/<(img|table|hr)/i.test(body)) { toast('⚠️ 这个文件里没有可导入的内容'); return; }
+        const choice = await npAskChoice({
+          title: '📂 文件读取成功',
+          desc: '请选择写入方式：\n· 追加到末尾：保留现有内容，接在后面\n· 覆盖现有内容：清空后写入（可 Ctrl+Z 撤销）',
+          buttons: [
+            { text: '取消', value: 'cancel' },
+            { text: '追加到末尾', value: 'append' },
+            { text: '覆盖现有内容', value: 'replace', primary: true }
+          ],
+          cancelValue: 'cancel'
+        });
+        if (!choice || choice === 'cancel') { toast('已取消导入'); return; }
+        notepadEditor.innerHTML = (choice === 'append')
+          ? notepadEditor.innerHTML + '<br><br>' + body
+          : body;
+        notepadEditor.dispatchEvent(new Event('input'));
+        toast(choice === 'append' ? '✨ 已追加导入' : '✨ 已覆盖导入');
       };
+
       if (isDocx) {
+        if (typeof mammoth === 'undefined') { toast('❌ Word 解析组件未加载（可能离线），请联网重试或改用 TXT 导入'); return; }
         try {
           const arrayBuffer = await file.arrayBuffer();
           const result = await mammoth.convertToHtml({ arrayBuffer });
-          writeContent(result.value || '');
-        } catch (err) { console.error(err); toast('❌ Word 解析失败，请确认是 .docx 文件'); }
+          await writeContent(result.value || '');
+        } catch (err) {
+          console.error('[docx] import failed', err);
+          toast('❌ Word 解析失败，请确认文件是有效的 .docx');
+        }
       } else {
-        const reader = new FileReader();
-        reader.onload = (event) => { writeContent(event.target.result.replace(/\n/g, '<br>')); };
-        reader.readAsText(file, 'UTF-8');
+        // 纯文本：自动识别 UTF-8 / GBK（Windows 记事本默认存 GBK，直接按 UTF-8 读会乱码）
+        try {
+          const buf = await file.arrayBuffer();
+          let text;
+          try {
+            text = new TextDecoder('utf-8', { fatal: true }).decode(buf);
+          } catch (eUtf8) {
+            try {
+              text = new TextDecoder('gbk').decode(buf);
+              toast('ℹ️ 检测到非 UTF-8 编码，已按 GBK 读取');
+            } catch (eGbk) {
+              text = new TextDecoder('utf-8').decode(buf);
+            }
+          }
+          if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+          await writeContent(npEscapeHtml(text).replace(/\r\n|\r|\n/g, '<br>'));
+        } catch (err) {
+          console.error('[txt] import failed', err);
+          toast('❌ 文件读取失败，请重试');
+        }
       }
     });
     fileInput.click();
@@ -4812,6 +6074,9 @@ replaceInput.addEventListener('keydown', (e) => {
   // ================= 一键整理 =================
   function tidyLayout(silent = false) {
     const gridW = grid.offsetWidth, gap = 16, minW = 300;
+    // 页面不可见或容器尚未布局时 offsetWidth 为 0，继续算会得到负数 / Infinity 列宽，
+    // 并把坏坐标写进本地存储（下次打开全部错位）→ 直接放弃本次整理
+    if (!gridW) { if (!silent) toast('⚠️ 页面还没准备好，稍后再试'); return; }
     const items = Object.keys(widgetConfig).map(id => ({ id, conf: widgetConfig[id] })).filter(it => it.conf.visible).sort((a, b) => (a.conf.y - b.conf.y) || (a.conf.x - b.conf.x));
     
     let cols = 3;
@@ -4912,9 +6177,10 @@ replaceInput.addEventListener('keydown', (e) => {
       e.preventDefault();
       const w = header.closest('.widget'), conf = widgetConfig[w.dataset.id];
       if (!conf) return;
-      if (typeof conf.x !== 'number' || isNaN(conf.x)) conf.x = parseInt(w.style.left) || 0;
-      if (typeof conf.y !== 'number' || isNaN(conf.y)) conf.y = parseInt(w.style.top) || 0;
-      draggingWidget = w; dragOffsetX = e.clientX - conf.x; dragOffsetY = e.clientY - conf.y;
+      if (typeof conf.x !== 'number' || isNaN(conf.x)) conf.x = parseInt(w.style.left, 10) || 0;
+      if (typeof conf.y !== 'number' || isNaN(conf.y)) conf.y = parseInt(w.style.top, 10) || 0;
+      const _dragZoom = (() => { const z = parseFloat(getComputedStyle(document.body).zoom); return (isFinite(z) && z > 0) ? z : 1; })();
+      draggingWidget = w; dragOffsetX = e.clientX / _dragZoom - conf.x; dragOffsetY = e.clientY / _dragZoom - conf.y;
       dragStartX = e.clientX; dragStartY = e.clientY; dragMoved = false;
       w.classList.add('dragging'); w.style.zIndex = 99998;
       let rafId = null;
@@ -4924,7 +6190,7 @@ replaceInput.addEventListener('keydown', (e) => {
         if (!dragMoved) return;
         if (rafId) cancelAnimationFrame(rafId);
         rafId = requestAnimationFrame(() => {
-          let nx = ev.clientX - dragOffsetX, ny = ev.clientY - dragOffsetY;
+          let nx = ev.clientX / _dragZoom - dragOffsetX, ny = ev.clientY / _dragZoom - dragOffsetY;
           const maxNx = grid.offsetWidth - (conf.w || 0);
           nx = Math.max(0, Math.min(nx, maxNx)); ny = Math.max(0, ny);
           if (isNaN(nx)) nx = 0; if (isNaN(ny)) ny = 0;
@@ -4956,11 +6222,15 @@ replaceInput.addEventListener('keydown', (e) => {
       const w = handle.closest('.widget'), conf = widgetConfig[w.dataset.id];
       const dirClass = [...handle.classList].find(c => ['resize-n','resize-s','resize-w','resize-e','resize-nw','resize-ne','resize-sw','resize-se'].includes(c));
       if (!dirClass) return;
+      // 小/大字号档位会对 body 整体 zoom（0.9 / 1.15），鼠标位移是屏幕像素，
+      // 必须除以 zoom 换算到卡片坐标系，否则同一档位下"缩得比手快/慢"，手感不一致
+      const _resizeZoom = (() => { const z = parseFloat(getComputedStyle(document.body).zoom); return (isFinite(z) && z > 0) ? z : 1; })();
       const startX = e.clientX, startY = e.clientY;
       const startConf = { x: conf.x, y: conf.y, w: conf.w, h: conf.h };
       const gridW = grid.offsetWidth;
-      const onMove = (ev) => {
-        const dx = ev.clientX - startX, dy = ev.clientY - startY;
+      let resizeRaf = null;
+      const applyResize = (ev) => {
+        const dx = (ev.clientX - startX) / _resizeZoom, dy = (ev.clientY - startY) / _resizeZoom;
         let { x, y, w: cw, h: ch } = startConf;
         if (dirClass.includes('-e') || dirClass === 'resize-e') cw = Math.max(MIN_W, startConf.w + dx);
         if (dirClass.includes('-s') || dirClass === 'resize-s') ch = Math.max(MIN_H, startConf.h + dy);
@@ -4979,7 +6249,12 @@ replaceInput.addEventListener('keydown', (e) => {
         conf.x = x; conf.y = y; conf.w = cw; conf.h = ch;
         w.style.left = x + 'px'; w.style.top = y + 'px'; w.style.width = cw + 'px'; w.style.height = ch + 'px';
       };
+      const onMove = (ev) => {
+        if (resizeRaf) cancelAnimationFrame(resizeRaf);
+        resizeRaf = requestAnimationFrame(() => applyResize(ev));
+      };
       const onUp = () => {
+        if (resizeRaf) { cancelAnimationFrame(resizeRaf); resizeRaf = null; }
         saveConfig(); updateGridHeight();
         document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp);
       };
@@ -5179,6 +6454,7 @@ replaceInput.addEventListener('keydown', (e) => {
   // ================= 自定义背景 =================
   const bgUpload = $('#bgUpload'), bgBtn = $('#bgBtn'), bgPanel = $('#bgPanel'), bgColorPicker = $('#bgColorPicker');
   function applyCustomBg() {
+    if (holidayBgActive) { paintHolidayBg(holidayBgInfo); return; }
     const bgType = store.get('nt_bg_type', 'default'), bgValue = store.get('nt_bg_value', ''), customBg = store.get('nt_custom_bg', '');
     if (customBg && bgType === 'default') {
       store.set('nt_bg_type', 'image'); store.set('nt_bg_value', customBg); return applyCustomBg();
@@ -5242,7 +6518,116 @@ replaceInput.addEventListener('keydown', (e) => {
       applyTheme(store.get('nt_theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
     }
   }
+  // ================= 节日自动背景 =================
+  // 仅在元旦 / 春节 / 劳动节 / 中秋节 / 国庆节当天首次打开时展示，且不进导出配置
+  const HOLIDAY_BG_IMAGES = {
+    '元旦': 'https://cdn.luogu.com.cn/upload/image_hosting/wuzdsv10.webp',
+    '春节': 'https://cdn.luogu.com.cn/upload/image_hosting/ek578mq7.webp',
+    '劳动节': 'https://cdn.luogu.com.cn/upload/image_hosting/9bz6wl1y.webp',
+    '中秋节': 'https://cdn.luogu.com.cn/upload/image_hosting/c2uomfmy.webp',
+    '国庆节': 'https://cdn.luogu.com.cn/upload/image_hosting/k3hdnobm.webp'
+  };
+  let holidayBgActive = false;   // 当前屏幕上看的是不是节日背景
+  let holidayBgInfo = null;      // { name, url }
+  let holidayBgUsed = null;      // 本次会话内用过的节日背景，供「恢复节日背景」复用
+
+  function holidayTodayName() {
+    const now = new Date();
+    const y = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate();
+    const p2 = n => String(n).padStart(2, '0');
+    const key = y + '-' + p2(m) + '-' + p2(d);
+    for (const name of Object.keys(HOLIDAY_BG_IMAGES)) {
+      const dates = HOLIDAY_DATES[name] || [];
+      if (dates.indexOf(key) !== -1) return name;
+    }
+    // 硬编码表用尽后的兜底：固定公历节日 + 农历规则推算
+    for (const name of Object.keys(FIXED_SOLAR_HOLIDAYS)) {
+      const r = FIXED_SOLAR_HOLIDAYS[name];
+      if (m === r.month && d === r.day) return name;
+    }
+    for (const name of ['春节', '中秋节']) {
+      const dt = computeHolidayByRule(name, y);
+      if (dt && dt.getFullYear() === y && dt.getMonth() + 1 === m && dt.getDate() === d) return name;
+    }
+    return null;
+  }
+  function holidaySeenKey(name) {
+    return 'nt_holiday_bg_' + new Date().getFullYear() + '_' + name;
+  }
+  function paintHolidayBg(info) {
+    if (!info || !info.url) return;
+    document.body.style.backgroundImage = 'url(' + info.url + ')';
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+    document.body.style.backgroundRepeat = 'no-repeat';
+    document.body.style.backgroundAttachment = 'fixed';
+    document.body.style.backgroundColor = 'transparent';
+    document.body.classList.add('has-custom-bg');
+    // 采样亮度自动配主题，保证文字可读
+    try {
+      const hi = new Image();
+      hi.crossOrigin = 'anonymous';
+      hi.onload = () => {
+        try {
+          const cv = document.createElement('canvas'); cv.width = 32; cv.height = 32;
+          const cx2 = cv.getContext('2d'); cx2.drawImage(hi, 0, 0, 32, 32);
+          const px2 = cx2.getImageData(0, 0, 32, 32).data;
+          let sum = 0;
+          for (let i = 0; i < px2.length; i += 4) sum += (px2[i] * 299 + px2[i+1] * 587 + px2[i+2] * 114) / 1000;
+          applyTheme((sum / (px2.length / 4)) >= 150 ? 'light' : 'dark');
+        } catch (e) { /* 跨域读不到像素时保持原主题 */ }
+      };
+      hi.onerror = () => { /* 加载失败保持原主题 */ };
+      hi.src = info.url;
+    } catch (e) { /* 采样异常不影响背景显示 */ }
+  }
+  function applyHolidayBg(info) {
+    holidayBgActive = true; holidayBgInfo = info; holidayBgUsed = info;
+    paintHolidayBg(info);
+  }
+  function exitHolidayBg() {
+    if (!holidayBgActive) return false;
+    holidayBgActive = false; holidayBgInfo = null;
+    document.body.classList.remove('has-custom-bg');
+    return true;
+  }
+  // 用户主动换回自己的背景后：toast 提示 + 「恢复节日背景」按钮（等价于撤销）
+  function notifyHolidayBgDismissed(msg) {
+    if (!holidayBgUsed) return;
+    const info = holidayBgUsed;
+    toast(msg || '已换回你自己的背景', {
+      actionText: '恢复节日背景',
+      duration: 8000,
+      onAction: () => { applyHolidayBg(info); toast('✨ 已恢复' + info.name + '节日背景'); }
+    });
+  }
+  function initHolidayBg() {
+    const name = holidayTodayName();
+    if (!name) return;
+    const url = HOLIDAY_BG_IMAGES[name];
+    if (!url) return;
+    const seenKey = holidaySeenKey(name);
+    if (store.get(seenKey, false) === true) return;   // 当天已展示过，不再自动替换
+    const probe = new Image();
+    probe.onload = () => {
+      store.set(seenKey, true);
+      applyHolidayBg({ name: name, url: url });
+      toast('🎉 ' + name + '快乐！已为你换上' + name + '专属背景', {
+        actionText: '换回我的背景',
+        duration: 10000,
+        onAction: () => {
+          exitHolidayBg();
+          applyCustomBg();
+          notifyHolidayBgDismissed('已换回你自己的背景');
+        }
+      });
+    };
+    probe.onerror = () => { /* 图片加载失败就不打扰，保持用户自己的背景 */ };
+    probe.src = url;
+  }
+
   setTimeout(applyCustomBg, 50);
+  setTimeout(initHolidayBg, 150);
   bgBtn.addEventListener('click', (e) => { e.stopPropagation(); bgPanel.classList.toggle('show'); });
   document.addEventListener('click', (e) => { if (!bgPanel.contains(e.target) && e.target !== bgBtn && !e.target.closest('#bgBtn')) bgPanel.classList.remove('show'); });
   $('#bgUploadBtn').addEventListener('click', () => { bgUpload.click(); });
@@ -5259,18 +6644,29 @@ replaceInput.addEventListener('keydown', (e) => {
         canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height);
         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.9);
         try {
+          const wasHoliday = exitHolidayBg();
           store.set('nt_bg_type', 'image'); store.set('nt_bg_value', compressedBase64); store.set('nt_custom_bg', compressedBase64);
-          applyCustomBg(); bgPanel.classList.remove('show'); toast('✨ 背景图已更新（高清压缩）！');
+          applyCustomBg(); bgPanel.classList.remove('show');
+          if (wasHoliday) notifyHolidayBgDismissed('已换回你的背景图'); else toast('✨ 背景图已更新（高清压缩）！');
         } catch (err) { toast('❌ 存储空间依然不足，请尝试纯色背景'); console.error(err); }
       };
       img.src = event.target.result;
     };
     reader.readAsDataURL(file); bgUpload.value = '';
   });
+  // 拖动取色时只做即时预览，松手（change）后才落库：既不频繁写 localStorage，也不会误清已上传的背景图
   bgColorPicker.addEventListener('input', (e) => {
     const color = e.target.value;
+    document.body.style.backgroundImage = 'none';
+    document.body.style.backgroundColor = color;
+    document.body.classList.remove('has-custom-bg');
+  });
+  bgColorPicker.addEventListener('change', (e) => {
+    const color = e.target.value;
+    const wasHoliday = exitHolidayBg();
     store.set('nt_bg_type', 'color'); store.set('nt_bg_value', color); store.set('nt_custom_bg', '');
     applyCustomBg();
+    if (wasHoliday) notifyHolidayBgDismissed('已换回你的纯色背景');
   });
   $('#bgResetBtn').addEventListener('click', () => {
     store.set('nt_bg_type', 'default'); store.set('nt_bg_value', ''); store.set('nt_custom_bg', '');
@@ -5278,7 +6674,9 @@ replaceInput.addEventListener('keydown', (e) => {
     document.documentElement.style.removeProperty('--card-border'); document.documentElement.style.removeProperty('--input-bg');
     document.documentElement.style.removeProperty('--text'); document.documentElement.style.removeProperty('--text-soft');
     document.documentElement.style.removeProperty('--text-mute');
-    applyCustomBg(); bgPanel.classList.remove('show'); toast('✅ 已恢复默认渐变背景');
+    const wasHoliday = exitHolidayBg();
+    applyCustomBg(); bgPanel.classList.remove('show');
+    if (wasHoliday) notifyHolidayBgDismissed('已换回你的默认渐变背景'); else toast('✅ 已恢复默认渐变背景');
   });
 
   $('#importBtn').addEventListener('click', (e) => {
@@ -5300,8 +6698,14 @@ replaceInput.addEventListener('keydown', (e) => {
         try {
           const data = JSON.parse(content);
           if (!confirm('⚠️ 导入配置将覆盖当前所有数据，确定继续吗？')) return;
-          if (data.config) { widgetConfig = data.config; saveConfig(); applyWidgetState(); }
-          if (data.shortcuts) { shortcuts = data.shortcuts; store.set('nt_shortcuts', shortcuts); renderShortcuts(); renderInlineLayout(); }
+          if (data.config && typeof data.config === 'object') {
+            // 旧版配置可能缺少后来新增的组件：直接套用会让新组件消失、甚至读取 undefined 报错 → 用默认值补齐
+            Object.keys(defaultConfig).forEach((k) => {
+              if (!data.config[k]) data.config[k] = JSON.parse(JSON.stringify(defaultConfig[k]));
+            });
+            widgetConfig = data.config; saveConfig(); applyWidgetState(); updateGridHeight();
+          }
+          if (Array.isArray(data.shortcuts)) { shortcuts = data.shortcuts; store.set('nt_shortcuts', shortcuts); renderShortcuts(); renderInlineLayout(); }
           if (data.todos) { todos = data.todos; store.set('nt_todos', todos); renderTodos(); }
           if (data.notepad !== undefined) { store.set('nt_notepad', data.notepad); notepadEditor.innerHTML = data.notepad; }
           if (data.theme) { applyTheme(data.theme); }
@@ -5326,7 +6730,7 @@ replaceInput.addEventListener('keydown', (e) => {
           store.set('nt_city_history', cityHistory); renderCityHistory();
           if (data.workStart) { workStartTime = data.workStart; store.set('nt_workStart', workStartTime); $('#workStart').value = workStartTime; }
           if (data.workEnd) { workEndTime = data.workEnd; store.set('nt_workEnd', workEndTime); $('#workEnd').value = workEndTime; }
-          if (data.workDays) { workDays = data.workDays; store.set('nt_workDays', workDays); document.querySelectorAll('.work-day').forEach(cb => { const di = parseInt(cb.value); if (typeof workDays[di] !== 'boolean') workDays[di] = (di >= 1 && di <= 5); cb.checked = workDays[di]; }); }
+          if (data.workDays) { workDays = data.workDays; store.set('nt_workDays', workDays); document.querySelectorAll('.work-day').forEach(cb => { const di = parseInt(cb.value, 10); if (typeof workDays[di] !== 'boolean') workDays[di] = (di >= 1 && di <= 5); cb.checked = workDays[di]; }); }
           if (typeof data.nightShift === 'boolean') { nightShift = data.nightShift; store.set('nt_nightShift', nightShift); if (typeof applyNightShiftUI === 'function') applyNightShiftUI(); }
           if (typeof updateWorkTime === 'function') updateWorkTime();
 
@@ -5378,16 +6782,17 @@ replaceInput.addEventListener('keydown', (e) => {
           }
           if (data.bgType !== undefined && data.bgValue !== undefined) {
             store.set('nt_bg_type', data.bgType); store.set('nt_bg_value', data.bgValue);
+            if (data.bgType === 'image' && data.bgValue) store.set('nt_custom_bg', data.bgValue);
           } else if (data.customBg) {
-            store.set('nt_bg_type', 'image'); store.set('nt_bg_value', data.customBg);
+            store.set('nt_bg_type', 'image'); store.set('nt_bg_value', data.customBg); store.set('nt_custom_bg', data.customBg);
           } else {
-            store.set('nt_bg_type', 'default'); store.set('nt_bg_value', '');
+            store.set('nt_bg_type', 'default'); store.set('nt_bg_value', ''); store.set('nt_custom_bg', '');
           }
           applyCustomBg();
           toast('✨ 配置导入成功！');
           // 因为已经用 JS 动态恢复了 DOM 和状态，不需要强制刷新页面
           // 如果非要刷新（比如背景图没加载），加个判断
-          if (data.bgType) applyCustomBg();
+          // 背景已在上面统一应用，这里不再重复渲染（避免主题闪一下）
           // setTimeout(() => location.reload(), 1500);
         } catch (err) { console.error(err); toast('❌ 解析失败，文件可能已损坏'); }
       };
@@ -5419,6 +6824,7 @@ replaceInput.addEventListener('keydown', (e) => {
   });
 
   // ================= 音乐播放器核心逻辑 =================
+  let mpSuppressError = false;   // 退出歌曲 / 清空 src 期间抑制 error 提示
   const mp = {
     currentTrack: null,
     playContext: [],
@@ -5854,10 +7260,13 @@ replaceInput.addEventListener('keydown', (e) => {
     box.classList.add('active');
   }
 
+  let searchToken = 0;   // 搜索批次号：退出/新搜索后旧批次的回调结果直接作废
+
   async function doSearch(kw) {
     kw = (kw || '').trim();
     if (!kw) { mpShowToast('请输入关键词'); return; }
     if (mp.searching) return;
+    const myToken = ++searchToken;
     mp.searching = true; mp.searchResults = [];
     mp.playContext = [];   // 新搜索开始时清空播放列表，避免指向已废弃的旧数组
     document.getElementById('mp-favPanel').classList.remove('active');
@@ -5870,6 +7279,7 @@ replaceInput.addEventListener('keydown', (e) => {
     let pending = 4, anyResult = false;
 
     function handleOne(list) {
+      if (myToken !== searchToken) return;   // 该批次已被取消（用户中途退出），丢弃结果
       const fresh = list.filter(t => !seenUids.has(t.uid));
       fresh.forEach(t => seenUids.add(t.uid));
       if (fresh.length) { anyResult = true; mp.searchResults.push(...fresh); appendSearchResults(fresh); }
@@ -5925,6 +7335,65 @@ replaceInput.addEventListener('keydown', (e) => {
   document.getElementById('mp-prevBtn').addEventListener('click', () => playNext('prev'));
   document.getElementById('mp-nextBtn').addEventListener('click', () => playNext('next'));
   document.getElementById('mp-downloadBtn').addEventListener('click', downloadCurrent);
+
+  // ===== 退出：关闭当前歌曲信息，回到音乐卡片初始界面（卡片本身保留，不隐藏）=====
+  function exitCurrentTrack() {
+    // 本来就没有歌曲在播 → 只提示，不做任何清空
+    if (!mp.currentTrack && !mp.audio.src) { mpShowToast('当前没有正在播放的歌曲'); return; }
+
+    playToken++;                                  // 让进行中的「加载/播放」流程立即作废
+    searchToken++; mp.searching = false;           // 让进行中的搜索结果作废，避免清空后又被填回
+    mpSuppressError = true;                       // 主动清空 src 也会触发 error 事件，期间不要弹错误
+    setTimeout(() => { mpSuppressError = false; }, 1500);
+    try { mp.audio.pause(); } catch (err) {}
+    mpRestorePending = true;                      // 清空过程中冻结进度写盘，避免 0 覆盖存档
+    mpDirty = false;
+    try { mp.audio.removeAttribute('src'); mp.audio.load(); } catch (err) {}
+    // 删掉上次播放位置，下次打开是干净的初始状态，不会自动续播这首歌
+    try {
+      localStorage.removeItem('nt_mp_progress');
+      localStorage.removeItem('nt_mp_last_play');
+    } catch (err) {}
+    mpSavedFullKey = null;
+
+    // 歌曲信息复位
+    mp.currentTrack = null;
+    mp.playContext = [];
+    mp.lyricLines = [];
+    mp.currentLyricIdx = -1;
+    document.getElementById('mp-trackTitle').textContent = '音乐播放器';
+    document.getElementById('mp-trackArtist').textContent = '搜索一首歌开始吧';
+    document.getElementById('mp-coverSquare').innerHTML = '<div class="mp-cover-placeholder">♫</div>';
+    document.getElementById('mp-lyricLine').textContent = '♪ 纯音乐，请欣赏';
+    resetProgress();
+    setPlayingUI(false);
+    updateFavBtn();
+
+    // 搜索区复位
+    const searchInput = document.getElementById('mp-searchInput');
+    searchInput.value = '';
+    document.getElementById('mp-searchClear').classList.remove('visible');
+    const searchBox = document.getElementById('mp-searchResults');
+    searchBox.classList.remove('active');
+    searchBox.innerHTML = '';
+    mp.searchResults = [];
+
+    // 收藏面板收起
+    const favPanel = document.getElementById('mp-favPanel');
+    if (favPanel) favPanel.classList.remove('active');
+
+    mpShowToast('已关闭当前歌曲，回到初始界面');
+    setTimeout(() => { mpRestorePending = false; }, 400);
+  }
+
+  const mpExitBtn = document.getElementById('mp-exitBtn');
+  if (mpExitBtn) {
+    mpExitBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      try { exitCurrentTrack(); } catch (err) { console.warn('退出播放失败', err); }
+    });
+  }
 
   /* ================= 进度条（重写版） =================
      核心：UI 位置只接受 0~1 比例，一律用百分比写入 left / width。
@@ -6034,8 +7503,8 @@ replaceInput.addEventListener('keydown', (e) => {
      ================================================================= */
   const MP_POS_KEY = 'nt_mp_progress';        // 轻量位置：{u, t, at}
   const MP_PROGRESS_KEY = 'nt_mp_last_play';  // 完整记录：{track, time, at}
-  const MP_SAMPLE_MS = 10;                    // 0.01 秒采样一次
-  const MP_FLUSH_MS = 10;                     // 落盘间隔 = 与采样同频，真正 0.01 秒写一次
+  const MP_SAMPLE_MS = 10;                    // 0.01 秒采样一次（内存精度 0.01 秒）
+  const MP_FLUSH_MS = 500;                    // localStorage 落盘间隔：500ms 足够（同步写盘，10ms 一次纯属浪费）
   let mpLastPos = -1;
   let mpLastFlushAt = 0;
   let mpDirty = false;
@@ -6112,7 +7581,11 @@ replaceInput.addEventListener('keydown', (e) => {
   const mpMuteBtn = document.getElementById('mp-muteToggle');
 
   // 初始化图标（如果是静音状态）
-  mp.audio.volume = parseFloat(store.get('nt_volume', '1')); // 读取持久化音量
+  // 音量与静音状态都要持久化：旧实现只读不写，每次刷新音量/静音都会被重置
+  const _npSavedVol = parseFloat(store.get('nt_volume', 1));
+  mp.audio.volume = (isFinite(_npSavedVol) && _npSavedVol >= 0 && _npSavedVol <= 1) ? _npSavedVol : 1;
+  mp.isMuted = !!store.get('nt_muted', false);
+  mp.audio.muted = mp.isMuted;
   mpVolumeSlider.value = mp.isMuted ? 0 : mp.audio.volume;
   mpMuteBtn.innerHTML = mp.isMuted ? ICON_VOL_MUTE : ICON_VOL_ON;
 
@@ -6130,6 +7603,8 @@ replaceInput.addEventListener('keydown', (e) => {
       mp.audio.muted = true;
       mpMuteBtn.innerHTML = ICON_VOL_MUTE;
     }
+    store.set('nt_volume', v);
+    store.set('nt_muted', mp.isMuted);
   });
 
   // 2. 点击图标静音/取消静音
@@ -6150,6 +7625,8 @@ replaceInput.addEventListener('keydown', (e) => {
       mpMuteBtn.innerHTML = ICON_VOL_ON;
     }
     
+    store.set('nt_muted', mp.isMuted);
+    store.set('nt_volume', mp.audio.volume);
     mpShowToast(mp.isMuted ? '已静音' : '取消静音');
   });
 
@@ -6195,7 +7672,13 @@ replaceInput.addEventListener('keydown', (e) => {
   mp.audio.addEventListener('play', () => setPlayingUI(true));
   mp.audio.addEventListener('pause', () => setPlayingUI(false));
   mp.audio.addEventListener('ended', () => playNext('next'));
-  mp.audio.addEventListener('error', () => { setPlayingUI(false); mpShowToast('音频加载失败'); });
+  mp.audio.addEventListener('error', () => {
+    setPlayingUI(false);
+    // 退出歌曲时是主动清空 src，浏览器同样会抛 error；此时提示「音频加载失败」
+    // 会和「已关闭当前歌曲」的提示自相矛盾 → 清空期间静默处理
+    if (mpSuppressError || !mp.audio.getAttribute('src')) return;
+    mpShowToast('音频加载失败');
+  });
 
   const mpSearchInput = document.getElementById('mp-searchInput');
   const mpSearchClear = document.getElementById('mp-searchClear');
@@ -6204,6 +7687,21 @@ replaceInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') { doSearch(mpSearchInput.value); mpSearchInput.blur(); }
   });
   mpSearchInput.addEventListener('input', () => { mpSearchClear.classList.toggle('visible', mpSearchInput.value.length > 0); });
+  // 迷你搜索按钮：移动端点它就能搜，不必按回车
+  const mpSearchGo = document.getElementById('mp-searchGo');
+  if (mpSearchGo) {
+    mpSearchGo.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const kw = mpSearchInput.value.trim();
+      if (!kw) {
+        mpShowToast('请先输入歌名或歌手');
+        mpSearchInput.focus();
+        return;
+      }
+      doSearch(kw);
+      mpSearchInput.blur();
+    });
+  }
   mpSearchClear.addEventListener('click', e => {
     e.stopPropagation(); mpSearchInput.value = ''; mpSearchClear.classList.remove('visible');
     document.getElementById('mp-searchResults').classList.remove('active');
@@ -6655,6 +8153,99 @@ replaceInput.addEventListener('keydown', (e) => {
     background: var(--accent);
     transform: scale(1.2);
   }
+
+  /* ==================== 迷你记事本：Word 风格功能区 ==================== */
+  .notepad-toolbar {
+    display: flex; flex-wrap: wrap; align-items: center;
+    gap: 1px; padding: 3px 4px; margin-bottom: 0;
+    background: var(--input-bg);
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+  }
+  /* 编辑区：像 Word 页面一样留出内边距，文字不再贴边 */
+  .notepad-editor {
+    padding: 7px 9px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: border-color .15s, background .15s;
+  }
+  .notepad-editor:focus { border-color: var(--divider); }
+  .np-grp {
+    display: flex; align-items: center; gap: 0; flex: 0 0 auto;
+    padding: 0 3px;
+    border-right: 1px solid var(--divider);
+  }
+  .np-grp:first-child { padding-left: 0; }
+  .np-grp:last-child { border-right: none; padding-right: 0; }
+  .notepad-toolbar .notepad-btn,
+  .notepad-toolbar .font-size-btn {
+    width: 24px; min-width: 24px; height: 23px; padding: 0; flex: 0 0 auto;
+    border-radius: 4px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--text-soft); font-size: 12.5px; line-height: 1;
+    background: transparent; border: 1px solid transparent;
+    transition: background .13s, color .13s, border-color .13s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .notepad-toolbar .notepad-btn:hover,
+  .notepad-toolbar .font-size-btn:hover {
+    background: var(--hover); color: var(--accent); border-color: transparent;
+  }
+  .notepad-toolbar .notepad-btn:active,
+  .notepad-toolbar .font-size-btn:active { background: var(--accent-soft); }
+  .notepad-toolbar .notepad-btn:focus,
+  .notepad-toolbar .font-size-btn:focus { outline: none; box-shadow: none; }
+  .notepad-toolbar .notepad-btn svg,
+  .notepad-toolbar .font-size-btn svg { width: 15px; height: 15px; display: block; }
+  /* B I U S 字形按钮（Word 同款衬线体） */
+  .notepad-toolbar .np-fmt {
+    font-family: 'Times New Roman', Cambria, Georgia, serif;
+    font-size: 14.5px;
+  }
+  .notepad-toolbar .np-fmt b,
+  .notepad-toolbar .np-fmt u,
+  .notepad-toolbar .np-fmt s { font-weight: 700; }
+  .notepad-toolbar .np-fmt i { font-family: 'Times New Roman', Georgia, serif; }
+  /* 字号按钮 A− / A+ */
+  .np-sup { font-size: .72em; vertical-align: super; line-height: 0; margin-left: .5px; }
+  .notepad-toolbar .font-size-btn.reset-size { font-size: 11.5px; letter-spacing: -.2px; }
+  .np-size-grp { display: inline-flex; align-items: center; gap: 0; padding-left: 3px; }
+  /* 字体选择框：Word 式组合框 */
+  .notepad-toolbar .font-menu-btn {
+    display: inline-flex; align-items: center; justify-content: space-between;
+    gap: 3px; height: 23px; min-width: 70px; max-width: 92px;
+    margin: 0 2px 0 3px; padding: 0 4px 0 6px;
+    background: var(--card); border: 1px solid var(--divider);
+    border-radius: 4px; color: var(--text); font-size: 11.5px;
+    cursor: pointer; transition: border-color .13s, color .13s, background .13s;
+  }
+  .notepad-toolbar .font-menu-btn:hover {
+    border-color: var(--accent); color: var(--accent); background: var(--card);
+  }
+  .notepad-toolbar .font-menu-btn #currentFontName {
+    flex: 1; min-width: 0; text-align: left;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .np-caret { width: 11px; height: 11px; flex-shrink: 0; opacity: .55; }
+  .notepad-toolbar .font-menu-btn:hover .np-caret { opacity: .9; }
+
+  /* ==================== 音乐播放器：退出按钮 ==================== */
+  .mp-exit-btn {
+    display: inline-flex; align-items: center; gap: .3em;
+    height: 1.9em; padding: 0 .6em;
+    border-radius: 999px;
+    border: 1px solid var(--divider);
+    background: var(--input-bg);
+    color: var(--text-soft);
+    font-family: inherit;
+    font-size: .78em; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mp-exit-btn svg { width: 1.05em; height: 1.05em; }
+  .mp-exit-btn:hover { color: #fff; background: var(--danger); border-color: var(--danger); }
+  .mp-exit-btn:focus { outline: none; }
 </style>
 </body>
 </html>
