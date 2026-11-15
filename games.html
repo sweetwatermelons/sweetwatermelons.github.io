@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>游戏专区 · sweet🍉的小站</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+  body {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.8) 2px, transparent 2px), linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    background-size: 40px 40px, 100% 100%;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+    padding: 20px; overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 1000px; width: 100%;
+    display: flex; flex-direction: column; align-items: center; margin-top: -2vh;
+  }
+
+  /* 标题区 */
+  .title-wrap { display: flex; flex-direction: column; align-items: center; width: 100%; }
+  .title { font-size: 4.5rem; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; text-shadow: 0 4px 15px rgba(255, 255, 255, 0.8); }
+  .title .en { font-family: 'Georgia', serif; font-style: italic; transform: rotate(-3deg); }
+  .title .emoji { font-size: 4rem; display: inline-block; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-8px) rotate(10deg); } }
+  .title .zh { font-size: 2.8rem; font-weight: 700; color: #0284c7; }
+  .underline { width: 60%; height: 4px; background: linear-gradient(90deg, transparent 0%, #ffb6c1 50%, transparent 100%); border-radius: 2px; margin-bottom: 35px; box-shadow: 0 0 12px rgba(255, 182, 193, 0.5); }
+
+  /* 游戏列表区 */
+  .game-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 50px;
+  }
+
+  .game-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    width: 100%;
+    padding: 22px 32px;
+    background: #ffffff;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 24px;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0369a1;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 6px 20px rgba(3, 105, 161, 0.12);
+    white-space: nowrap;
+  }
+
+  .game-btn:hover {
+    transform: translateY(-4px);
+    border-color: #38bdf8;
+    color: #0284c7;
+    box-shadow: 0 14px 32px rgba(56, 189, 248, 0.35);
+  }
+
+  .game-btn .emoji {
+    font-size: 2rem;
+    transition: transform 0.3s;
+  }
+
+  .game-btn:hover .emoji {
+    transform: scale(1.2) rotate(8deg);
+  }
+
+  .game-btn .name {
+    display: inline-block;
+  }
+
+  /* 返回按钮 */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0284c7;
+    text-decoration: none;
+    padding: 12px 28px;
+    border-radius: 30px;
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(3, 105, 161, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-link:hover {
+    color: #ffffff;
+    background: #38bdf8;
+    box-shadow: 0 8px 25px rgba(56, 189, 248, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .back-link svg {
+    width: 18px;
+    height: 18px;
+    fill: #38bdf8;
+    transition: fill 0.3s;
+  }
+
+  .back-link:hover svg {
+    fill: #ffffff;
+  }
+
+  /* 页脚 */
+  .footer-text { color: #64748b; font-size: 13px; margin-top: 40px; }
+
+  /* 手机端适配 */
+  @media (max-width: 860px) {
+    .title { font-size: 2.8rem; flex-wrap: wrap; gap: 8px; }
+    .title .emoji { font-size: 2.8rem; }
+    .title .zh { font-size: 2rem; }
+    .game-list { max-width: 100%; gap: 18px; }
+    .game-btn { padding: 18px 24px; font-size: 1.15rem; border-radius: 20px; }
+    .game-btn .emoji { font-size: 1.7rem; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="title-wrap">
+      <h1 class="title">
+        <span class="en">Game</span>
+        <span class="emoji">🎮</span>
+        <span class="zh">游戏专区</span>
+      </h1>
+      <div class="underline"></div>
+    </div>
+
+    <!-- 游戏入口按钮列表 -->
+    <div class="game-list">
+      <a href="https://sweetwatermelons.github.io/pvz.html" target="_blank" class="game-btn">
+        <span class="emoji">🌻</span>
+        <span class="name">植物大战僵尸</span>
+      </a>
+
+      <a href="https://sweetwatermelons.github.io/sheep.html" target="_blank" class="game-btn">
+        <span class="emoji">🐑</span>
+        <span class="name">送三只小羊回家</span>
+      </a>
+    </div>
+
+    <!-- 返回首页 -->
+    <a href="https://sweetwatermelons.github.io/" class="back-link">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      返回首页
+    </a>
+
+    <div class="footer-text">sweet🍉的小站 · 游戏专区</div>
+  </div>
+
+</body>
+</html>
