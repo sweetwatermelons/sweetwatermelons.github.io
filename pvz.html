@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>植物大战僵尸 - 首页</title>
+<title>植物大战僵尸 - sweet🍉的小站</title>
 <style>
   /* 引入具有游戏感的字体（如果没有则回退到系统字体） */
   @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
@@ -24,6 +24,7 @@
     font-family: 'ZCOOL KuaiLe', 'Microsoft YaHei', sans-serif;
     overflow: hidden;
     position: relative;
+    padding: 20px;
   }
 
   /* 背景草坪的纹理（斜线网格） */
@@ -62,6 +63,8 @@
     transform: translateY(-20px);
     animation: floatUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     opacity: 0;
+    max-width: 600px;
+    width: 100%;
   }
 
   /* 面板顶部的铆钉装饰 */
@@ -80,7 +83,7 @@
 
   /* 标题区域 */
   .title-wrap {
-    margin-bottom: 45px;
+    margin-bottom: 35px;
     position: relative;
   }
 
@@ -114,7 +117,7 @@
     justify-content: center;
     align-items: center;
     gap: 30px;
-    margin-bottom: 45px;
+    margin-bottom: 35px;
   }
 
   .sunflower {
@@ -134,10 +137,10 @@
   .btn-group {
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 20px;
     width: 100%;
-    max-width: 340px; /* 稍微加宽以容纳更长的文字 */
-    margin: 0 auto;
+    max-width: 340px;
+    margin: 0 auto 30px;
   }
 
   /* 统一的按钮样式（复古 3D 游戏按钮） */
@@ -155,7 +158,7 @@
     transition: all 0.1s;
     position: relative;
     text-shadow: 0 2px 0 rgba(0,0,0,0.2);
-    white-space: nowrap; /* 防止文字换行 */
+    white-space: nowrap;
   }
 
   /* HTML版下载按钮：亮绿色 */
@@ -192,11 +195,57 @@
     box-shadow: 0 0px 0 #8b5a2b, 0 4px 10px rgba(0,0,0,0.2);
   }
 
+  /* 返回游戏专区按钮：深木色 */
+  .btn-back {
+    background-color: #a57c4e;
+    border-color: #5a3817;
+    color: #ffffff;
+    box-shadow: 0 6px 0 #5a3817, 0 10px 10px rgba(0,0,0,0.2);
+    font-size: 1.1rem;
+    padding: 14px 20px;
+  }
+  .btn-back:hover {
+    background-color: #b88c5a;
+    transform: translateY(2px);
+    box-shadow: 0 4px 0 #5a3817, 0 8px 10px rgba(0,0,0,0.2);
+  }
+  .btn-back:active {
+    transform: translateY(6px);
+    box-shadow: 0 0px 0 #5a3817, 0 4px 10px rgba(0,0,0,0.2);
+  }
+
   /* 按钮上的小图标 */
   .btn-icon {
     margin-right: 6px;
     vertical-align: middle;
     font-size: 1.1rem;
+  }
+
+  /* 文字说明区域 */
+  .info-text {
+    background: rgba(255, 255, 255, 0.45);
+    border: 2px dashed #8b5a2b;
+    border-radius: 14px;
+    padding: 16px 22px;
+    margin-top: 10px;
+    text-align: left;
+    font-size: 0.95rem;
+    color: #4a3319;
+    line-height: 1.8;
+    font-family: 'Microsoft YaHei', sans-serif;
+    font-weight: bold;
+  }
+
+  .info-text p {
+    margin-bottom: 6px;
+  }
+  .info-text p:last-child {
+    margin-bottom: 0;
+  }
+
+  .info-text .highlight {
+    color: #2e7d32;
+    font-weight: bold;
   }
 
   /* 悬浮的豌豆子弹（背景装饰） */
@@ -251,6 +300,7 @@
     .subtitle { font-size: 1rem; }
     .sunflower { font-size: 2.5rem; }
     .game-btn { font-size: 1.1rem; padding: 14px 15px; }
+    .info-text { font-size: 0.85rem; padding: 12px 16px; }
   }
 </style>
 </head>
@@ -273,6 +323,7 @@
       <span class="sun">☀️</span>
     </div>
 
+    <!-- 按钮组 -->
     <div class="btn-group">
       <!-- 下载HTML版按钮 -->
       <a href="https://gh.dpik.top/https://github.com/sweetwatermelons/Games/releases/download/PVZ/Plants.vs.Zombies.html" target="_blank" class="game-btn btn-play">
@@ -283,6 +334,18 @@
       <a href="https://gh.dpik.top/https://github.com/sweetwatermelons/Games/releases/download/PVZ/Plants.vs.Zombies.exe" target="_blank" class="game-btn btn-download">
         <span class="btn-icon">⬇️</span> 下载安装包
       </a>
+
+      <!-- 返回游戏专区按钮 -->
+      <a href="https://sweetwatermelons.github.io/games.html" class="game-btn btn-back">
+        <span class="btn-icon">↩️</span> 返回游戏专区
+      </a>
+    </div>
+
+    <!-- 文字说明 -->
+    <div class="info-text">
+      <p>🌱 <span class="highlight">HTML版</span>：下载后直接用浏览器打开即可游玩，存档保存在该浏览器内，无需安装。</p>
+      <p>💾 <span class="highlight">安装包</span>：下载 .exe 文件后运行安装程序，体验感更佳，适合离线游玩。</p>
+      <p>⚠️ 下载如遇浏览器拦截，请选择“保留文件”或允许下载。</p>
     </div>
   </div>
 
