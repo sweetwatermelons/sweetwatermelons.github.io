@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>植物大战僵尸 - 首页</title>
+<title>植物大战僵尸 - 启动页</title>
 <style>
   /* 引入具有游戏感的字体（如果没有则回退到系统字体） */
   @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
@@ -136,15 +136,15 @@
     flex-direction: column;
     gap: 25px;
     width: 100%;
-    max-width: 320px;
+    max-width: 340px; /* 稍微加宽以容纳更长的文字 */
     margin: 0 auto;
   }
 
   /* 统一的按钮样式（复古 3D 游戏按钮） */
   .game-btn {
     display: inline-block;
-    padding: 16px 30px;
-    font-size: 1.3rem;
+    padding: 16px 20px;
+    font-size: 1.25rem;
     font-family: inherit;
     font-weight: bold;
     text-decoration: none;
@@ -155,9 +155,10 @@
     transition: all 0.1s;
     position: relative;
     text-shadow: 0 2px 0 rgba(0,0,0,0.2);
+    white-space: nowrap; /* 防止文字换行 */
   }
 
-  /* 在线玩按钮：亮绿色 */
+  /* HTML版下载按钮：亮绿色 */
   .btn-play {
     background-color: #8bc34a;
     border-color: #4a7c1f;
@@ -174,7 +175,7 @@
     box-shadow: 0 0px 0 #4a7c1f, 0 4px 10px rgba(0,0,0,0.2);
   }
 
-  /* 下载按钮：泥土棕/橙 */
+  /* 安装包下载按钮：泥土棕/橙 */
   .btn-download {
     background-color: #e8a85c;
     border-color: #8b5a2b;
@@ -193,8 +194,9 @@
 
   /* 按钮上的小图标 */
   .btn-icon {
-    margin-right: 8px;
+    margin-right: 6px;
     vertical-align: middle;
+    font-size: 1.1rem;
   }
 
   /* 悬浮的豌豆子弹（背景装饰） */
@@ -248,7 +250,7 @@
     .title { font-size: 2.5rem; }
     .subtitle { font-size: 1rem; }
     .sunflower { font-size: 2.5rem; }
-    .game-btn { font-size: 1.1rem; padding: 14px 20px; }
+    .game-btn { font-size: 1.1rem; padding: 14px 15px; }
   }
 </style>
 </head>
@@ -272,12 +274,12 @@
     </div>
 
     <div class="btn-group">
-      <!-- 在线玩按钮 -->
-      <a href="https://sweetwatermelons.github.io/playpvzonline" target="_blank" class="game-btn btn-play">
-        <span class="btn-icon">🎮</span> 在线玩
+      <!-- 下载HTML版按钮 -->
+      <a href="https://gh.dpik.top/https://github.com/sweetwatermelons/Games/releases/download/PVZ/Plants.vs.Zombies.html" target="_blank" class="game-btn btn-play">
+        <span class="btn-icon">🌐</span> 下载HTML版
       </a>
       
-      <!-- 下载安装包按钮（已更新链接） -->
+      <!-- 下载安装包按钮 -->
       <a href="https://gh.dpik.top/https://github.com/sweetwatermelons/Games/releases/download/PVZ/Plants.vs.Zombies.exe" target="_blank" class="game-btn btn-download">
         <span class="btn-icon">⬇️</span> 下载安装包
       </a>
