@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>植物大战僵尸 - 启动页</title>
+<style>
+  /* 引入具有游戏感的字体（如果没有则回退到系统字体） */
+  @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    /* 模拟草地和泥土的渐变背景 */
+    background-color: #5c9e31;
+    background-image: 
+      radial-gradient(circle at 50% 20%, rgba(255,255,255,0.2) 0%, transparent 40%),
+      linear-gradient(to bottom, #7bc043 0%, #5c9e31 60%, #4a3319 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'ZCOOL KuaiLe', 'Microsoft YaHei', sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* 背景草坪的纹理（斜线网格） */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(0, 0, 0, 0.05) 40px,
+      rgba(0, 0, 0, 0.05) 80px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* 主面板：木纹质感 */
+  .panel {
+    background: #e6c280;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px);
+    background-size: 20px 20px;
+    border: 8px solid #8b5a2b; /* 深色木边框 */
+    border-radius: 20px;
+    box-shadow: 
+      0 15px 0 #5a3817, /* 底部厚度 */
+      0 25px 30px rgba(0,0,0,0.5),
+      inset 0 0 20px rgba(139, 90, 43, 0.5);
+    padding: 50px 70px;
+    text-align: center;
+    position: relative;
+    z-index: 10;
+    transform: translateY(-20px);
+    animation: floatUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    opacity: 0;
+  }
+
+  /* 面板顶部的铆钉装饰 */
+  .panel::before, .panel::after {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+    background: #a57c4e;
+    border-radius: 50%;
+    border: 3px solid #5a3817;
+    box-shadow: inset -2px -2px 5px rgba(0,0,0,0.5);
+    top: 15px;
+  }
+  .panel::before { left: 15px; }
+  .panel::after { right: 15px; }
+
+  /* 标题区域 */
+  .title-wrap {
+    margin-bottom: 45px;
+    position: relative;
+  }
+
+  .title {
+    font-size: 4rem;
+    color: #f2e344; /* 阳光黄 */
+    text-shadow: 
+      -3px -3px 0 #4a3319,
+       3px -3px 0 #4a3319,
+      -3px  3px 0 #4a3319,
+       3px  3px 0 #4a3319,
+       0px  6px 0 #2e1f0e;
+    letter-spacing: 4px;
+    transform: rotate(-2deg);
+    display: inline-block;
+  }
+
+  .subtitle {
+    display: block;
+    margin-top: 10px;
+    font-size: 1.2rem;
+    color: #5a3817;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+  }
+
+  /* 装饰元素：向日葵和阳光 */
+  .decorations {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 45px;
+  }
+
+  .sunflower {
+    font-size: 3.5rem;
+    animation: bounce 2s infinite ease-in-out;
+    display: inline-block;
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+  }
+  
+  .sun {
+    font-size: 2.5rem;
+    animation: pulse 3s infinite;
+    filter: drop-shadow(0 0 10px #f2e344);
+  }
+
+  /* 按钮容器 */
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  /* 统一的按钮样式（复古 3D 游戏按钮） */
+  .game-btn {
+    display: inline-block;
+    padding: 16px 30px;
+    font-size: 1.3rem;
+    font-family: inherit;
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+    border-radius: 12px;
+    border: 4px solid;
+    cursor: pointer;
+    transition: all 0.1s;
+    position: relative;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.2);
+  }
+
+  /* 在线玩按钮：亮绿色 */
+  .btn-play {
+    background-color: #8bc34a;
+    border-color: #4a7c1f;
+    color: #ffffff;
+    box-shadow: 0 6px 0 #4a7c1f, 0 10px 10px rgba(0,0,0,0.2);
+  }
+  .btn-play:hover {
+    background-color: #9ccc65;
+    transform: translateY(2px);
+    box-shadow: 0 4px 0 #4a7c1f, 0 8px 10px rgba(0,0,0,0.2);
+  }
+  .btn-play:active {
+    transform: translateY(6px);
+    box-shadow: 0 0px 0 #4a7c1f, 0 4px 10px rgba(0,0,0,0.2);
+  }
+
+  /* 下载按钮：泥土棕/橙 */
+  .btn-download {
+    background-color: #e8a85c;
+    border-color: #8b5a2b;
+    color: #4a3319;
+    box-shadow: 0 6px 0 #8b5a2b, 0 10px 10px rgba(0,0,0,0.2);
+  }
+  .btn-download:hover {
+    background-color: #f0b875;
+    transform: translateY(2px);
+    box-shadow: 0 4px 0 #8b5a2b, 0 8px 10px rgba(0,0,0,0.2);
+  }
+  .btn-download:active {
+    transform: translateY(6px);
+    box-shadow: 0 0px 0 #8b5a2b, 0 4px 10px rgba(0,0,0,0.2);
+  }
+
+  /* 按钮上的小图标 */
+  .btn-icon {
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  /* 悬浮的豌豆子弹（背景装饰） */
+  .peas {
+    position: absolute;
+    top: 20%;
+    left: 10%;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle at 30% 30%, #a4e642, #5c9e31);
+    border-radius: 50%;
+    box-shadow: inset -2px -2px 5px rgba(0,0,0,0.3);
+    animation: shoot 3s linear infinite;
+    z-index: 1;
+  }
+  
+  .peas:nth-child(2) {
+    top: 70%;
+    left: 85%;
+    animation-duration: 4s;
+    animation-delay: 1.5s;
+  }
+
+  /* 动画定义 */
+  @keyframes floatUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.2); opacity: 1; }
+  }
+
+  @keyframes shoot {
+    0% { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(100vw); opacity: 0; }
+  }
+
+  /* 移动端适配 */
+  @media (max-width: 600px) {
+    .panel {
+      padding: 40px 25px;
+      width: 90%;
+      border-width: 6px;
+    }
+    .title { font-size: 2.5rem; }
+    .subtitle { font-size: 1rem; }
+    .sunflower { font-size: 2.5rem; }
+    .game-btn { font-size: 1.1rem; padding: 14px 20px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- 背景飞行的豌豆 -->
+  <div class="peas"></div>
+  <div class="peas"></div>
+
+  <!-- 主面板 -->
+  <div class="panel">
+    <div class="title-wrap">
+      <h1 class="title">植物大战僵尸</h1>
+      <span class="subtitle">— 保卫你的草坪 —</span>
+    </div>
+
+    <div class="decorations">
+      <span class="sun">☀️</span>
+      <span class="sunflower">🌻</span>
+      <span class="sun">☀️</span>
+    </div>
+
+    <div class="btn-group">
+      <!-- 在线玩按钮 -->
+      <a href="https://sweetwatermelons.github.io/playpvzonline" target="_blank" class="game-btn btn-play">
+        <span class="btn-icon">🎮</span> 在线玩
+      </a>
+      
+      <!-- 下载安装包按钮（已更新链接） -->
+      <a href="https://gh.dpik.top/https://github.com/sweetwatermelons/Games/releases/download/PVZ/Plants.vs.Zombies.exe" target="_blank" class="game-btn btn-download">
+        <span class="btn-icon">⬇️</span> 下载安装包
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>
