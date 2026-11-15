@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>送三只小羊回家 · sweet🍉的小站</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+  body {
+    /* 田园风光：天空蓝到草地的柔和渐变 */
+    background: linear-gradient(180deg, #a8d8ea 0%, #c9e4de 45%, #f0e6c8 70%, #d4e8b0 100%);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.7) 0%, transparent 28%),
+      radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.5) 0%, transparent 22%),
+      radial-gradient(circle at 50% 100%, rgba(160, 200, 120, 0.4) 0%, transparent 50%),
+      linear-gradient(180deg, #a8d8ea 0%, #c9e4de 45%, #f0e6c8 70%, #d4e8b0 100%);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+    padding: 20px; overflow-x: hidden;
+    position: relative;
+  }
+
+  /* 飘浮的云朵装饰 */
+  .cloud {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.75);
+    border-radius: 50%;
+    filter: blur(1px);
+    pointer-events: none;
+    animation: drift 20s ease-in-out infinite;
+  }
+  .cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background: inherit;
+    border-radius: 50%;
+  }
+  .cloud1 { width: 100px; height: 40px; top: 12%; left: 8%; }
+  .cloud1::before { width: 50px; height: 50px; top: -22px; left: 18px; }
+  .cloud1::after { width: 38px; height: 38px; top: -14px; left: 55px; }
+  .cloud2 { width: 80px; height: 32px; top: 22%; right: 12%; animation-delay: -7s; }
+  .cloud2::before { width: 40px; height: 40px; top: -18px; left: 14px; }
+  .cloud2::after { width: 30px; height: 30px; top: -10px; left: 44px; }
+  .cloud3 { width: 70px; height: 28px; top: 6%; right: 30%; animation-delay: -13s; opacity: 0.6; }
+  .cloud3::before { width: 34px; height: 34px; top: -15px; left: 12px; }
+  .cloud3::after { width: 26px; height: 26px; top: -8px; left: 38px; }
+
+  @keyframes drift {
+    0%, 100% { transform: translateX(0) translateY(0); }
+    50% { transform: translateX(24px) translateY(-6px); }
+  }
+
+  /* 草地小装饰（小羊、草） */
+  .ground-deco {
+    position: absolute;
+    bottom: 4%;
+    font-size: 2.2rem;
+    opacity: 0.55;
+    pointer-events: none;
+    animation: bob 4s ease-in-out infinite;
+  }
+  .deco1 { left: 6%; animation-delay: 0s; }
+  .deco2 { right: 8%; animation-delay: -1.5s; }
+  .deco3 { left: 22%; bottom: 2%; font-size: 1.6rem; animation-delay: -2.5s; }
+  .deco4 { right: 25%; bottom: 2.5%; font-size: 1.8rem; animation-delay: -0.8s; }
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .container {
+    max-width: 820px; width: 100%;
+    display: flex; flex-direction: column; align-items: center; margin-top: -2vh;
+    position: relative; z-index: 2;
+  }
+
+  /* 标题区 */
+  .title-wrap { display: flex; flex-direction: column; align-items: center; width: 100%; }
+  .title {
+    font-size: 3.6rem; font-weight: 900;
+    color: #3b4a2f;
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 18px;
+    text-shadow: 0 2px 12px rgba(255, 255, 255, 0.9);
+  }
+  .title .emoji {
+    font-size: 3.6rem; display: inline-block;
+    animation: float 3s ease-in-out infinite;
+  }
+  .title .zh {
+    font-size: 2.6rem; font-weight: 800;
+    color: #4a7c59;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(8deg); }
+  }
+  .underline {
+    width: 55%; height: 4px;
+    background: linear-gradient(90deg, transparent 0%, #e8b86d 50%, transparent 100%);
+    border-radius: 2px; margin-bottom: 42px;
+    box-shadow: 0 0 14px rgba(232, 184, 109, 0.6);
+  }
+
+  /* 下载区 */
+  .download-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 52px;
+    width: 100%;
+  }
+
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 26px 60px;
+    /* 木质/草垛风格按钮 */
+    background: linear-gradient(180deg, #fdf6e3 0%, #f5e6c8 100%);
+    border: 3px solid #d4a96a;
+    border-radius: 60px;
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #6b4f2a;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow:
+      0 8px 0 #c49a58,
+      0 12px 28px rgba(100, 70, 30, 0.25);
+    white-space: nowrap;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .download-btn:hover {
+    transform: translateY(-4px);
+    background: linear-gradient(180deg, #fffdf5 0%, #faf0d8 100%);
+    border-color: #e8b86d;
+    color: #5a4120;
+    box-shadow:
+      0 12px 0 #c49a58,
+      0 18px 38px rgba(100, 70, 30, 0.3);
+  }
+
+  .download-btn:active {
+    transform: translateY(4px);
+    box-shadow:
+      0 4px 0 #c49a58,
+      0 8px 18px rgba(100, 70, 30, 0.2);
+  }
+
+  .download-btn .emoji {
+    font-size: 2.3rem;
+    transition: transform 0.3s;
+  }
+
+  .download-btn:hover .emoji {
+    transform: scale(1.15) rotate(-6deg);
+  }
+
+  .download-hint {
+    font-size: 1rem;
+    color: #6b7a5e;
+    text-align: center;
+    line-height: 1.8;
+    max-width: 460px;
+    background: rgba(255, 255, 255, 0.55);
+    padding: 14px 24px;
+    border-radius: 18px;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+  }
+
+  /* 返回按钮 */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #4a7c59;
+    text-decoration: none;
+    padding: 12px 30px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 15px rgba(74, 124, 89, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    backdrop-filter: blur(4px);
+  }
+
+  .back-link:hover {
+    color: #ffffff;
+    background: #6ba368;
+    box-shadow: 0 8px 25px rgba(107, 163, 104, 0.45);
+    transform: translateY(-2px);
+  }
+
+  .back-link svg {
+    width: 18px; height: 18px;
+    fill: #6ba368;
+    transition: fill 0.3s;
+  }
+  .back-link:hover svg { fill: #ffffff; }
+
+  /* 页脚 */
+  .footer-text {
+    color: #7d8a6e;
+    font-size: 13px;
+    margin-top: 40px;
+    background: rgba(255, 255, 255, 0.4);
+    padding: 6px 18px;
+    border-radius: 20px;
+  }
+
+  /* 手机端适配 */
+  @media (max-width: 860px) {
+    .title { font-size: 2.4rem; flex-wrap: wrap; gap: 8px; }
+    .title .emoji { font-size: 2.4rem; }
+    .title .zh { font-size: 1.8rem; }
+    .download-btn { padding: 20px 34px; font-size: 1.15rem; gap: 10px; border-radius: 44px; }
+    .download-btn .emoji { font-size: 1.7rem; }
+    .download-hint { font-size: 0.9rem; padding: 12px 18px; }
+    .ground-deco { font-size: 1.6rem; }
+    .cloud { display: none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- 飘浮云朵装饰 -->
+  <div class="cloud cloud1"></div>
+  <div class="cloud cloud2"></div>
+  <div class="cloud cloud3"></div>
+
+  <!-- 草地小装饰 -->
+  <div class="ground-deco deco1">🐑</div>
+  <div class="ground-deco deco2">🌿</div>
+  <div class="ground-deco deco3">🌱</div>
+  <div class="ground-deco deco4">🐏</div>
+
+  <div class="container">
+    <div class="title-wrap">
+      <h1 class="title">
+        <span class="emoji">🐑</span>
+        <span class="zh">送三只小羊回家</span>
+      </h1>
+      <div class="underline"></div>
+    </div>
+
+    <!-- 下载区 -->
+    <div class="download-area">
+      <a href="https://gh.dpik.top/https://github.com/sweetwatermelons/Games/releases/download/HomeSheepHome/HomeSheepHome.exe" class="download-btn">
+        <span class="emoji">📦</span>
+        <span>点击下载安装包</span>
+      </a>
+      <p class="download-hint">
+        点击按钮即可下载「送三只小羊回家」安装程序<br>
+        下载后运行 .exe 安装程序安装完成后即可开始游戏
+      </p>
+    </div>
+
+    <!-- 返回按钮 -->
+    <a href="https://sweetwatermelons.github.io/games.html" class="back-link">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      返回游戏专区
+    </a>
+
+    <div class="footer-text">sweet🍉的小站 · 送三只小羊回家</div>
+  </div>
+
+</body>
+</html>
