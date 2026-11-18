@@ -426,6 +426,8 @@
   }
   .notepad-editor { flex: 1; width: 100%; min-height: 120px; outline: none; font-family: inherit; font-size: 14px; line-height: 1.6; color: var(--text); overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; }
   .notepad-editor[placeholder]:empty::before { content: attr(placeholder); color: var(--text-mute); cursor: text; }
+  .notepad-editor a { color: #0563c1; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+  .notepad-editor a:hover { color: #0a7ae0; }
 
   /* ======= 右键菜单 ======= */
   .widget-ctxmenu { position: fixed; z-index: 99999; min-width: 160px; background: var(--ctx-bg); backdrop-filter: blur(30px) saturate(150%); border: 1px solid var(--ctx-border); border-radius: 10px; box-shadow: var(--ctx-shadow); padding: 6px; display: none; flex-direction: column; gap: 2px; font-size: 13.5px; color: var(--text); user-select: none; }
@@ -828,7 +830,7 @@
 
   /* Toast */
   .mp-toast {
-    position: absolute; bottom: 1.5em; left: 50%;
+    position: absolute; bottom: 4.8em; left: 50%;
     transform: translateX(-50%) translateY(10px);
     background: rgba(0,0,0,.85); color: #fff;
     font-size: .75em; padding: .5em 1em; border-radius: 2em;
@@ -845,7 +847,7 @@
   <div class="topbar">
     <div class="hello-block">
       <h1 id="greeting">你好<span>。</span></h1>
-      <p id="subline">今天也要元气满满 ✨</p>
+      <p id="subline">今天也要元气满满哦 ✨</p>
     </div>
     <div class="top-right">
       <div class="pill">
@@ -1271,6 +1273,31 @@
       <div class="resize-handle resize-se"></div>
     </div>
 
+    <!-- 捏捏乐解压小卡片 -->
+    <div class="widget" data-id="momo" style="display: none;">
+      <div class="widget-header">
+        <div class="widget-title"><span class="dot" style="background: #ffb6c1;"></span> MOMO 捏捏乐</div>
+        <div style="font-size: 11px; color: var(--text-mute);">Ctrl+S 保存卡片</div>
+      </div>
+      <div class="stage" id="momoStage" style="position: relative; flex: 1; touch-action: none; display: flex; justify-content: center; align-items: center; overflow: hidden; background: var(--input-bg); border-radius: 12px; margin-top: 10px;">
+        <canvas id="momoCanvas" style="position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab;"></canvas>
+        <div class="shortcut-hint" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 11px; color: #999; pointer-events: none;">按住任意位置捏一捏</div>
+        <div class="toolbar" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 4; background: rgba(255,255,255,0.8); padding: 6px 12px; border-radius: 12px; backdrop-filter: blur(10px); box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+          <button class="momo-tool active" data-mode="squish" style="padding: 4px 10px; border: none; border-radius: 8px; background: var(--accent); color: white; font-size: 12px; cursor: pointer;">捏一捏</button>
+          <button class="momo-tool" data-mode="stretch" style="padding: 4px 10px; border: none; border-radius: 8px; background: transparent; color: var(--text); font-size: 12px; cursor: pointer;">拉长长</button>
+          <button class="momo-tool" data-mode="tickle" style="padding: 4px 10px; border: none; border-radius: 8px; background: transparent; color: var(--text); font-size: 12px; cursor: pointer;">挠痒痒</button>
+        </div>
+      </div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
+    </div>
+
     <!-- 摸鱼笑话 -->
     <div class="widget" data-id="joke">
       <div class="widget-header">
@@ -1421,6 +1448,12 @@
                 <path d="M12 3.5v10.5"/><path d="m7.5 10 4.5 4.5L16.5 10"/><path d="M4.5 19.5h15"/>
               </svg>
             </button>
+            <!-- 分享：复制歌曲链接 -->
+            <button class="mp-icon-btn" id="mp-shareBtn" aria-label="分享" title="分享歌曲链接（复制到剪贴板）">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 16V4"/><path d="m8 7.5 4-3.5 4 3.5"/><path d="M5 14v4.5a1.5 1.5 0 0 0 1.5 1.5h11a1.5 1.5 0 0 0 1.5-1.5V14"/>
+              </svg>
+            </button>
             <!-- 退出：关闭当前歌曲信息，回到初始界面（卡片保留） -->
             <button class="mp-exit-btn" id="mp-exitBtn" aria-label="关闭当前歌曲，返回初始界面" title="关闭当前歌曲，返回初始界面">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
@@ -1478,7 +1511,53 @@
             <input type="range" id="mp-volumeSlider" class="mp-volume-slider" min="0" max="1" step="0.05" value="1">
           </div>
         </div>
-        
+
+        <!-- 播放增强工具条：播放速度 / 播放顺序 / 定时停止 -->
+        <div class="mp-extra-bar" id="mp-extraBar">
+          <button class="mp-pill" id="mp-rateBtn" title="播放速度：1.0x" aria-label="播放速度">
+            <svg viewBox="0 0 24 24"><path d="M12 4.5a7.6 7.6 0 1 0 7.3 5.5"/><path d="M12 8.2v4.1l2.6 1.6"/><path d="M19.6 4.2v4h-4"/></svg>
+            <span id="mp-rateLabel">1.0x</span>
+          </button>
+          <button class="mp-pill" id="mp-modeBtn" title="播放顺序：列表循环（点击切换）" aria-label="播放顺序">
+            <svg viewBox="0 0 24 24" id="mp-modeIcon"><path d="M17 2.5l3.5 3.5L17 9.5"/><path d="M3.5 11.5V9a3.5 3.5 0 0 1 3.5-3.5h13"/><path d="M7 21.5L3.5 18 7 14.5"/><path d="M20.5 12.5V15a3.5 3.5 0 0 1-3.5 3.5H4"/></svg>
+            <span id="mp-modeLabel">列表循环</span>
+          </button>
+          <button class="mp-pill" id="mp-sleepBtn" title="定时停止播放" aria-label="定时停止播放">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7.8"/><path d="M12 9.3V13l2.6 1.7"/><path d="M9 3.4h6"/></svg>
+            <span id="mp-sleepLabel">定时</span>
+          </button>
+
+          <!-- 倍速弹层 -->
+          <div class="mp-pop" id="mp-ratePop">
+            <div class="mp-pop-title">播放速度</div>
+            <div class="mp-pop-opts" id="mp-rateOpts">
+              <button class="mp-opt" data-rate="0.5">0.5x</button>
+              <button class="mp-opt" data-rate="0.75">0.75x</button>
+              <button class="mp-opt on" data-rate="1">1.0x</button>
+              <button class="mp-opt" data-rate="1.25">1.25x</button>
+              <button class="mp-opt" data-rate="1.5">1.5x</button>
+              <button class="mp-opt" data-rate="1.75">1.75x</button>
+              <button class="mp-opt" data-rate="2">2.0x</button>
+            </div>
+            <div class="mp-custom">
+              <input class="mp-custom-input" id="mp-rateCustom" type="number" min="0.25" max="4" step="0.05"
+                     inputmode="decimal" placeholder="自定义" aria-label="自定义播放速度">
+              <button class="mp-custom-apply" id="mp-rateApply">应用</button>
+            </div>
+          </div>
+          <!-- 定时弹层 -->
+          <div class="mp-pop" id="mp-sleepPop">
+            <div class="mp-pop-title">定时停止播放</div>
+            <div class="mp-pop-opts" id="mp-sleepOpts">
+              <button class="mp-opt" data-min="15">15 分钟</button>
+              <button class="mp-opt" data-min="30">30 分钟</button>
+              <button class="mp-opt" data-min="60">60 分钟</button>
+              <button class="mp-opt" data-min="-1">本曲结束后</button>
+              <button class="mp-opt" data-min="0">取消</button>
+            </div>
+          </div>
+        </div>
+
         <!-- 播放器内轻提示 -->
         <div class="mp-toast" id="mp-toast"></div>
       </div>
@@ -1517,7 +1596,7 @@
                 <strong>② 缩放卡片：</strong>鼠标移到卡片<strong>四条边或四个角</strong>，光标变成双向箭头，按住拖动即可自由调整宽高；最小宽 240px、最小高 160px。<br>
                 <strong>③ 调整层级：</strong>在卡片上<strong>点击右键</strong>弹出菜单，可选「⬆️ 置于顶层」或「⬇️ 置于底层」，解决卡片互相遮挡。<br>
                 <strong>④ 自动限位：</strong>拖动/缩放时卡片被限制在容器内，不会跑出页面；窗口缩小后超出右边缘的卡片会被自动拉回可视区。<br>
-                <strong>⑤ 一键整理：</strong>点击左下角<strong>扫把（🧹）</strong>，自动把所有可见卡片按行紧凑排列——宽屏 3 列、中屏 2 列、窄屏 1 列，特别宽的卡片（如天气卡）自动占满整行，完成后提示「已整理 ✨」。<br>
+                <strong>⑤ 一键整理：</strong>点击左下角<strong>扫把（🧹）</strong>，自动把所有可见卡片按行紧凑排列——宽屏 3 列、中屏 2 列、窄屏 1 列，特别宽的卡片（如天气卡）自动占满整行，完成后提示「已整理 ✨」。<br>整理<strong>只调位置</strong>：不会把卡片恢复成默认布局，也不会强行改回你手动调过的卡片宽度和高度；不满意可按 <strong>Ctrl+Z</strong> 撤销上一次整理。<br>
                 <strong>⑥ 移动端：</strong>屏幕宽度 ≤ 860px 时卡片自动改为纵向流式排列，拖动/缩放手柄自动禁用，保证手机正常浏览。
               </span>
             </li>
@@ -1612,7 +1691,17 @@
                 <strong>⑦ 导出：</strong>📥 导出 <strong>Word（.docx）</strong>、📄 导出 <strong>TXT</strong>，文件名自动带日期；内容为空时会提示「记事本还是空的」。<br>
                 <span style="color:#bbb;">· <strong>.docx</strong> 是标准 Office 文档格式，Word / WPS / 手机 Office 都能<strong>直接打开</strong>，标题、加粗、斜体、颜色、表格、图片、链接、分隔线都会保留，导出的文件也能再导入回来；<br>· <strong>TXT</strong> 只保存纯文字（图片与表格带不过去，会先提示），适合贴到别处当纯文本用。</span><br>
                 <strong>⑧ 导入：</strong>📂 支持 <strong>TXT</strong> 与 <strong>.docx</strong> 两种文件，导入 .docx 会保留标题、加粗、表格与图片；<strong>老版 .doc 不支持</strong>（会提示先用 Word「另存为 .docx」再导入），单个文件上限 <strong>20MB</strong>；写入前会询问「追加到末尾」还是「覆盖现有内容」。<br>
-                <strong>⑨ 自动保存：</strong>停止输入 500ms 后自动存入浏览器本地；粘贴时去除外部样式，仅保留纯文字与换行。
+				<strong>⑨ 自动保存：</strong>停止输入 500ms 后自动存入浏览器本地；粘贴时去除外部样式，仅保留纯文字与换行。<br>
+<strong>☆温馨提示☆</strong>迷你记事本中的超链接会随导出一起保留：导出 <strong>.docx</strong> 时写成真正可点击的超链接，Word / WPS 打开后可直接点击，文档内按 <strong>Ctrl / Cmd + 左键</strong>也能直接在新标签页打开；<strong>.docx</strong> 会保留字体、字号、高亮、表格、图片与链接，<strong>.txt</strong> 为纯文本（格式与链接都会失效）。<br><strong>☆快捷保存☆</strong>在记事本编辑区内按 <strong>Ctrl + S（Mac 为 Cmd + S）</strong> 会立即存入浏览器本地并提示「💾 已保存」，不会弹出下载框；停止输入 500ms 也会自动保存。<br>
+              </span>
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">MOMO 捏捏乐</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                <strong>① 三种手感：</strong>卡片底部三个按钮切换——<strong>捏</strong>（横向压扁、纵向压缩）、<strong>拉伸</strong>（四向拉长）、<strong>挠痒</strong>（左右轻晃 + 微微旋转），当前模式按钮高亮。<br>
+                <strong>② 怎么玩：</strong>在 MOMO 上<strong>按住拖动</strong>即可实时变形，松手后带弹性回弹动画回到原状，鼠标移出或中途松手都不会卡住。<br>
+                <strong>③ 保存卡片：</strong>鼠标停在卡片上按 <strong>Ctrl + S（Mac 为 Cmd + S）</strong>，导出 <strong>600×800</strong> 的 PNG 卡片——标题「今天的快乐，有形状了」+ 当前捏出的形状 + 二维码；图片未加载完会提示稍等。<br>
+                <strong>④ 优先级：</strong>焦点在记事本等可编辑区域时，Ctrl / Cmd + S 优先保存记事本内容，不会被捏捏乐抢占。
               </span>
             </li>
 
@@ -3645,6 +3734,169 @@
   // 如果缓存为空，页面加载时主动拉取一次
   if (!cachedJoke) fetchJoke();
 
+  // ================= 捏捏乐逻辑 =================
+  (function() {
+    const momoWidget = document.querySelector('[data-id="momo"]');
+    if (!momoWidget) return;
+    
+    const canvas = document.getElementById('momoCanvas');
+    const ctx = canvas.getContext('2d');
+    const tools = momoWidget.querySelectorAll('.momo-tool');
+    
+    const MOMO_URL = 'https://cdn.luogu.com.cn/upload/image_hosting/kd0y2pul.webp';
+    const QR_URL = 'https://cdn.luogu.com.cn/upload/image_hosting/6xbq4dyk.webp';
+    
+    let mode = 'squish';
+    let width, height;
+    let img = new Image(); img.crossOrigin = "Anonymous"; img.src = MOMO_URL;
+    let qrImg = new Image(); qrImg.crossOrigin = "Anonymous"; qrImg.src = QR_URL;
+
+    let isDragging = false;
+    let startPos = { x: 0, y: 0 };
+    let state = { x: 0, y: 0, sx: 1, sy: 1, r: 0 };
+    let target = { x: 0, y: 0, sx: 1, sy: 1, r: 0 };
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      if(width === 0 || height === 0) return;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    
+    new ResizeObserver(resize).observe(canvas.parentElement);
+    setTimeout(resize, 100);
+
+    canvas.addEventListener('pointerdown', (e) => {
+      isDragging = true;
+      startPos = { x: e.clientX, y: e.clientY };
+      canvas.setPointerCapture(e.pointerId);
+      canvas.style.cursor = 'grabbing';
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - startPos.x;
+      const dy = e.clientY - startPos.y;
+
+      if (mode === 'squish') {
+        target.sx = 1 + Math.min(Math.abs(dx) / 200, 0.4);
+        target.sy = 1 - Math.min(Math.abs(dy) / 200, 0.3);
+      } else if (mode === 'stretch') {
+        target.sx = 1 + Math.min(Math.abs(dx) / 150, 0.5);
+        target.sy = 1 + Math.min(Math.abs(dy) / 150, 0.5);
+      } else if (mode === 'tickle') {
+        target.r = Math.sin(Date.now() * 0.05) * 0.08;
+        target.x = dx * 0.2;
+      }
+    });
+
+    function endDrag() {
+      isDragging = false;
+      target = { x: 0, y: 0, sx: 1, sy: 1, r: 0 };
+      canvas.style.cursor = 'grab';
+    }
+    canvas.addEventListener('pointerup', endDrag);
+    canvas.addEventListener('pointercancel', endDrag);
+    canvas.addEventListener('lostpointercapture', endDrag);
+
+    tools.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        tools.forEach(t => {
+          t.classList.remove('active');
+          t.style.background = 'transparent';
+          t.style.color = 'var(--text)';
+        });
+        btn.classList.add('active');
+        btn.style.background = 'var(--accent)';
+        btn.style.color = 'white';
+        mode = btn.dataset.mode;
+        target = { x: 0, y: 0, sx: 1, sy: 1, r: 0 };
+      });
+    });
+
+    function saveCard() {
+      if (!img.complete || !img.naturalWidth) {
+      if (typeof toast === 'function') toast('图片还在加载中，请稍等…');
+      return;
+    }
+    const hasQR = qrImg.complete && qrImg.naturalWidth > 0;
+      const cardCanvas = document.createElement('canvas');
+      cardCanvas.width = 600; cardCanvas.height = 800;
+      const cCtx = cardCanvas.getContext('2d');
+
+      cCtx.fillStyle = '#faf9f7';
+      cCtx.fillRect(0, 0, 600, 800);
+      
+      cCtx.fillStyle = '#4e463d';
+      cCtx.font = 'bold 28px sans-serif';
+      cCtx.textAlign = 'center';
+      cCtx.fillText('今天的快乐，有形状了', 300, 100);
+
+      cCtx.save();
+      cCtx.translate(300, 350);
+      cCtx.rotate(state.r);
+      cCtx.scale(state.sx, state.sy);
+      cCtx.drawImage(img, -150, -150, 300, 300);
+      cCtx.restore();
+
+      if (hasQR) {
+      cCtx.drawImage(qrImg, 420, 600, 100, 100);
+      cCtx.font = '14px sans-serif';
+      cCtx.fillStyle = '#999';
+      cCtx.fillText('扫码来捏一捏', 470, 720);
+    }
+
+      const dataUrl = cardCanvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = 'MOMO-卡片.png';
+      link.href = dataUrl;
+      
+      try {
+        link.click();
+        if(typeof toast === 'function') toast('✅ 卡片已保存');
+      } catch (err) {
+        const win = window.open();
+        win.document.write(`<img src="${dataUrl}" style="max-width:100%;" alt="右键另存为">`);
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      if (e.key !== 's' && e.key !== 'S') return;
+      const ae = document.activeElement;
+      if (ae && (ae.isContentEditable || /^(INPUT|TEXTAREA)$/.test(ae.tagName || ''))) return;
+      if (momoWidget.matches(':hover') || momoWidget.contains(ae)) {
+        e.preventDefault();
+        saveCard();
+      }
+    });
+
+    function animate() {
+      for (let key in state) {
+        state[key] += (target[key] - state[key]) * 0.15;
+      }
+      if (width && height) {
+        ctx.clearRect(0, 0, width, height);
+        if (img.complete && img.naturalWidth !== 0) {
+          ctx.save();
+          ctx.translate(width / 2 + state.x, height / 2 + state.y);
+          ctx.rotate(state.r);
+          ctx.scale(state.sx, state.sy);
+          const imgSize = Math.min(width, height) * 0.8;
+          ctx.drawImage(img, -imgSize / 2, -imgSize / 2, imgSize, imgSize);
+          ctx.restore();
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+  })();
+
   // ================= 迷你记事本 =================
   const notepadEditor = $('#notepadEditor');
   notepadEditor.innerHTML = store.get('nt_notepad', '');
@@ -3693,6 +3945,7 @@
     } else {
       document.execCommand('insertText', false, text);
     }
+    setTimeout(() => { npAutoLink(); }, 0);
   });
   let saveTimer;
   let isComposing = false;
@@ -3727,6 +3980,66 @@
     else if (k === 'f') { e.preventDefault(); openFindPanel(); }
     else if (k === 's') { e.preventDefault(); saveNotepad(); toast('💾 已保存'); }
   });
+  // Ctrl / Cmd + 左键点击：直接在浏览器新标签页打开记事本里的链接
+  notepadEditor.addEventListener('click', (e) => {
+    const aEl = e.target && e.target.closest ? e.target.closest('a') : null;
+    if (!aEl || !notepadEditor.contains(aEl)) return;
+    const href = (aEl.getAttribute('href') || '').trim();
+    if (!/^(https?:\/\/|mailto:)/i.test(href)) return;
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      e.stopPropagation();
+      try { window.open(href, '_blank', 'noopener,noreferrer'); }
+      catch (err) { location.href = href; }
+      toast('🔗 已在新标签页打开链接');
+    }
+  });
+  // 失焦 / 粘贴后：把纯文本网址自动变成可点击链接
+  const NP_URL_RE = /(https?:\/\/[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]+|www\.[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]+)/gi;
+  const NP_CUT = /[.,;:!?)\]}>\x22\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff09\u3011\u300b\u300d\u300f]+$/;
+  const npAutoLink = () => {
+    if (!notepadEditor) return false;
+    const walker = document.createTreeWalker(notepadEditor, NodeFilter.SHOW_TEXT, null);
+    const targetsX = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      if (!node.nodeValue || !/(https?:\/\/|www\.)/i.test(node.nodeValue)) continue;
+      let p = node.parentNode, skip = false;
+      while (p && p !== notepadEditor) {
+        const tn = p.tagName ? p.tagName.toLowerCase() : '';
+        if (tn === 'a' || tn === 'pre' || tn === 'code' || tn === 'script' || tn === 'style') { skip = true; break; }
+        p = p.parentNode;
+      }
+      if (!skip) targetsX.push(node);
+    }
+    let changed = false;
+    targetsX.forEach((tn) => {
+      const txt = tn.nodeValue;
+      const frag = document.createDocumentFragment();
+      let last = 0, m, hit = false;
+      NP_URL_RE.lastIndex = 0;
+      while ((m = NP_URL_RE.exec(txt)) !== null) {
+        const url = m[0].replace(NP_CUT, '');
+        if (url.length < 6) continue;
+        hit = true;
+        if (m.index > last) frag.appendChild(document.createTextNode(txt.slice(last, m.index)));
+        const link = document.createElement('a');
+        link.href = /^https?:\/\//i.test(url) ? url : ('http://' + url);
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = url;
+        frag.appendChild(link);
+        last = m.index + url.length;
+      }
+      if (!hit) return;
+      if (last < txt.length) frag.appendChild(document.createTextNode(txt.slice(last)));
+      tn.parentNode.replaceChild(frag, tn);
+      changed = true;
+    });
+    if (changed) saveNotepad();
+    return changed;
+  };
+  notepadEditor.addEventListener('blur', () => { setTimeout(() => { if (npAutoLink()) toast('🔗 已自动把网址变成可点击链接'); }, 30); });
   $('#btnUndo').addEventListener('mousedown', (e) => {
     e.preventDefault(); clearTimeout(historyTimer); pushHistory(); 
     if (historyIndex > 0) { historyIndex--; notepadEditor.innerHTML = historyStack[historyIndex]; saveNotepad(); notepadEditor.focus(); }
@@ -3789,9 +4102,8 @@
   $('#insertLinkBtn').addEventListener('mousedown', (e) => {
     e.preventDefault(); e.stopPropagation();
     
-    // 👇 新增：点击插入链接时，强制关闭左侧的更多工具面板，防止重叠
-    const moreToolsPanel = document.getElementById('moreToolsPanel');
-    if (moreToolsPanel) moreToolsPanel.classList.remove('show');
+    // 点击插入链接前先收起所有已展开的浮层（查找替换 / 更多工具 / 表格 / 字体），避免面板叠在一起
+    closeNotepadPanelsExcept(null);
     
     notepadEditor.focus();
 
@@ -3945,6 +4257,7 @@
   $('#insertTableBtn').addEventListener('mousedown', (e) => {
     e.preventDefault(); e.stopPropagation();
     const willShow = !tablePicker.classList.contains('show');
+    if (willShow) closeNotepadPanelsExcept(['tablePicker', 'moreToolsPanel']);
     tablePicker.classList.toggle('show');
     if (willShow) {
       // 先显示再测量尺寸，然后定位到 ▦ 按钮下方（左对齐）
@@ -3965,6 +4278,7 @@
   moreToolsBtn.addEventListener('mousedown', (e) => {
     e.preventDefault(); e.stopPropagation();
     const willShow = !moreToolsPanel.classList.contains('show');
+    if (willShow) closeNotepadPanelsExcept('moreToolsPanel');
     moreToolsPanel.classList.toggle('show');
     if (willShow) {
       positionFixedPanel(moreToolsPanel, moreToolsBtn, 'left');
@@ -4142,8 +4456,33 @@
     if (!prevLeft && !prevTop) { /* 首次定位，保留当前值 */ }
   }
 
+  /* ---------- 浮层互斥：同一时刻只允许一个记事本浮层展开，避免面板互相叠在一起 ---------- */
+  // 关闭查找面板（不清选区，避免破坏用户正在编辑的选中文本，只清高亮）
+  function closeFindPanelQuiet() {
+    if (!findPanel || !findPanel.classList.contains('show')) return;
+    findPanel.classList.remove('show');
+    if (window.CSS && CSS.highlights) {
+      try { CSS.highlights.delete('np-find'); } catch (e) {}
+    }
+    findMatches = [];
+    findIdx = -1;
+    if (findCount) findCount.textContent = '';
+  }
+  // keepIds 为本次要展开的浮层 id（可传数组，因为表格选择器要叠在更多工具面板上），其余一律收起；传 null 表示全部收起
+  function closeNotepadPanelsExcept(keepIds) {
+    var keep = Array.isArray(keepIds) ? keepIds : [keepIds];
+    ['findPanel', 'tablePicker', 'moreToolsPanel', 'fontDropdown'].forEach(function (id) {
+      if (keep.indexOf(id) >= 0) return;
+      var el = document.getElementById(id);
+      if (!el || !el.classList.contains('show')) return;
+      if (id === 'findPanel') { closeFindPanelQuiet(); return; }
+      el.classList.remove('show');
+    });
+  }
+
   /* ---------- 打开 / 关闭查找面板 ---------- */
   function openFindPanel() {
+    closeNotepadPanelsExcept('findPanel');
     findPanel.classList.add('show');
     const sel = window.getSelection();
     if (sel && sel.rangeCount && !sel.getRangeAt(0).collapsed) {
@@ -4646,6 +4985,7 @@ replaceInput.addEventListener('keydown', (e) => {
     }
 
     const willShow = !fontDropdown.classList.contains('show');
+    if (willShow) closeNotepadPanelsExcept('fontDropdown');
     fontDropdown.classList.toggle('show');
 
     if (willShow) {
@@ -5053,8 +5393,8 @@ replaceInput.addEventListener('keydown', (e) => {
 
     var MEDIA, RELS, ridSeq, imgSeq, docPrSeq;
 
-    function resetCtx() { MEDIA = []; RELS = []; ridSeq = 100; imgSeq = 0; docPrSeq = 1; }
-
+    var linkDepth = 0;
+    function resetCtx() { MEDIA = []; RELS = []; ridSeq = 100; imgSeq = 0; docPrSeq = 1; linkDepth = 0; }
     function addMedia(src) {
 
       var m = /^data:image\/(png|jpe?g|gif);base64,([\s\S]+)$/i.exec(src || '');
@@ -5227,6 +5567,41 @@ replaceInput.addEventListener('keydown', (e) => {
 
     }
 
+    var URL_RE = /(https?:\/\/[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]+|www\.[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]+|mailto:[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]+)/gi;
+
+    function urlTrim(u) { return u.replace(/[.,;:!?)\]}>'\x22\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff09\u3011\u300b\u300d\u300f]+$/, ''); }
+
+    function hyperlinkRun(text, href, st) {
+      var rid = 'rId' + (ridSeq++);
+      var target = /^(https?:\/\/|mailto:)/i.test(href) ? href : ('http://' + href);
+      RELS.push({ id: rid, target: target, type: 'hyperlink', external: true });
+      var s2 = {};
+      for (var k in (st || {})) if (Object.prototype.hasOwnProperty.call(st, k)) s2[k] = st[k];
+      s2.color = '0563C1'; s2.underline = true;
+      return '<w:hyperlink r:id="' + rid + '" w:history="1"><w:r>' + rPrXml(s2) +
+        '<w:t xml:space="preserve">' + esc(text) + '</w:t></w:r></w:hyperlink>';
+    }
+
+    // 纯文本里的裸网址也生成真超链接（用户直接敲/粘网址时，导出 Word 依然是可点链接）
+    function textRunLinked(text, st) {
+      st = st || {};
+      if (text === null || text === undefined) return '';
+      var str = String(text);
+      if (linkDepth > 0 || !/(https?:\/\/|www\.|mailto:)/i.test(str)) return textRun(str, st);
+      var out = '', last = 0, m, hit = false;
+      URL_RE.lastIndex = 0;
+      while ((m = URL_RE.exec(str)) !== null) {
+        var url = urlTrim(m[0]);
+        if (!url || url.length < 5) continue;
+        hit = true;
+        if (m.index > last) out += textRun(str.slice(last, m.index), st);
+        out += hyperlinkRun(url, url, st);
+        last = m.index + url.length;
+      }
+      if (!hit) return textRun(str, st);
+      if (last < str.length) out += textRun(str.slice(last), st);
+      return out;
+    }
     function imageRun(imgEl) {
 
       var info = addMedia(imgEl.getAttribute('src') || '');
@@ -5283,7 +5658,7 @@ replaceInput.addEventListener('keydown', (e) => {
 
         var n = kids[i];
 
-        if (n.nodeType === 3) { out += textRun(n.nodeValue, st); continue; }
+        if (n.nodeType === 3) { out += textRunLinked(n.nodeValue, st); continue; }
 
         if (n.nodeType !== 1) continue;
 
@@ -5296,25 +5671,21 @@ replaceInput.addEventListener('keydown', (e) => {
         if (tag === 'img') { out += imageRun(n); continue; }
 
         if (tag === 'a') {
-
           var href = n.getAttribute('href') || '';
-
-          var inner = inlineXml(n, styleFrom(n, st));
-
+          var ast = styleFrom(n, st);
           if (/^(https?:\/\/|mailto:)/i.test(href)) {
-
+            ast.color = '0563C1'; ast.underline = true;
+            linkDepth++;
+            var inner = inlineXml(n, ast);
+            linkDepth--;
             var rid = 'rId' + (ridSeq++);
-
             RELS.push({ id: rid, target: href, type: 'hyperlink', external: true });
-
-            out += '<w:hyperlink r:id="' + rid + '">' + inner + '</w:hyperlink>';
-
-          } else { out += inner; }
-
+            out += '<w:hyperlink r:id="' + rid + '" w:history="1">' + inner + '</w:hyperlink>';
+          } else {
+            out += inlineXml(n, ast);
+          }
           continue;
-
         }
-
         if (BLOCK[tag]) {   // 行内位置遇到块级：用换行降级
 
           out += '<w:r>' + rPrXml(st) + '<w:br/></w:r>' + inlineXml(n, st);
@@ -5489,7 +5860,7 @@ replaceInput.addEventListener('keydown', (e) => {
 
           if (acc === '' && !t.replace(/[\s\u00a0]/g, '')) continue;
 
-          acc += textRun(t, ctx.st || {});
+          acc += textRunLinked(t, ctx.st || {});
 
           continue;
 
@@ -5653,8 +6024,8 @@ replaceInput.addEventListener('keydown', (e) => {
 
         '</w:pPr></w:pPrDefault></w:docDefaults>' +
 
-        '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>';
-
+        '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>' +
+        '<w:style w:type="character" w:styleId="Hyperlink"><w:name w:val="Hyperlink"/><w:uiPriority w:val="99"/><w:rPr><w:color w:val="0563C1"/><w:u w:val="single"/></w:rPr></w:style>';
       var sizes = { 1: 36, 2: 30, 3: 26 };
 
       for (var lvl in sizes) {
@@ -5965,7 +6336,8 @@ replaceInput.addEventListener('keydown', (e) => {
     qrcode:     { x: 390,  y: 2280, w: 370,  h: 320, visible: true, order: 14, name: '二维码生成' },
     joke:       { x: 780,  y: 2280, w: 370,  h: 320, visible: true, order: 15, name: '摸鱼笑话' },
     notepad:    { x: 0,    y: 2680, w: 370,  h: 380, visible: true, order: 16, name: '迷你记事本' },
- musicplayer:{ x: 400,  y: 2680, w: 620,  h: 740, visible: true, order: 17, name: '音乐播放器' }
+    musicplayer:{ x: 400,  y: 2680, w: 620,  h: 740, visible: true, order: 17, name: '音乐播放器' },
+    momo:       { x: 1040, y: 2680, w: 380,  h: 400, visible: true, order: 18, name: 'MOMO 捏捏乐' }
   };
   Object.keys(defaultConfig).forEach(k => { if (defaultConfig[k].z === undefined) defaultConfig[k].z = 1; });
   // 同步 footer 中的组件数量，避免写死数字与配置脱节
@@ -6015,12 +6387,17 @@ replaceInput.addEventListener('keydown', (e) => {
   }
 
   const CURRENT_LAYOUT_VERSION = 'v2024.10.7';
-  if (store.get('nt_layout_version', '') !== CURRENT_LAYOUT_VERSION || !store.get('nt_widgetConfig', null)) {
+  // 关键修复：以前版本号一变就把整份配置（含你辛辛苦苦排好的位置）覆盖成默认布局，
+  // 页面一打开卡片就被「拉回原状」。现在只有在从来没有存过配置时才套默认值，
+  // 版本号只做记录，绝不动用户已有的排位 / 尺寸。
+  const __hasStoredConfig = !!widgetConfig && !isOldConfig;
+  if (!__hasStoredConfig) {
     widgetConfig = JSON.parse(JSON.stringify(defaultConfig));
     saveConfig();
     store.set('nt_layout_version', CURRENT_LAYOUT_VERSION);
-    setTimeout(() => { tidyLayout(true); }, 100); 
+    setTimeout(() => { tidyLayout(true); }, 100);
   } else {
+    store.set('nt_layout_version', CURRENT_LAYOUT_VERSION);
     applyWidgetState();
   }
   let _resizeTimer;
@@ -6030,8 +6407,14 @@ replaceInput.addEventListener('keydown', (e) => {
       const gridW = grid.offsetWidth; let changed = false;
       Object.values(widgetConfig).forEach(c => {
         if (!c.visible || !(c.w > 0)) return;
-        if (c.x + c.w > gridW) { c.x = Math.max(0, gridW - c.w); changed = true; }
-        if (c.x < 0) { c.x = 0; changed = true; }
+        if (c.x + c.w > gridW || c.x < 0) {
+          // 只是被临时挤出可视区：记住原位置，窗口变宽后自动放回去，不永久改写布局
+          if (c._xOrigin === undefined) c._xOrigin = c.x;
+          const nx = Math.max(0, Math.min(c.x, gridW - c.w));
+          if (Math.abs(nx - c.x) > 0.5) { c.x = nx; changed = true; }
+        } else if (c._xOrigin !== undefined) {
+          if (c._xOrigin + c.w <= gridW) { c.x = c._xOrigin; delete c._xOrigin; changed = true; }
+        }
         if (c.y < 0) { c.y = 0; changed = true; }
       });
       if (changed) { saveConfig(); applyWidgetState(); }
@@ -6072,43 +6455,91 @@ replaceInput.addEventListener('keydown', (e) => {
   });
 
   // ================= 一键整理 =================
+  // 原则：整理只做「紧凑排位」——不把卡片恢复成默认布局、不改变卡片高度、
+  // 尽量保留你手动调过的宽度，并且支持 Ctrl+Z 撤销上一次整理。
+  let tidyUndoSnapshot = null;
   function tidyLayout(silent = false) {
     const gridW = grid.offsetWidth, gap = 16, minW = 300;
     // 页面不可见或容器尚未布局时 offsetWidth 为 0，继续算会得到负数 / Infinity 列宽，
     // 并把坏坐标写进本地存储（下次打开全部错位）→ 直接放弃本次整理
     if (!gridW) { if (!silent) toast('⚠️ 页面还没准备好，稍后再试'); return; }
-    const items = Object.keys(widgetConfig).map(id => ({ id, conf: widgetConfig[id] })).filter(it => it.conf.visible).sort((a, b) => (a.conf.y - b.conf.y) || (a.conf.x - b.conf.x));
-    
+    // 排序按「行带」分组后再比 x：y 只差几像素时不会忽然互换顺序，排位更稳定
+    const items = Object.keys(widgetConfig)
+      .map(id => ({ id, conf: widgetConfig[id] }))
+      .filter(it => it.conf.visible && it.conf.w > 0 && isFinite(it.conf.x) && isFinite(it.conf.y))
+      .sort((a, b) => (Math.round(a.conf.y / 40) - Math.round(b.conf.y / 40)) || (a.conf.x - b.conf.x));
+
     let cols = 3;
     if (gridW < 760) cols = 1; else if (gridW < 1100) cols = 2;
     if (items.length < cols) cols = items.length;
-    
-    const colW = Math.floor((gridW - gap * (cols - 1)) / cols);
+    if (!cols) { if (!silent) toast('没有可整理的卡片'); return; }
+
+    const colUnit = Math.floor((gridW - gap * (cols - 1)) / cols);
+    const spanWidth = (n) => n * colUnit + (n - 1) * gap;
+    const next = {};
     let x = 0, y = 0, col = 0, rowMaxH = 0;
-    
+
     items.forEach((it) => {
       const c = it.conf;
-      // 用绝对宽度阈值判断宽卡片，避免窗口缩放导致 colW 变化后判定漂移
+      // 宽卡片：默认就宽的（天气），或用户自己拉宽到接近整行
       const defW = (defaultConfig[it.id] && defaultConfig[it.id].w) || c.w;
-      const isWide = defW >= 600;
-      let w = isWide ? gridW : Math.max(minW, Math.min(colW, c.w));
-      let spanCols = isWide ? cols : 1;
-      
-      if (col + spanCols > cols) { x = 0; y += rowMaxH + gap; col = 0; rowMaxH = 0; }
+      let span = Math.max(1, Math.min(cols, Math.round((c.w + gap) / (colUnit + gap))));
+      // 只有真正的大卡（默认接近整行的天气卡）才独占一行；像 620px 的音乐播放器
+      // 按实际宽度占 2 列，不再被强行拉成满行
+      if (defW >= 900 && cols > 1) span = cols;
+
+      if (col + span > cols) { x = 0; y += rowMaxH + gap; col = 0; rowMaxH = 0; }
+
+      let w = spanWidth(span);
+      // 用户手动调小的卡片保留原宽度，不再强行撑回列宽（这是「被拉回原状」的主要来源）
+      if (c.w >= minW && c.w <= w + 0.5) w = c.w;
       if (x + w > gridW) w = Math.max(minW, gridW - x);
-      
-      c.x = x; c.y = y; c.w = w; c.h = Math.max(160, c.h);
-      rowMaxH = Math.max(rowMaxH, c.h);
-      
-      x += (spanCols === cols ? gridW : colW + gap);
-      col += spanCols;
-      
+
+      const h = Math.max(160, c.h || 160);
+      next[it.id] = { x, y, w, h };
+      rowMaxH = Math.max(rowMaxH, h);
+      col += span;
       if (col >= cols) { x = 0; y += rowMaxH + gap; col = 0; rowMaxH = 0; }
+      else { x += w + gap; }
     });
-    
-    saveConfig(); applyWidgetState(); 
-    if (!silent) toast('已整理 ✨'); // 👈 只有点击按钮时才提示
+
+    let changed = false;
+    Object.keys(next).forEach((id) => {
+      const c = widgetConfig[id], t = next[id];
+      if (Math.abs((c.x || 0) - t.x) > 0.5 || Math.abs((c.y || 0) - t.y) > 0.5 ||
+          Math.abs((c.w || 0) - t.w) > 0.5 || Math.abs((c.h || 0) - t.h) > 0.5) changed = true;
+    });
+    if (!changed) { if (!silent) toast('已经很整齐啦 ✨'); return; }
+
+    // 整理前拍快照，供 Ctrl+Z 还原（只记位置尺寸，不动可见性 / 收藏）
+    tidyUndoSnapshot = {};
+    Object.keys(next).forEach((id) => {
+      const c = widgetConfig[id];
+      tidyUndoSnapshot[id] = { x: c.x, y: c.y, w: c.w, h: c.h };
+    });
+    Object.keys(next).forEach((id) => Object.assign(widgetConfig[id], next[id]));
+
+    saveConfig(); applyWidgetState();
+    if (!silent) toast('已整理 ✨ Ctrl+Z 可撤销');
   }
+
+  function undoTidyLayout() {
+    if (!tidyUndoSnapshot) return false;
+    Object.keys(tidyUndoSnapshot).forEach((id) => {
+      if (widgetConfig[id]) Object.assign(widgetConfig[id], tidyUndoSnapshot[id]);
+    });
+    tidyUndoSnapshot = null;
+    saveConfig(); applyWidgetState();
+    toast('已撤销整理 ↩️');
+    return true;
+  }
+  document.addEventListener('keydown', (e) => {
+    if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return;
+    if (e.key !== 'z' && e.key !== 'Z') return;
+    const ae = document.activeElement;
+    if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable)) return;
+    if (tidyUndoSnapshot && undoTidyLayout()) e.preventDefault();
+  });
   // 👇 补上 🧹 按钮的点击绑定
   $('#tidyBtn').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -6841,7 +7272,14 @@ replaceInput.addEventListener('keydown', (e) => {
     toastTimer: null,
     audio: document.getElementById('mp-audio'),
     lyricLines: [],
-    currentLyricIdx: -1
+    currentLyricIdx: -1,
+    rate: 1,          // 播放速度
+    mode: 'order',    // 播放顺序：order 列表循环 / one 单曲循环 / shuffle 随机播放
+    sleepEndAt: 0,    // 定时停止的截止时间戳
+    sleepMin: 0,      // 定时分钟数
+    sleepTimer: null,
+    stopAfterTrack: false,   // 本曲播完后停止
+    timeMode: 'elapsed'      // 时间显示：elapsed 已播放 / left 剩余倒计时
   };
   const SRC_NAME = { netease: '网易云', qq: 'QQ', kuwo: '酷我', joox: 'JOOX' };
   const JOOX_TOKEN = 'f84ao9lMF_q7husBWRfgUw';
@@ -7201,6 +7639,7 @@ replaceInput.addEventListener('keydown', (e) => {
       mp.audio.pause(); 
       mp.audio.src = t.audioUrl;
       mp.audio.currentTime = 0; // 👈 强制重置进度
+      mpApplyRate();            // 👈 换源后浏览器会重置 playbackRate，这里重新应用
       await mp.audio.play();
       if (myToken !== playToken) return;   // play 期间又被切歌
       setPlayingUI(true);
@@ -7220,6 +7659,16 @@ replaceInput.addEventListener('keydown', (e) => {
   function playNext(dir = 'next') {
     const list = mp.playContext;
     if (!list.length) { mpShowToast('播放列表为空'); return; }
+    // 随机播放：从列表里随机挑一首（尽量避开当前这首）
+    if (mp.mode === 'shuffle' && list.length > 1) {
+      const cur = list.findIndex(x => x.uid === mp.currentTrack?.uid);
+      let r = cur;
+      let guard = 0;
+      while (r === cur && guard++ < 40) r = Math.floor(Math.random() * list.length);
+      if (r === cur) r = (cur + 1) % list.length;
+      playTrack(list[r], list);
+      return;
+    }
     let idx = list.findIndex(x => x.uid === mp.currentTrack?.uid);
     if (idx === -1) {
       // 当前曲目不在播放列表里：next 从头开始，prev 从末尾开始
@@ -7228,6 +7677,192 @@ replaceInput.addEventListener('keydown', (e) => {
       idx = (idx + (dir === 'prev' ? -1 : 1) + list.length) % list.length;
     }
     playTrack(list[idx], list);
+  }
+
+  // ================= 播放增强：播放速度 / 播放顺序 / 定时停止 =================
+  const MP_RATES = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+  const MP_MODE_LIST = [
+    { key: 'order', label: '列表循环', icon: '<path d="M17 2.5l3.5 3.5L17 9.5"/><path d="M3.5 11.5V9a3.5 3.5 0 0 1 3.5-3.5h13"/><path d="M7 21.5L3.5 18 7 14.5"/><path d="M20.5 12.5V15a3.5 3.5 0 0 1-3.5 3.5H4"/>' },
+    { key: 'one',   label: '单曲循环', icon: '<path d="M17 2.5l3.5 3.5L17 9.5"/><path d="M3.5 11.5V9a3.5 3.5 0 0 1 3.5-3.5h13"/><path d="M7 21.5L3.5 18 7 14.5"/><path d="M20.5 12.5V15a3.5 3.5 0 0 1-3.5 3.5H4"/><path d="M11.1 9.7l1.4-1v4.8"/>' },
+    { key: 'shuffle', label: '随机播放', icon: '<path d="M16 3.6h4.4V8"/><path d="M20.4 3.6L4.2 19.8"/><path d="M20.4 16v4.4H16"/><path d="M14.6 14.4l5.8 5.8"/><path d="M4.2 3.6l4.4 4.4"/>' }
+  ];
+
+  function mpRateLabel(r) { return (Number.isInteger(r) ? r.toFixed(1) : String(r)) + 'x'; }
+
+  function mpNormalizeRate(v) {
+    let r = Number(v);
+    if (!isFinite(r)) r = 1;
+    r = Math.round(r * 100) / 100;
+    if (r < 0.25) r = 0.25;
+    if (r > 4) r = 4;
+    return r;
+  }
+
+  function mpApplyRate() {
+    const r = mpNormalizeRate(mp.rate);
+    mp.rate = r;
+    try { mp.audio.defaultPlaybackRate = r; mp.audio.playbackRate = r; } catch (err) {}
+    const lbl = document.getElementById('mp-rateLabel');
+    if (lbl) lbl.textContent = mpRateLabel(r);
+    const btn = document.getElementById('mp-rateBtn');
+    if (btn) {
+      btn.title = '播放速度：' + mpRateLabel(r) + '（点击调整）';
+      btn.classList.toggle('active', Math.abs(r - 1) > 0.001);
+    }
+    document.querySelectorAll('#mp-rateOpts .mp-opt').forEach(el => {
+      el.classList.toggle('on', Math.abs(parseFloat(el.dataset.rate) - r) < 0.001);
+    });
+  }
+
+  function mpSetRate(r) {
+    r = mpNormalizeRate(r);
+    mp.rate = r;
+    store.set('nt_mp_rate', r);
+    mpClosePops();
+    mpShowToast('播放速度 ' + mpRateLabel(r));
+  }
+
+  function mpApplyCustomRate() {
+    const el = document.getElementById('mp-rateCustom');
+    if (!el) return;
+    const raw = String(el.value || '').trim().replace(/x$/i, '');
+    if (raw === '' || !isFinite(Number(raw))) { mpShowToast('请输入 0.25 - 4.0 之间的数字'); return; }
+    let v = Number(raw);
+    if (v < 0.25 || v > 4) mpShowToast('已调整为 ' + (v < 0.25 ? '0.25' : '4.0') + 'x（允许范围 0.25 - 4.0）');
+    mpSetRate(v);
+  }
+
+  function mpModeInfo() { return MP_MODE_LIST.find(x => x.key === mp.mode) || MP_MODE_LIST[0]; }
+
+  function mpUpdateModeUI() {
+    const m = mpModeInfo();
+    if (MP_MODE_LIST.every(x => x.key !== mp.mode)) mp.mode = 'order';
+    const icon = document.getElementById('mp-modeIcon');
+    if (icon) icon.innerHTML = m.icon;
+    const lbl = document.getElementById('mp-modeLabel');
+    if (lbl) lbl.textContent = m.label;
+    const btn = document.getElementById('mp-modeBtn');
+    if (btn) {
+      btn.title = '播放顺序：' + m.label + '（点击切换）';
+      btn.classList.toggle('active', m.key !== 'order');
+    }
+  }
+
+  function mpSetMode(key, silent) {
+    mp.mode = MP_MODE_LIST.some(x => x.key === key) ? key : 'order';
+    store.set('nt_mp_mode', mp.mode);
+    mpUpdateModeUI();
+    if (!silent) mpShowToast('播放顺序：' + mpModeInfo().label);
+  }
+
+  function mpCycleMode() {
+    const i = MP_MODE_LIST.findIndex(x => x.key === mp.mode);
+    mpSetMode(MP_MODE_LIST[(i + 1) % MP_MODE_LIST.length].key);
+  }
+
+  function mpUpdateSleepUI() {
+    const lbl = document.getElementById('mp-sleepLabel');
+    const btn = document.getElementById('mp-sleepBtn');
+    if (!lbl || !btn) return;
+    if (mp.stopAfterTrack) {
+      lbl.textContent = '本曲后';
+      btn.classList.add('active');
+      btn.title = '本曲播完后停止（点击可调整或取消）';
+    } else if (!mp.sleepEndAt) {
+      lbl.textContent = '定时';
+      btn.classList.remove('active');
+      btn.title = '定时停止播放';
+    } else {
+      lbl.textContent = mpFmt(Math.max(0, Math.round((mp.sleepEndAt - Date.now()) / 1000)));
+      btn.classList.add('active');
+      btn.title = '定时停止中（剩 ' + lbl.textContent + '），点击可调整或取消';
+    }
+    document.querySelectorAll('#mp-sleepOpts .mp-opt').forEach(el => {
+      const m = Number(el.dataset.min);
+      const on = m === -1 ? !!mp.stopAfterTrack : (!mp.stopAfterTrack && m === (mp.sleepMin || 0));
+      el.classList.toggle('on', on);
+    });
+  }
+
+  function mpSleepTick() {
+    if (!mp.sleepEndAt) return;
+    if (Date.now() >= mp.sleepEndAt) {
+      clearInterval(mp.sleepTimer);
+      mp.sleepTimer = null;
+      mp.sleepEndAt = 0;
+      mp.sleepMin = 0;
+      try { mp.audio.pause(); } catch (err) {}
+      mpUpdateSleepUI();
+      mpShowToast('定时时间到，已暂停播放');
+      return;
+    }
+    mpUpdateSleepUI();
+  }
+
+  function mpSetSleep(min) {
+    if (min === -1) {
+      clearInterval(mp.sleepTimer);
+      mp.sleepTimer = null;
+      mp.sleepEndAt = 0;
+      mp.sleepMin = 0;
+      mp.stopAfterTrack = true;
+      mpUpdateSleepUI();
+      mpClosePops();
+      mpShowToast('本曲播完后将自动停止');
+      return;
+    }
+    clearInterval(mp.sleepTimer);
+    mp.sleepTimer = null;
+    if (!min) {
+      mp.stopAfterTrack = false;
+      mp.sleepEndAt = 0;
+      mp.sleepMin = 0;
+      mpUpdateSleepUI();
+      mpClosePops();
+      mpShowToast('已取消定时停止');
+      return;
+    }
+    mp.sleepMin = min;
+    mp.sleepEndAt = Date.now() + min * 60000;
+    mp.sleepTimer = setInterval(mpSleepTick, 1000);
+    mpUpdateSleepUI();
+    mpClosePops();
+    mpShowToast('将在 ' + min + ' 分钟后暂停播放');
+  }
+
+  // 时间显示：已播放 / 剩余倒计时（点击左侧时间切换）
+  function mpRenderCurrent(cur, dur) {
+    const el = document.getElementById('mp-currentTime');
+    if (!el) return;
+    const c = isFinite(cur) ? Math.max(0, cur) : 0;
+    if (mp.timeMode === 'left') {
+      const d = isFinite(dur) ? dur : 0;
+      el.textContent = '-' + mpFmt(Math.max(0, d - c));
+    } else {
+      el.textContent = mpFmt(c);
+    }
+  }
+
+  function mpToggleTimeMode() {
+    mp.timeMode = mp.timeMode === 'left' ? 'elapsed' : 'left';
+    store.set('nt_mp_timeMode', mp.timeMode);
+    mpRenderCurrent(mp.audio.currentTime, mp.audio.duration);
+    mpShowToast(mp.timeMode === 'left' ? '时间显示：剩余倒计时' : '时间显示：已播放');
+  }
+
+  function mpClosePops() {
+    document.querySelectorAll('.mp-pop').forEach(el => el.classList.remove('show'));
+    mpApplyRate();
+    mpUpdateSleepUI();
+  }
+
+  function mpTogglePop(popId, btnId) {
+    const pop = document.getElementById(popId);
+    const btn = document.getElementById(btnId);
+    if (!pop || !btn) return;
+    const willShow = !pop.classList.contains('show');
+    mpClosePops();
+    if (willShow) { pop.classList.add('show'); btn.classList.add('active'); }
   }
 
   function appendSearchResults(newItems) {
@@ -7330,11 +7965,97 @@ replaceInput.addEventListener('keydown', (e) => {
     });
   }
 
+  // ===== 分享歌曲链接：按来源拼官方页，兜底用音源地址 =====
+  function mpShareUrl(t) {
+    if (!t) return '';
+    const id = t.songid ? encodeURIComponent(t.songid) : '';
+    if (t.source === 'netease' && id) return `https://music.163.com/#/song?id=${id}`;
+    if (t.source === 'qq' && id) return `https://y.qq.com/n/ryqq/songDetail/${id}`;
+    if (t.source === 'kuwo' && id) return `https://www.kuwo.cn/play_detail/${id}`;
+    if (t.audioUrl) return t.audioUrl;
+    return '';
+  }
+
+  function shareCurrent() {
+    const t = mp.currentTrack;
+    if (!t) { mpShowToast('先播一首歌再分享吧'); return; }
+    const url = mpShareUrl(t);
+    const name = (t.artist ? t.artist + ' - ' : '') + (t.title || '未知歌曲');
+    const text = url ? `${name} ${url}` : name;
+    const done = () => mpShowToast(url ? '已复制分享链接 🔗' : '已复制歌曲名 🔗');
+    const manual = () => {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+        document.body.appendChild(ta);
+        ta.select(); ta.setSelectionRange(0, text.length);
+        const ok = document.execCommand('copy');
+        ta.remove();
+        if (ok) done(); else mpShowToast('复制失败，请手动复制');
+      } catch (e) { mpShowToast('复制失败，请手动复制'); }
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(manual);
+    } else { manual(); }
+  }
+
   // 播放器事件绑定
   document.getElementById('mp-playPauseBtn').addEventListener('click', togglePlay);
   document.getElementById('mp-prevBtn').addEventListener('click', () => playNext('prev'));
   document.getElementById('mp-nextBtn').addEventListener('click', () => playNext('next'));
+
+  // ===== 播放增强控件：播放速度 / 播放顺序 / 定时停止 =====
+  document.getElementById('mp-modeBtn').addEventListener('click', (e) => { e.stopPropagation(); mpClosePops(); mpCycleMode(); });
+  document.getElementById('mp-rateBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    const wasOpen = document.getElementById('mp-ratePop').classList.contains('show');
+    mpTogglePop('mp-ratePop', 'mp-rateBtn');
+    if (!wasOpen) {
+      const ci = document.getElementById('mp-rateCustom');
+      if (ci) { ci.value = ''; ci.placeholder = '自定义 ' + mpRateLabel(mp.rate); }
+    }
+  });
+  document.getElementById('mp-sleepBtn').addEventListener('click', (e) => { e.stopPropagation(); mpTogglePop('mp-sleepPop', 'mp-sleepBtn'); });
+  document.getElementById('mp-rateOpts').addEventListener('click', (e) => {
+    const b = e.target.closest('.mp-opt');
+    if (b) mpSetRate(parseFloat(b.dataset.rate));
+  });
+  document.getElementById('mp-sleepOpts').addEventListener('click', (e) => {
+    const b = e.target.closest('.mp-opt');
+    if (b) mpSetSleep(Number(b.dataset.min));
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.mp-extra-bar')) mpClosePops();
+  });
+  // 自定义倍速：回车或点「应用」生效
+  const mpRateCustomEl = document.getElementById('mp-rateCustom');
+  document.getElementById('mp-rateApply').addEventListener('click', (e) => { e.stopPropagation(); mpApplyCustomRate(); });
+  mpRateCustomEl.addEventListener('click', (e) => e.stopPropagation());
+  mpRateCustomEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); mpApplyCustomRate(); }
+    else if (e.key === 'Escape') { e.stopPropagation(); mpClosePops(); }
+  });
+  // 点击时间显示切换「已播放 / 剩余倒计时」
+  const mpProgressSection = document.querySelector('.mp-progress-section');
+  if (mpProgressSection) {
+    mpProgressSection.addEventListener('click', (e) => {
+      if (!e.target.closest('.mp-time')) return;
+      mpToggleTimeMode();
+    });
+  }
+  const mpCurTimeEl = document.getElementById('mp-currentTime');
+  if (mpCurTimeEl) { mpCurTimeEl.style.cursor = 'pointer'; mpCurTimeEl.title = '点击切换：已播放 / 剩余倒计时'; }
+  // 读取上次的播放速度与播放顺序
+  mp.rate = (function(){ const v = Number(store.get('nt_mp_rate', 1)); return MP_RATES.indexOf(v) !== -1 ? v : 1; })();
+  mp.mode = (function(){ const v = store.get('nt_mp_mode', 'order'); return MP_MODE_LIST.some(x => x.key === v) ? v : 'order'; })();
+  mp.timeMode = store.get('nt_mp_timeMode', 'elapsed') === 'left' ? 'left' : 'elapsed';
+  mpApplyRate();
+  mpUpdateModeUI();
+  mpUpdateSleepUI();
+  if (mpRateCustomEl) mpRateCustomEl.value = '';
   document.getElementById('mp-downloadBtn').addEventListener('click', downloadCurrent);
+document.getElementById('mp-shareBtn').addEventListener('click', shareCurrent);
 
   // ===== 退出：关闭当前歌曲信息，回到音乐卡片初始界面（卡片本身保留，不隐藏）=====
   function exitCurrentTrack() {
@@ -7422,7 +8143,7 @@ replaceInput.addEventListener('keydown', (e) => {
     progressFill.style.width = (ratio * 100) + '%';
     progressThumb.style.left = (ratio * 100) + '%';
     if (currentTimeEl && mpDurationOK()) {
-      currentTimeEl.textContent = mpFmt(ratio * mp.audio.duration);
+      mpRenderCurrent(ratio * mp.audio.duration, mp.audio.duration);
     }
   }
 
@@ -7645,7 +8366,7 @@ replaceInput.addEventListener('keydown', (e) => {
     // 拖拽中 / seek 未完成：UI 完全由指针驱动，timeupdate 不得插手
     if (!dragging && seekTarget === null) {
       setProgressUI(mp.audio.currentTime / mp.audio.duration);
-      currentTimeEl.textContent = mpFmt(mp.audio.currentTime);
+      mpRenderCurrent(mp.audio.currentTime, mp.audio.duration);
     }
     document.getElementById('mp-totalTime').textContent = mpFmt(mp.audio.duration);
 
@@ -7671,7 +8392,23 @@ replaceInput.addEventListener('keydown', (e) => {
   mp.audio.addEventListener('loadedmetadata', () => { document.getElementById('mp-totalTime').textContent = mpFmt(mp.audio.duration); });
   mp.audio.addEventListener('play', () => setPlayingUI(true));
   mp.audio.addEventListener('pause', () => setPlayingUI(false));
-  mp.audio.addEventListener('ended', () => playNext('next'));
+  mp.audio.addEventListener('ended', () => {
+    // 本曲结束后停止
+    if (mp.stopAfterTrack) {
+      mp.stopAfterTrack = false;
+      mpUpdateSleepUI();
+      try { mp.audio.pause(); } catch (err) {}
+      setPlayingUI(false);
+      mpShowToast('本曲已结束，已停止播放');
+      return;
+    }
+    // 单曲循环：原地重播当前曲目
+    if (mp.mode === 'one' && mp.audio.getAttribute('src')) {
+      try { mp.audio.currentTime = 0; mp.audio.play().catch(() => {}); } catch (err) {}
+      return;
+    }
+    playNext('next');
+  });
   mp.audio.addEventListener('error', () => {
     setPlayingUI(false);
     // 退出歌曲时是主动清空 src，浏览器同样会抛 error；此时提示「音频加载失败」
@@ -8246,6 +8983,111 @@ replaceInput.addEventListener('keydown', (e) => {
   .mp-exit-btn svg { width: 1.05em; height: 1.05em; }
   .mp-exit-btn:hover { color: #fff; background: var(--danger); border-color: var(--danger); }
   .mp-exit-btn:focus { outline: none; }
+  /* ===== 播放增强工具条：倍速 / 顺序 / 定时 ===== */
+  .mp-extra-bar {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: .45em;
+    margin: .6em 0 .1em;
+    flex-shrink: 0;
+  }
+  .mp-pill {
+    display: inline-flex; align-items: center; gap: .35em;
+    height: 2em; padding: 0 .78em;
+    border-radius: 999px;
+    border: 1px solid var(--divider);
+    background: var(--input-bg);
+    color: var(--text-soft);
+    font-family: inherit; font-size: .8em; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+    transition: color .16s, border-color .16s, background .16s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mp-pill svg {
+    width: 1.05em; height: 1.05em;
+    fill: none; stroke: currentColor; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+    flex-shrink: 0;
+  }
+  .mp-pill:hover { color: var(--accent); border-color: var(--accent); background: var(--hover); }
+  .mp-pill.active { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+  .mp-pill:focus { outline: none; }
+
+  .mp-pop {
+    position: absolute;
+    bottom: calc(100% + .55em);
+    left: 50%;
+    transform: translateX(-50%) translateY(6px);
+    z-index: 30;
+    padding: .7em .85em;
+    border-radius: .9em;
+    border: 1px solid var(--card-border);
+    background: var(--card);
+    backdrop-filter: blur(24px) saturate(160%);
+    box-shadow: 0 12px 30px rgba(0,0,0,.18);
+    opacity: 0; pointer-events: none;
+    transition: opacity .16s ease, transform .16s ease;
+    max-width: calc(100% - .5em);
+  }
+  .mp-pop.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+  .mp-pop-title {
+    font-size: .76em; font-weight: 600; color: var(--text-mute);
+    letter-spacing: .02em; margin-bottom: .55em; white-space: nowrap;
+  }
+  .mp-pop-opts { display: flex; flex-wrap: wrap; gap: .4em; }
+  .mp-opt {
+    height: 1.95em; padding: 0 .8em;
+    border-radius: 999px;
+    border: 1px solid var(--divider);
+    background: transparent;
+    color: var(--text-soft);
+    font-family: inherit; font-size: .8em;
+    cursor: pointer; white-space: nowrap;
+    transition: all .14s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mp-opt:hover { color: var(--accent); border-color: var(--accent); }
+  .mp-opt.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .mp-opt:focus { outline: none; }
+
+  /* 自定义倍速输入 */
+  .mp-custom {
+    display: flex; align-items: center; gap: .4em;
+    margin-top: .6em; padding-top: .6em;
+    border-top: 1px solid var(--divider);
+  }
+  .mp-custom-input {
+    flex: 1 1 auto; width: 0; min-width: 3.6em;
+    height: 2em; padding: 0 .55em;
+    border-radius: .55em;
+    border: 1px solid var(--divider);
+    background: var(--input-bg);
+    color: var(--text);
+    font-family: inherit; font-size: .8em; text-align: center;
+    outline: none; min-width: 0;
+    -moz-appearance: textfield;
+    transition: border-color .15s;
+  }
+  .mp-custom-input::-webkit-outer-spin-button,
+  .mp-custom-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .mp-custom-input:focus { border-color: var(--accent); }
+  .mp-custom-input::placeholder { color: var(--text-mute); font-size: .92em; }
+  .mp-custom-apply {
+    flex: 0 0 auto; height: 2em; padding: 0 .9em;
+    border-radius: 999px;
+    border: 1px solid var(--accent);
+    background: var(--accent); color: #fff;
+    font-family: inherit; font-size: .8em; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+    transition: opacity .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mp-custom-apply:hover { opacity: .86; }
+  .mp-custom-apply:focus { outline: none; }
+
+  /* 时间显示可点击（切换已播放 / 剩余倒计时） */
+  #mp-currentTime { cursor: pointer; transition: color .15s; }
+  #mp-currentTime:hover { color: var(--accent); }
 </style>
 </body>
 </html>
