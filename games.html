@@ -1,3 +1,4 @@
+<!-- games.html -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -78,8 +79,18 @@
     transform: scale(1.2) rotate(8deg);
   }
 
-  .game-btn .name {
-    display: inline-block;
+  /* 像素小恐龙按钮图标：用文字像素风表现 */
+  .game-btn .pixel-dino {
+    font-size: 1.6rem;
+    font-family: 'Courier New', monospace;
+    font-weight: 900;
+    color: #38bdf8;
+    transition: transform 0.3s, color 0.3s;
+    letter-spacing: -2px;
+  }
+  .game-btn:hover .pixel-dino {
+    transform: scale(1.15) rotate(-5deg);
+    color: #0284c7;
   }
 
   /* 返回按钮 */
@@ -153,6 +164,17 @@
       <a href="https://sweetwatermelons.github.io/sheep.html" target="_blank" class="game-btn">
         <span class="emoji">🐑</span>
         <span class="name">送三只小羊回家</span>
+      </a>
+
+      <a href="https://sweetwatermelons.github.io/rabbit.html" target="_blank" class="game-btn">
+        <span class="emoji">🎩</span>
+        <span class="name">The Mr. Rabbit Magic Show</span>
+      </a>
+
+      <!-- 新增：像素小恐龙 -->
+      <a href="https://sweetwatermelons.github.io/dino.html" target="_blank" class="game-btn">
+        <span class="pixel-dino">🦖</span>
+        <span class="name">像素小恐龙</span>
       </a>
     </div>
 
