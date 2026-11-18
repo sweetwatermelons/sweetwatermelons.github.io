@@ -1,0 +1,296 @@
+<!-- rabbit.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Mr. Rabbit Magic Show · sweet🍉的小站</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+  body {
+    background: linear-gradient(135deg, #2d1b3d 0%, #4a2c5e 50%, #1a1025 100%);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+    padding: 20px; overflow-x: hidden;
+    position: relative;
+  }
+
+  /* 神秘的星光背景 */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 70%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 55% 35%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 80%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 15%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 15% 85%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 45% 10%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 50%, rgba(255, 255, 255, 0.4) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+    animation: twinkle 5s ease-in-out infinite alternate;
+  }
+
+  @keyframes twinkle {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+
+  .container {
+    max-width: 720px; width: 100%;
+    display: flex; flex-direction: column; align-items: center;
+    position: relative; z-index: 2;
+  }
+
+  /* 魔术帽装饰 */
+  .magic-hat {
+    font-size: 5rem;
+    margin-bottom: 10px;
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.4));
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-12px) rotate(3deg); }
+  }
+
+  /* 标题区 */
+  .title-wrap { display: flex; flex-direction: column; align-items: center; width: 100%; margin-bottom: 30px; }
+  .title {
+    font-size: 2.8rem; font-weight: 900;
+    color: #f5e6b8;
+    display: flex; align-items: center; gap: 14px;
+    text-align: center;
+    text-shadow: 0 2px 20px rgba(255, 215, 0, 0.35);
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .title .en { font-family: 'Georgia', serif; font-style: italic; }
+  .subtitle {
+    font-size: 1.1rem;
+    color: #b8a9d4;
+    letter-spacing: 2px;
+    font-weight: 600;
+  }
+  .underline {
+    width: 50%; height: 3px;
+    background: linear-gradient(90deg, transparent 0%, #d4af37 50%, transparent 100%);
+    border-radius: 2px; margin-top: 20px;
+    box-shadow: 0 0 14px rgba(212, 175, 55, 0.5);
+  }
+
+  /* 游戏介绍卡片 */
+  .intro-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin-bottom: 32px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .intro-card p {
+    font-size: 1rem;
+    line-height: 1.9;
+    color: #e0d6f0;
+    margin-bottom: 12px;
+  }
+  .intro-card p:last-child { margin-bottom: 0; }
+
+  .intro-card .highlight {
+    color: #f5d76e;
+    font-weight: 700;
+  }
+
+  .intro-card .tag {
+    display: inline-block;
+    background: rgba(212, 175, 55, 0.2);
+    color: #f5d76e;
+    padding: 2px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-right: 6px;
+    margin-bottom: 6px;
+  }
+
+  /* 按钮组 */
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+    max-width: 480px;
+    margin-bottom: 36px;
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 22px 32px;
+    font-size: 1.3rem;
+    font-weight: 800;
+    text-decoration: none;
+    border-radius: 18px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    white-space: nowrap;
+    cursor: pointer;
+    border: none;
+  }
+
+  /* 主要下载按钮 */
+  .btn-primary {
+    background: linear-gradient(180deg, #f5d76e 0%, #d4af37 100%);
+    color: #2d1b3d;
+    box-shadow:
+      0 6px 0 #a88a1f,
+      0 12px 28px rgba(212, 175, 55, 0.4);
+    font-size: 1.4rem;
+    padding: 26px 36px;
+  }
+  .btn-primary:hover {
+    transform: translateY(-4px);
+    background: linear-gradient(180deg, #f9e38a 0%, #e0c04a 100%);
+    box-shadow:
+      0 10px 0 #a88a1f,
+      0 18px 38px rgba(212, 175, 55, 0.5);
+  }
+  .btn-primary:active {
+    transform: translateY(4px);
+    box-shadow:
+      0 2px 0 #a88a1f,
+      0 6px 14px rgba(212, 175, 55, 0.3);
+  }
+
+  /* 次要官方按钮 */
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: #d4af37;
+    border: 2px solid rgba(212, 175, 55, 0.5);
+    font-size: 1.05rem;
+    padding: 16px 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
+  .btn-secondary:hover {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: #d4af37;
+    color: #f5d76e;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.25);
+  }
+  .btn-secondary:active {
+    transform: translateY(0);
+  }
+
+  /* 返回按钮 */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #b8a9d4;
+    text-decoration: none;
+    padding: 12px 28px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .back-link:hover {
+    color: #2d1b3d;
+    background: #d4af37;
+    border-color: #d4af37;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+  }
+  .back-link svg {
+    width: 18px; height: 18px;
+    fill: currentColor;
+    transition: fill 0.3s;
+  }
+
+  /* 页脚 */
+  .footer-text {
+    color: #7d6f99;
+    font-size: 13px;
+    margin-top: 40px;
+  }
+
+  /* 手机端适配 */
+  @media (max-width: 860px) {
+    .title { font-size: 2rem; }
+    .subtitle { font-size: 0.95rem; }
+    .intro-card { padding: 22px 22px; }
+    .intro-card p { font-size: 0.92rem; }
+    .btn-primary { padding: 20px 24px; font-size: 1.15rem; }
+    .btn-secondary { padding: 14px 20px; font-size: 0.95rem; }
+    .magic-hat { font-size: 3.5rem; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="magic-hat">🎩</div>
+
+    <div class="title-wrap">
+      <h1 class="title">
+        <span class="en">The Mr. Rabbit Magic Show</span>
+      </h1>
+      <div class="subtitle">— 兔子先生的魔术秀 —</div>
+      <div class="underline"></div>
+    </div>
+
+    <!-- 游戏介绍 -->
+    <div class="intro-card">
+      <p>
+        <span class="tag">解谜</span>
+        <span class="tag">魔术</span>
+        <span class="tag">Rusty Lake</span>
+      </p>
+      <p>
+        《The Mr. Rabbit Magic Show》是由 <span class="highlight">Rusty Lake</span> 打造的一款充满神秘与怪诞气息的解谜游戏。你将受邀观看兔子先生的魔术表演，但这场秀远不止表面那么简单——每一个魔术背后都藏着令人不安的谜题。
+      </p>
+      <p>
+        点触式的解谜玩法，配合标志性的手绘风格与诡异的氛围，带你进入一个充满惊喜与惊悚的魔术世界。如果你喜欢 Rusty Lake 系列，这部作品不容错过。
+      </p>
+      <p>
+        💾 本游戏下载安装包后安装完成后运行 <span class="highlight">The Mr. Rabbit Magic Show</span> 即可游玩，也可通过官方页面了解更多详情。
+      </p>
+    </div>
+
+    <!-- 按钮组 -->
+    <div class="btn-group">
+      <!-- 主要安装包下载按钮（大） -->
+      <a href="https://gh-proxy.com/https://github.com/sweetwatermelons/Games/releases/download/TheMr.RabbitMagicShow/TheMr.RabbitMagicShow.exe" class="btn btn-primary">
+        ⬇️ 下载安装包
+      </a>
+
+      <!-- 次要官方链接按钮（小） -->
+      <a href="https://rustylake.itch.io/the-mr-rabbit-magic-show" target="_blank" class="btn btn-secondary">
+        🌐 前往官方了解并下载安装包
+      </a>
+    </div>
+
+    <!-- 返回游戏专区 -->
+    <a href="https://sweetwatermelons.github.io/games.html" class="back-link">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      返回游戏专区
+    </a>
+
+    <div class="footer-text">sweet🍉的小站 · The Mr. Rabbit Magic Show</div>
+  </div>
+
+</body>
+</html>
