@@ -838,6 +838,98 @@
     pointer-events: none; z-index: 30; white-space: nowrap;
   }
   .mp-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  /* ======= AI 聊天助手卡片 ======= */
+  .widget[data-id="aichat"] { padding: 16px; }
+  .ac-shell { display: flex; flex: 1; min-height: 0; gap: 10px; }
+  .ac-side {
+    flex: 0 0 32%; max-width: 190px; min-width: 0; display: flex; flex-direction: column; gap: 8px;
+    border-right: 1px solid var(--card-border); padding-right: 10px;
+  }
+  .ac-side.collapsed { display: none; }
+  .ac-new {
+    flex: 0 0 auto; border: 1px dashed var(--card-border); background: var(--input-bg); color: var(--accent);
+    font-size: 12.5px; font-weight: 600; padding: 8px; border-radius: 10px; cursor: pointer;
+    font-family: inherit; transition: .15s;
+  }
+  .ac-new:hover { background: var(--accent); color: #fff; border-color: transparent; }
+  .ac-search {
+    width: 100%; box-sizing: border-box; border: 1px solid var(--card-border); background: var(--input-bg);
+    color: var(--text); font-size: 12px; padding: 6px 8px; border-radius: 8px; outline: none; font-family: inherit;
+  }
+  .ac-search:focus { border-color: var(--accent); }
+  .ac-list { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+  .ac-empty-s { font-size: 11.5px; color: var(--text-mute); text-align: center; padding: 14px 4px; line-height: 1.7; }
+  .ac-item {
+    position: relative; display: flex; align-items: center; padding: 7px 24px 7px 9px; border-radius: 9px;
+    cursor: pointer; font-size: 12.5px; color: var(--text-soft); border: 1px solid transparent; transition: .12s;
+  }
+  .ac-item:hover { background: var(--input-bg); }
+  .ac-item.active { background: var(--input-bg); border-color: var(--card-border); color: var(--text); font-weight: 600; }
+  .ac-item-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ac-del {
+    position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px;
+    line-height: 15px; text-align: center; border-radius: 50%; border: none; background: transparent;
+    color: var(--text-mute); cursor: pointer; font-size: 13px; opacity: 0; padding: 0; transition: .12s;
+  }
+  .ac-item:hover .ac-del { opacity: 1; }
+  .ac-del:hover { background: #ff5f56; color: #fff; }
+  .ac-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .ac-topbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding-bottom: 7px; border-bottom: 1px solid var(--card-border);
+  }
+  .ac-title { font-size: 13px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ac-status { font-size: 11px; color: var(--text-mute); flex: 0 0 auto; }
+  .ac-toggle {
+    flex: 0 0 auto; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text-soft);
+    border-radius: 8px; font-size: 11.5px; padding: 3px 9px; cursor: pointer; font-family: inherit; transition: .15s;
+  }
+  .ac-toggle:hover, .ac-toggle.on { color: var(--accent); border-color: var(--accent); }
+  .ac-msgs {
+    flex: 1; min-height: 0; overflow-y: auto; padding: 10px 2px; display: flex; flex-direction: column; gap: 10px;
+    user-select: text;
+  }
+  .ac-row { display: flex; flex-direction: column; gap: 3px; max-width: 94%; }
+  .ac-row.me { align-self: flex-end; align-items: flex-end; }
+  .ac-who { font-size: 10.5px; color: var(--text-mute); padding: 0 4px; }
+  .ac-bubble {
+    font-size: 13px; line-height: 1.65; padding: 9px 12px; border-radius: 12px;
+    background: var(--input-bg); color: var(--text); border: 1px solid var(--card-border);
+    word-break: break-word; overflow-wrap: anywhere;
+  }
+  .ac-row.me .ac-bubble { background: var(--accent); color: #fff; border-color: transparent; }
+  .ac-bubble p { margin: 0 0 .55em; }
+  .ac-bubble p:last-child { margin-bottom: 0; }
+  .ac-bubble .ac-quote { padding-left: 8px; border-left: 3px solid var(--card-border); opacity: .85; }
+  .ac-bubble pre {
+    background: rgba(0,0,0,.35); color: #eee; padding: 8px 10px; border-radius: 8px;
+    overflow-x: auto; font-size: 11.5px; margin: .5em 0; line-height: 1.5;
+  }
+  .ac-bubble code { font-family: Consolas, Monaco, "Courier New", monospace; font-size: 11.5px; background: rgba(127,127,127,.22); padding: .1em .35em; border-radius: 4px; }
+  .ac-bubble pre code { background: none; padding: 0; font-size: 11.5px; }
+  .ac-bubble ul, .ac-bubble ol { margin: .4em 0; padding-left: 1.3em; }
+  .ac-bubble li { margin: .15em 0; }
+  .ac-bubble a { color: inherit; text-decoration: underline; }
+  .ac-bubble strong { font-weight: 700; }
+  .ac-cursor { display: inline-block; width: .5em; animation: acBlink 1s steps(1) infinite; }
+  @keyframes acBlink { 50% { opacity: 0; } }
+  .ac-empty { margin: auto; text-align: center; font-size: 12.5px; color: var(--text-mute); line-height: 1.9; }
+  .ac-inputbar { flex: 0 0 auto; display: flex; align-items: flex-end; gap: 8px; padding-top: 8px; border-top: 1px solid var(--card-border); }
+  .ac-input {
+    flex: 1; min-width: 0; resize: none; max-height: 96px; min-height: 36px; line-height: 1.5; font-size: 13px;
+    padding: 8px 10px; border-radius: 10px; border: 1px solid var(--card-border); background: var(--input-bg);
+    color: var(--text); outline: none; font-family: inherit; box-sizing: border-box;
+  }
+  .ac-input:focus { border-color: var(--accent); }
+  .ac-send {
+    flex: 0 0 auto; border: none; border-radius: 10px; background: var(--accent); color: #fff;
+    font-size: 12.5px; font-weight: 600; padding: 9px 14px; cursor: pointer; font-family: inherit; transition: .15s;
+  }
+  .ac-send:hover { opacity: .9; }
+  .ac-send.stop { background: #e5484d; }
+  .ac-msgs::-webkit-scrollbar, .ac-list::-webkit-scrollbar { width: 6px; }
+  .ac-msgs::-webkit-scrollbar-thumb, .ac-list::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 3px; }
+  .ac-msgs::-webkit-scrollbar-track, .ac-list::-webkit-scrollbar-track { background: transparent; }
 </style>
 </head>
 <body>
@@ -1378,6 +1470,39 @@
       <div class="resize-handle resize-se"></div>
     </div>
 
+    <!-- AI 聊天助手（配置导出/导入已含完整聊天记录） -->
+    <div class="widget" data-id="aichat" style="display: none;">
+      <div class="widget-header">
+        <div class="widget-title"><span class="dot" style="background:#7c5cff;"></span> AI 聊天助手</div>
+        <button class="ac-toggle on" id="acToggleSide" type="button" title="收起对话列表">列表</button>
+      </div>
+      <div class="ac-shell">
+        <div class="ac-side" id="acSide">
+          <button class="ac-new" id="acNew" type="button">＋ 新建对话</button>
+          <input class="ac-search" id="acSearch" type="text" placeholder="搜索对话…" autocomplete="off">
+          <div class="ac-list" id="acList"></div>
+        </div>
+        <div class="ac-main">
+          <div class="ac-topbar">
+            <div class="ac-title" id="acTitle">新对话</div>
+            <div class="ac-status" id="acStatus">就绪</div>
+          </div>
+          <div class="ac-msgs" id="acMsgs"></div>
+          <div class="ac-inputbar">
+            <textarea class="ac-input" id="acInput" rows="1" placeholder="输入消息，Enter 发送，Shift+Enter 换行"></textarea>
+            <button class="ac-send" id="acSend" type="button">发送</button>
+          </div>
+        </div>
+      </div>
+      <div class="resize-handle resize-n"></div>
+      <div class="resize-handle resize-s"></div>
+      <div class="resize-handle resize-w"></div>
+      <div class="resize-handle resize-e"></div>
+      <div class="resize-handle resize-nw"></div>
+      <div class="resize-handle resize-ne"></div>
+      <div class="resize-handle resize-sw"></div>
+      <div class="resize-handle resize-se"></div>
+    </div>
     <!-- 音乐播放器 -->
     <div class="widget" data-id="musicplayer">
       <div class="widget-header">
@@ -1605,7 +1730,7 @@
               <span style="background: var(--accent); color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">组件管理</span>
               <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
                 <strong>① 显示/隐藏：</strong>点击左下角<strong>加号（＋）</strong>弹出组件清单，每项右侧显示「显示中 / 已隐藏」，<strong>点一下即可切换</strong>，菜单不关闭，方便连续开关多个卡片。<br>
-                <strong>② 组件清单：</strong>天气详情、计时、待办事项、快捷访问、每日格言、日历、节日倒计时、世界时钟、进度条、打工倒计时、汇率换算、单位换算、时间戳转换、二维码生成、摸鱼笑话、迷你记事本、音乐播放器，共 <span id="footerWidgetCount">17</span> 个组件。<br>
+                <strong>② 组件清单：</strong>天气详情、计时、待办事项、快捷访问、每日格言、日历、节日倒计时、世界时钟、进度条、打工倒计时、汇率换算、单位换算、时间戳转换、二维码生成、摸鱼笑话、迷你记事本、音乐播放器、MOMO 捏捏乐、AI 聊天助手，共 <span id="footerWidgetCount">19</span> 个组件。<br>
                 <strong>③ 布局持久化：</strong>所有卡片的位置、大小、显隐、层级都会自动保存到本地，刷新页面后恢复。
               </span>
             </li>
@@ -1714,7 +1839,18 @@
                 <strong>④ 下载：</strong>点右上角 📥 下载当前歌曲音频；无可下载音源会提示。<br>
                 <strong>⑤ 控制：</strong>播放 / 暂停、上一首 / 下一首、音量滑块与静音切换；进度条可拖动定位，并<strong>按 0.1 秒精度记录</strong>播放位置，刷新页面后自动回到上次听到的地方。<br>
                 <strong>⑥ 歌词：</strong>封面下方解析 LRC 歌词并实时单行滚动，纯音乐显示「♪ 纯音乐，请欣赏」。<br>
-                <strong>⑦ 布局：</strong>卡片可拖动标题栏移动、可缩放，与整体布局系统融合。
+              </span>
+            </li>
+
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: #7c5cff; color: #fff; font-size: 11px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-weight: 600;">AI 聊天助手</span>
+              <span style="color: #ddd; font-size: 12.5px; line-height: 1.6;">
+                <strong>① 发消息：</strong>输入框输入后按 <strong>Enter</strong> 发送，<strong>Shift + Enter</strong> 换行，也可点右侧「发送」按钮。<br>
+                <strong>② 停止与继续：</strong>回答过程中按钮变为「停止」，点一下立即中断并保留已生成的内容，随后按钮自动恢复「发送」，可马上接着问；不会卡住、不会重复报「已停止生成」。<br>
+                <strong>③ 多会话：</strong>左侧「＋ 新建对话」开新会话，最多保存 100 个；顶部搜索框按标题过滤，点条目切换，× 删除该会话。<br>
+                <strong>④ 记录保存：</strong>聊天记录存在本地（localStorage），刷新不丢；导出配置时一并打包，导入后自动恢复。<br>
+                <strong>⑤ 回复规则：</strong>回答简洁直接、不自我介绍、不说客服套话，代码用 Markdown 代码块显示。<br>
+                <strong>⑥ 文明提醒：</strong><span style="color: #ffb36b;">请不要输入不当言论。检测到不良内容时会直接拒绝输出，并提示「您输入了不良内容，已拒绝输出，请文明用语」。</span>
               </span>
             </li>
 
@@ -6337,7 +6473,8 @@ replaceInput.addEventListener('keydown', (e) => {
     joke:       { x: 780,  y: 2280, w: 370,  h: 320, visible: true, order: 15, name: '摸鱼笑话' },
     notepad:    { x: 0,    y: 2680, w: 370,  h: 380, visible: true, order: 16, name: '迷你记事本' },
     musicplayer:{ x: 400,  y: 2680, w: 620,  h: 740, visible: true, order: 17, name: '音乐播放器' },
-    momo:       { x: 1040, y: 2680, w: 380,  h: 400, visible: true, order: 18, name: 'MOMO 捏捏乐' }
+    momo:       { x: 1040, y: 2680, w: 380,  h: 400, visible: true, order: 18, name: 'MOMO 捏捏乐' },
+    aichat:      { x: 0,    y: 3440, w: 620,  h: 640, visible: true, order: 19, name: 'AI 聊天助手' }
   };
   Object.keys(defaultConfig).forEach(k => { if (defaultConfig[k].z === undefined) defaultConfig[k].z = 1; });
   // 同步 footer 中的组件数量，避免写死数字与配置脱节
@@ -6364,6 +6501,8 @@ replaceInput.addEventListener('keydown', (e) => {
       if (widgetConfig[k].z === undefined) widgetConfig[k].z = defaultConfig[k].z;
     }
   });
+  // 补齐结果立刻落盘，避免新增组件每次加载都要重新补齐
+  store.set('nt_widgetConfig', widgetConfig);
   function saveConfig() { store.set('nt_widgetConfig', widgetConfig); }
   function updateGridHeight() {
     let maxBottom = 0;
@@ -6448,6 +6587,365 @@ replaceInput.addEventListener('keydown', (e) => {
     const isShowing = widgetMenu.classList.toggle('show');
     if (isShowing) renderMenu();
   });
+
+  // ================= AI 聊天助手 =================
+  const aiChatAPI = (function initAiChat() {
+    const card = document.querySelector('.widget[data-id="aichat"]');
+    if (!card) return null;
+    const AC_KEY = 'ai_chat_conv_v2';
+    const AC_SIDE_KEY = 'ai_chat_side';
+    const AC_API = 'https://api.llm7.io/v1/chat/completions';
+    const AC_TOKEN = 'lnImwpp0HkxxTwF6uYn2ggWZ+YPhUu4aQ31+IM+DS6XBdsl0CuOSn4ImA09qXPPZe3MpZHwHo/YUptGCsmSCwasOy8L83voSvbMtn+OhdWeB8hd+40u3DAN1qpPo7cVFGpgmR3dqHH8drA==';
+    const AC_MODEL = 'default';
+    const AC_MAX_CONV = 100;
+    const AC_MAX_MSG = 50;
+    const AC_CTX_MSG = 20;
+    const AC_SYS = '直接用简洁自然的中文回答用户问题，像朋友聊天一样，先给结论、再展开要点。涉及代码时用 Markdown 代码块。';
+    const pick = (s) => card.querySelector(s);
+    const el = {
+      side: pick('#acSide'), list: pick('#acList'), search: pick('#acSearch'), newBtn: pick('#acNew'),
+      title: pick('#acTitle'), status: pick('#acStatus'), msgs: pick('#acMsgs'),
+      input: pick('#acInput'), send: pick('#acSend'), toggle: pick('#acToggleSide')
+    };
+    if (!el.msgs || !el.input || !el.send) return null;
+    let state = store.get(AC_KEY, null);
+    if (!state || !Array.isArray(state.convs)) state = { convs: [], curId: null };
+    let busy = false, ctrl = null, kw = '', stopFlag = false, genSeq = 0, watchdog = null, onStop = null;
+
+    const AC_BAD = ['傻逼','傻子吧','煞笔','沙比','草泥马','操你','你妈的','他妈的','婊子','贱人','去死','滚你妈','fuck','fucking','shit','bitch','asshole','色情','色图','黄图','裸照','做爱','性交','强奸','自杀教程','炸弹制作','毒品购买'];
+    const badWordsHit = (s) => {
+      const t = String(s || '').toLowerCase().replace(/\s+/g, '');
+      if (!t) return false;
+      return AC_BAD.some(w => t.indexOf(String(w).toLowerCase()) >= 0);
+    };
+    const AC_BAD_REPLY = '您输入了不良内容，已拒绝输出，请文明用语。';
+    const uid = () => 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    const persist = () => { if (!store.set(AC_KEY, state)) toast('❌ 聊天记录过大，保存失败'); };
+    const currentConv = () => (state.curId ? (state.convs.find(c => c.id === state.curId) || null) : null);
+
+    function ensureConv() {
+      const c = currentConv();
+      if (c) return c;
+      const n = { id: uid(), title: '新对话', msgs: [], updatedAt: Date.now() };
+      state.convs.unshift(n); state.curId = n.id;
+      if (state.convs.length > AC_MAX_CONV) state.convs.length = AC_MAX_CONV;
+      persist();
+      return n;
+    }
+    function esc(v) {
+      return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function mdToHtml(src) {
+      const blocks = [], inls = [];
+      let text = String(src == null ? '' : src);
+      text = text.replace(/```([A-Za-z0-9+#-]*)\n?([\s\S]*?)```/g, (m, lang, code) => {
+        blocks.push('<pre><code>' + esc(code.replace(/\n+$/, '')) + '</code></pre>');
+        return '\u0000B' + (blocks.length - 1) + '\u0000';
+      });
+      text = text.replace(/`([^`\n]+)`/g, (m, c) => {
+        inls.push('<code>' + esc(c) + '</code>');
+        return '\u0000I' + (inls.length - 1) + '\u0000';
+      });
+      text = esc(text);
+      text = text.replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g,
+        (m, t, u) => '<a href="' + u + '" target="_blank" rel="noopener">' + t + '</a>');
+      text = text.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+      text = text.replace(/~~([^~\n]+)~~/g, '<del>$1</del>');
+      const lines = text.split('\n'), out = [];
+      let para = [], list = null, listBuf = [];
+      const closeList = () => {
+        if (list) { out.push('<' + list + '>' + listBuf.join('') + '</' + list + '>'); list = null; listBuf = []; }
+      };
+      const closePara = () => { if (para.length) { out.push('<p>' + para.join('<br>') + '</p>'); para = []; } };
+      lines.forEach(line => {
+        const t = line.trim();
+        if (!t) { closePara(); closeList(); return; }
+        const mB = t.match(/^\u0000B\d+\u0000$/);
+        if (mB) { closePara(); closeList(); out.push(t); return; }
+        const m1 = t.match(/^[-*+]\s+(.*)$/);
+        if (m1) { closePara(); if (list !== 'ul') { closeList(); list = 'ul'; } listBuf.push('<li>' + m1[1] + '</li>'); return; }
+        const m2 = t.match(/^\d+[.)]\s+(.*)$/);
+        if (m2) { closePara(); if (list !== 'ol') { closeList(); list = 'ol'; } listBuf.push('<li>' + m2[1] + '</li>'); return; }
+        const m3 = t.match(/^#{1,6}\s+(.*)$/);
+        if (m3) { closePara(); closeList(); out.push('<p><strong>' + m3[1] + '</strong></p>'); return; }
+        const m4 = t.match(/^&gt;\s?(.*)$/);
+        if (m4) { closePara(); closeList(); out.push('<p class="ac-quote">' + m4[1] + '</p>'); return; }
+        const m5 = t.match(/^(?:---|\*\*\*|_{3,})$/);
+        if (m5) { closePara(); closeList(); out.push('<p style="opacity:.35;margin:.6em 0;">──────────</p>'); return; }
+        closeList(); para.push(t);
+      });
+      closePara(); closeList();
+      let html = out.join('');
+      html = html.replace(/\u0000B(\d+)\u0000/g, (m, i) => blocks[+i] || '');
+      html = html.replace(/\u0000I(\d+)\u0000/g, (m, i) => inls[+i] || '');
+      return html || '<p></p>';
+    }
+    function renderList() {
+      if (!el.list) return;
+      const k = String(kw || '').trim().toLowerCase();
+      const items = state.convs.filter(c => {
+        if (!k) return true;
+        if (String(c.title || '').toLowerCase().indexOf(k) >= 0) return true;
+        return (c.msgs || []).some(m => String(m.content || '').toLowerCase().indexOf(k) >= 0);
+      });
+      el.list.innerHTML = '';
+      if (!items.length) {
+        const d = document.createElement('div');
+        d.className = 'ac-empty-s';
+        d.textContent = k ? '没有匹配的对话' : '还没有对话，点上方新建';
+        el.list.appendChild(d);
+        return;
+      }
+      items.forEach(c => {
+        const it = document.createElement('div');
+        it.className = 'ac-item' + (c.id === state.curId ? ' active' : '');
+        const tt = document.createElement('div');
+        tt.className = 'ac-item-t';
+        tt.textContent = c.title || '新对话';
+        tt.title = c.title || '新对话';
+        const del = document.createElement('button');
+        del.className = 'ac-del'; del.type = 'button'; del.textContent = '×'; del.title = '删除这个对话';
+        del.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!confirm('删除对话「' + (c.title || '新对话') + '」？此操作不可撤销。')) return;
+          state.convs = state.convs.filter(x => x.id !== c.id);
+          if (state.curId === c.id) state.curId = state.convs.length ? state.convs[0].id : null;
+          persist(); renderList(); renderMsgs(); toast('🗑️ 已删除对话');
+        });
+        it.appendChild(tt); it.appendChild(del);
+        it.addEventListener('click', () => {
+          if (busy) { toast('⏳ 正在生成，先点「停止」再切换'); return; }
+          state.curId = c.id; persist(); renderList(); renderMsgs();
+          setTimeout(() => { if (el.input) el.input.focus(); }, 30);
+        });
+        el.list.appendChild(it);
+      });
+    }
+    function bubbleRow(role) {
+      const row = document.createElement('div');
+      row.className = 'ac-row' + (role === 'user' ? ' me' : '');
+      const who = document.createElement('div');
+      who.className = 'ac-who';
+      who.textContent = role === 'user' ? '我' : 'AI';
+      const b = document.createElement('div');
+      b.className = 'ac-bubble';
+      row.appendChild(who); row.appendChild(b);
+      return { row: row, bubble: b };
+    }
+    function renderMsgs() {
+      if (!el.msgs) return;
+      const c = currentConv();
+      el.msgs.innerHTML = '';
+      if (el.title) el.title.textContent = c ? (c.title || '新对话') : '新对话';
+      if (!c || !c.msgs || !c.msgs.length) {
+        const e = document.createElement('div');
+        e.className = 'ac-empty';
+        e.innerHTML = '和 AI 聊点什么吧 ✨<br><span style="font-size:11px;">Enter 发送 · Shift+Enter 换行</span>';
+        el.msgs.appendChild(e);
+        return;
+      }
+      c.msgs.forEach(m => {
+        const r = bubbleRow(m.role === 'user' ? 'user' : 'ai');
+        r.bubble.innerHTML = mdToHtml(m.content || '');
+        el.msgs.appendChild(r.row);
+      });
+      el.msgs.scrollTop = el.msgs.scrollHeight;
+    }
+    function setStatus(t) { if (el.status) el.status.textContent = t; }
+    function autoGrow() {
+      if (!el.input) return;
+      el.input.style.height = 'auto';
+      el.input.style.height = Math.min(el.input.scrollHeight || 36, 96) + 'px';
+    }
+    function request(payload, onDelta, signal) {
+      return fetch(AC_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AC_TOKEN },
+        body: JSON.stringify({ model: AC_MODEL, messages: payload, temperature: 0.7, stream: true }),
+        signal: signal
+      }).then(res => {
+        if (!res.ok) {
+          const hint = res.status === 401 ? '（接口密钥失效）' : (res.status === 429 ? '（请求太频繁，稍后再试）' : (res.status >= 500 ? '（服务端开小差）' : ''));
+          throw new Error('HTTP ' + res.status + hint);
+        }
+        if (!res.body || typeof res.body.getReader !== 'function') {
+          return res.json().then(j => {
+            const ch = j && j.choices && j.choices[0];
+            const txt = ch ? ((ch.message && ch.message.content) || '') : '';
+            if (txt) onDelta(txt, txt);
+            return txt;
+          });
+        }
+        const reader = res.body.getReader(), dec = new TextDecoder('utf-8');
+        let buf = '', full = '';
+        const pump = () => reader.read().then(rv => {
+          if (rv.done) return full;
+          buf += dec.decode(rv.value, { stream: true });
+          let idx;
+          while ((idx = buf.indexOf('\n')) >= 0) {
+            const line = buf.slice(0, idx).trim();
+            buf = buf.slice(idx + 1);
+            if (!line || line.charAt(0) === ':') continue;
+            if (line.indexOf('data:') !== 0) continue;
+            const pay = line.slice(5).trim();
+            if (!pay || pay === '[DONE]') continue;
+            try {
+              const j = JSON.parse(pay);
+              const ch = j && j.choices && j.choices[0];
+              const piece = (ch && ch.delta && ch.delta.content) ? ch.delta.content : ((ch && ch.message && ch.message.content) || '');
+              if (piece) { full += piece; onDelta(piece, full); }
+            } catch (e) {}
+          }
+          return pump();
+        });
+        return pump();
+      });
+    }
+    function stop() {
+      if (!busy) return;
+      stopFlag = true;
+      try { if (ctrl) ctrl.abort(); } catch (e) {}
+      if (watchdog) { clearTimeout(watchdog); watchdog = null; }
+      const f = onStop; onStop = null;
+      if (typeof f === 'function') { try { f(); } catch (e) {} }
+    }
+    function send() {
+      if (busy) { stop(); return; }
+      const text = String(el.input.value || '').trim();
+      if (!text) return;
+      if (badWordsHit(text)) {
+        const c0 = ensureConv();
+        c0.msgs.push({ role: 'user', content: text, ts: Date.now() });
+        if (!c0.title || c0.title === '新对话') c0.title = text.replace(/\s+/g, ' ').slice(0, 18);
+        c0.msgs.push({ role: 'assistant', content: AC_BAD_REPLY, ts: Date.now() });
+        if (c0.msgs.length > AC_MAX_MSG) c0.msgs = c0.msgs.slice(-AC_MAX_MSG);
+        c0.updatedAt = Date.now();
+        persist();
+        el.input.value = ''; autoGrow();
+        renderList(); renderMsgs(); setStatus('已拒绝');
+        return;
+      }
+      const conv = ensureConv();
+      conv.msgs.push({ role: 'user', content: text, ts: Date.now() });
+      if (!conv.title || conv.title === '新对话') conv.title = text.replace(/\s+/g, ' ').slice(0, 18);
+      conv.msgs.push({ role: 'assistant', content: '', ts: Date.now() });
+      if (conv.msgs.length > AC_MAX_MSG) conv.msgs = conv.msgs.slice(-AC_MAX_MSG);
+      conv.updatedAt = Date.now();
+      persist();
+      el.input.value = ''; autoGrow();
+      renderList(); renderMsgs();
+      const rows = el.msgs.querySelectorAll('.ac-row');
+      const lastRow = rows.length ? rows[rows.length - 1] : null;
+      const bub = lastRow ? lastRow.querySelector('.ac-bubble') : null;
+      const payload = [{ role: 'system', content: AC_SYS }];
+      conv.msgs.forEach(m => {
+        if (!m.content) return;
+        if (m.role !== 'user' && m.role !== 'assistant') return;
+        payload.push({ role: m.role, content: m.content });
+      });
+      const ctx = payload.slice(0, 1).concat(payload.slice(1).slice(-AC_CTX_MSG));
+      busy = true;
+      stopFlag = false;
+      const myGen = ++genSeq;
+      ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      el.send.textContent = '停止'; el.send.classList.add('stop');
+      setStatus('思考中…');
+      let full = '';
+      const resetUI = () => {
+        busy = false; ctrl = null; stopFlag = false; onStop = null;
+        if (watchdog) { clearTimeout(watchdog); watchdog = null; }
+        el.send.textContent = '发送'; el.send.classList.remove('stop');
+      };
+      const finish = (txt, ok, note, saveText) => {
+        resetUI();
+        const c2 = currentConv();
+        if (c2) {
+          const last = c2.msgs[c2.msgs.length - 1];
+          if (last && last.role === 'assistant') last.content = (typeof saveText === 'string' ? saveText : (txt || ''));
+          c2.updatedAt = Date.now();
+          persist();
+        }
+        if (bub) bub.innerHTML = mdToHtml(txt || '');
+        el.msgs.scrollTop = el.msgs.scrollHeight;
+        setStatus(note || (ok ? '就绪' : '出错了'));
+        if (el.input) el.input.focus();
+      };
+      const endGen = (txt, ok, note, saveText) => {
+        if (myGen !== genSeq) return;
+        genSeq++;
+        finish(txt, ok, note, saveText);
+      };
+      onStop = () => endGen(full || '（已停止生成）', true, '已停止', full || '');
+      if (watchdog) clearTimeout(watchdog);
+      watchdog = setTimeout(() => {
+        if (myGen !== genSeq || !busy) return;
+        try { if (ctrl) ctrl.abort(); } catch (e) {}
+        endGen(full || '⚠️ 等待超时，网络可能不通，请稍后重试', false, '出错了');
+      }, 120000);
+      request(ctx, (piece, all) => {
+        if (myGen !== genSeq) return;
+        full = all;
+        if (bub) bub.innerHTML = mdToHtml(all) + '<span class="ac-cursor">▋</span>';
+        el.msgs.scrollTop = el.msgs.scrollHeight;
+      }, ctrl ? ctrl.signal : undefined).then(txt => {
+        if (myGen !== genSeq) return;
+        const raw = String(txt || '');
+        const body = raw.trim() ? raw : full;
+        if (!body || !String(body).trim()) {
+          endGen('⚠️ 这次没收到内容，换个说法再试一次', false, '出错了', '');
+          return;
+        }
+        endGen(body, true, '就绪');
+      }).catch(err => {
+        if (myGen !== genSeq) return;
+        const msg = String((err && err.message) || err || '');
+        if (stopFlag || (err && err.name === 'AbortError')) {
+          endGen(full || '（已停止生成）', true, '已停止', full || '');
+          return;
+        }
+        endGen((full ? full + '\n\n' : '') + '⚠️ 请求失败：' + (msg || '未知错误') + '\n\n（可检查网络，或稍后重试）', false, '出错了');
+      });
+    }
+    function newConv() {
+      if (busy) { toast('⏳ 正在生成，先点「停止」'); return; }
+      const c = { id: uid(), title: '新对话', msgs: [], updatedAt: Date.now() };
+      state.convs.unshift(c); state.curId = c.id;
+      if (state.convs.length > AC_MAX_CONV) state.convs.length = AC_MAX_CONV;
+      persist();
+      el.input.value = ''; autoGrow();
+      renderList(); renderMsgs(); setStatus('就绪');
+      el.input.focus();
+    }
+    el.send.addEventListener('click', (e) => { e.stopPropagation(); send(); });
+    if (el.newBtn) el.newBtn.addEventListener('click', (e) => { e.stopPropagation(); newConv(); });
+    if (el.search) el.search.addEventListener('input', () => { kw = el.search.value || ''; renderList(); });
+    el.input.addEventListener('input', autoGrow);
+    el.input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); }
+    });
+    if (el.toggle) el.toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const collapsed = el.side.classList.toggle('collapsed');
+      el.toggle.classList.toggle('on', !collapsed);
+      el.toggle.title = collapsed ? '展开对话列表' : '收起对话列表';
+      store.set(AC_SIDE_KEY, collapsed);
+    });
+    if (el.side && store.get(AC_SIDE_KEY, false)) {
+      el.side.classList.add('collapsed');
+      if (el.toggle) { el.toggle.classList.remove('on'); el.toggle.title = '展开对话列表'; }
+    }
+    renderList(); renderMsgs(); autoGrow();
+    return {
+      reload: function () {
+        state = store.get(AC_KEY, null);
+        if (!state || !Array.isArray(state.convs)) state = { convs: [], curId: null };
+        kw = ''; if (el.search) el.search.value = '';
+        renderList(); renderMsgs(); setStatus('就绪');
+      }
+    };
+  })();
   document.addEventListener('click', (e) => {
     if (!widgetMenu.contains(e.target) && e.target !== addWidgetBtn) {
       addWidgetBtn.classList.remove('active'); widgetMenu.classList.remove('show');
@@ -6842,6 +7340,7 @@ replaceInput.addEventListener('keydown', (e) => {
       city: currentCity, cityHistory: cityHistory, workStart: workStartTime, workEnd: workEndTime, workDays: workDays, nightShift: nightShift,
       customBg: store.get('nt_custom_bg', ''), bgType: store.get('nt_bg_type', 'default'), bgValue: store.get('nt_bg_value', ''),
       mpFavorites: store.get('nt_mp_favorites', []),
+      aiChat: store.get('ai_chat_conv_v2', null),
       
       // ====== 新增：全量状态备份 ======
       // 1. 计时器状态
@@ -7210,6 +7709,12 @@ replaceInput.addEventListener('keydown', (e) => {
           }
           if (Array.isArray(data.mpFavorites)) {
             store.set('nt_mp_favorites', data.mpFavorites);
+          }
+
+          // 恢复 AI 聊天助手全部对话
+          if (data.aiChat && Array.isArray(data.aiChat.convs)) {
+            store.set('ai_chat_conv_v2', data.aiChat);
+            if (typeof aiChatAPI !== 'undefined' && aiChatAPI && aiChatAPI.reload) aiChatAPI.reload();
           }
           if (data.bgType !== undefined && data.bgValue !== undefined) {
             store.set('nt_bg_type', data.bgType); store.set('nt_bg_value', data.bgValue);
