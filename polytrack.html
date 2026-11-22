@@ -1,0 +1,246 @@
+<!-- polytrack.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PolyTrack · sweet🍉的小站</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+  body {
+    background: linear-gradient(150deg, #2b1a3d 0%, #5a2c6e 45%, #1e1029 100%);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+    padding: 20px; overflow-x: hidden;
+    position: relative;
+  }
+
+  /* 低多边形网格纹理背景 */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(30deg, transparent, transparent 50px, rgba(255,255,255,0.025) 50px, rgba(255,255,255,0.025) 52px),
+      repeating-linear-gradient(-30deg, transparent, transparent 50px, rgba(255,255,255,0.025) 50px, rgba(255,255,255,0.025) 52px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 680px; width: 100%;
+    display: flex; flex-direction: column; align-items: center;
+    position: relative; z-index: 2;
+  }
+
+  .race-icon {
+    font-size: 5rem;
+    margin-bottom: 10px;
+    animation: race 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 18px rgba(200, 120, 255, 0.45));
+  }
+
+  @keyframes race {
+    0%, 100% { transform: translateX(0) rotate(-4deg); }
+    50% { transform: translateX(16px) rotate(4deg); }
+  }
+
+  .title-wrap { display: flex; flex-direction: column; align-items: center; width: 100%; margin-bottom: 28px; }
+  .title {
+    font-size: 3rem; font-weight: 900;
+    color: #f0d8ff;
+    text-align: center;
+    text-shadow: 0 2px 22px rgba(200, 120, 255, 0.4);
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+  .subtitle {
+    font-size: 1rem;
+    color: #a888c8;
+    letter-spacing: 2px;
+    font-weight: 600;
+  }
+  .underline {
+    width: 50%; height: 3px;
+    background: linear-gradient(90deg, transparent 0%, #c878ff 50%, transparent 100%);
+    border-radius: 2px; margin-top: 18px;
+    box-shadow: 0 0 14px rgba(200, 120, 255, 0.5);
+  }
+
+  .intro-card {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(200, 120, 255, 0.25);
+    border-radius: 20px;
+    padding: 26px 30px;
+    margin-bottom: 30px;
+    width: 100%;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  }
+
+  .intro-card p {
+    font-size: 1rem;
+    line-height: 1.9;
+    color: #e0d0f0;
+    margin-bottom: 10px;
+  }
+  .intro-card p:last-child { margin-bottom: 0; }
+  .intro-card .highlight { color: #d8a0ff; font-weight: 700; }
+
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+    max-width: 440px;
+    margin-bottom: 34px;
+  }
+
+  .btn-download {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px 32px;
+    background: linear-gradient(180deg, #c878ff 0%, #9a4ad8 100%);
+    color: #ffffff;
+    font-size: 1.35rem;
+    font-weight: 800;
+    text-decoration: none;
+    border-radius: 18px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow:
+      0 6px 0 #7a3aB0,
+      0 12px 28px rgba(154, 74, 216, 0.45);
+  }
+  .btn-download:hover {
+    transform: translateY(-4px);
+    background: linear-gradient(180deg, #d898ff 0%, #aa5ae8 100%);
+    box-shadow:
+      0 10px 0 #7a3aB0,
+      0 18px 38px rgba(154, 74, 216, 0.55);
+  }
+  .btn-download:active {
+    transform: translateY(4px);
+    box-shadow:
+      0 2px 0 #7a3aB0,
+      0 6px 14px rgba(154, 74, 216, 0.3);
+  }
+
+  /* 在线游玩按钮样式 */
+  .btn-online {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px 32px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #d8a0ff;
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 18px;
+    border: 2px solid rgba(200, 120, 255, 0.45);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .btn-online:hover {
+    transform: translateY(-2px);
+    background: rgba(200, 120, 255, 0.15);
+    border-color: #d8a0ff;
+    color: #f0d8ff;
+    box-shadow: 0 8px 24px rgba(200, 120, 255, 0.3);
+  }
+  .btn-online:active {
+    transform: translateY(0);
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #d8a0ff;
+    text-decoration: none;
+    padding: 12px 28px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(200, 120, 255, 0.25);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .back-link:hover {
+    color: #2b1a3d;
+    background: #d8a0ff;
+    border-color: #d8a0ff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(216, 160, 255, 0.4);
+  }
+  .back-link svg {
+    width: 18px; height: 18px;
+    fill: currentColor;
+    transition: fill 0.3s;
+  }
+
+  .footer-text {
+    color: #8a72a8;
+    font-size: 13px;
+    margin-top: 38px;
+  }
+
+  @media (max-width: 860px) {
+    .title { font-size: 2.2rem; }
+    .subtitle { font-size: 0.9rem; }
+    .intro-card { padding: 20px 20px; }
+    .intro-card p { font-size: 0.92rem; }
+    .btn-download { padding: 20px 24px; font-size: 1.15rem; }
+    .btn-online { padding: 16px 24px; font-size: 1rem; }
+    .race-icon { font-size: 3.5rem; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="race-icon">🏎️</div>
+
+    <div class="title-wrap">
+      <h1 class="title">PolyTrack</h1>
+      <div class="subtitle">— 低多边形赛车 —</div>
+      <div class="underline"></div>
+    </div>
+
+    <div class="intro-card">
+      <p>
+        <span class="highlight">PolyTrack</span> 是一款低多边形风格的竞速游戏。在充满几何美感的赛道上飞驰，挑战最快圈速，感受速度与简约视觉的碰撞。
+      </p>
+      <p>
+        游戏操作简单、节奏明快，适合喜欢竞速与极简风格的玩家。你可以下载安装包离线游玩，也可以直接通过官方网页在线体验。
+      </p>
+    </div>
+
+    <div class="btn-group">
+      <a href="https://github.com/sweetwatermelons/Games/releases/download/polytrack/PolyTrack.exe" class="btn-download">
+        ⬇️ 下载安装包
+      </a>
+
+      <!-- 在线游玩按钮 -->
+      <a href="https://www.kodub.com/apps/polytrack" target="_blank" class="btn-online">
+        🌐 在线游玩（官方网页）
+      </a>
+    </div>
+
+    <a href="https://sweetwatermelons.github.io/games.html" class="back-link">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      返回游戏专区
+    </a>
+
+    <div class="footer-text">sweet🍉的小站 · PolyTrack</div>
+  </div>
+
+</body>
+</html>
