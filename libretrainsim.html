@@ -1,0 +1,216 @@
+<!-- libretrainsim.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LibreTrainSim · sweet🍉的小站</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+  body {
+    background: linear-gradient(160deg, #1a2a3a 0%, #2d4a6b 50%, #1b2b3a 100%);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+    padding: 20px; overflow-x: hidden;
+    position: relative;
+  }
+
+  /* 轨道纹理背景 */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 60px,
+      rgba(255, 255, 255, 0.03) 60px,
+      rgba(255, 255, 255, 0.03) 62px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 680px; width: 100%;
+    display: flex; flex-direction: column; align-items: center;
+    position: relative; z-index: 2;
+  }
+
+  .train-icon {
+    font-size: 5rem;
+    margin-bottom: 10px;
+    animation: chug 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 16px rgba(100, 180, 255, 0.4));
+  }
+
+  @keyframes chug {
+    0%, 100% { transform: translateX(0) rotate(-2deg); }
+    50% { transform: translateX(12px) rotate(2deg); }
+  }
+
+  .title-wrap { display: flex; flex-direction: column; align-items: center; width: 100%; margin-bottom: 28px; }
+  .title {
+    font-size: 3rem; font-weight: 900;
+    color: #d0e8ff;
+    text-align: center;
+    text-shadow: 0 2px 20px rgba(100, 180, 255, 0.35);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .subtitle {
+    font-size: 1rem;
+    color: #7fa5c4;
+    letter-spacing: 2px;
+    font-weight: 600;
+  }
+  .underline {
+    width: 50%; height: 3px;
+    background: linear-gradient(90deg, transparent 0%, #5eaee8 50%, transparent 100%);
+    border-radius: 2px; margin-top: 18px;
+    box-shadow: 0 0 14px rgba(94, 174, 232, 0.5);
+  }
+
+  .intro-card {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(100, 180, 255, 0.25);
+    border-radius: 20px;
+    padding: 26px 30px;
+    margin-bottom: 30px;
+    width: 100%;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .intro-card p {
+    font-size: 1rem;
+    line-height: 1.9;
+    color: #c8dff0;
+    margin-bottom: 10px;
+  }
+  .intro-card p:last-child { margin-bottom: 0; }
+  .intro-card .highlight { color: #8ec8f0; font-weight: 700; }
+
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+    max-width: 440px;
+    margin-bottom: 34px;
+  }
+
+  .btn-download {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px 32px;
+    background: linear-gradient(180deg, #5eaee8 0%, #3a86c8 100%);
+    color: #ffffff;
+    font-size: 1.35rem;
+    font-weight: 800;
+    text-decoration: none;
+    border-radius: 18px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow:
+      0 6px 0 #2a6aa0,
+      0 12px 28px rgba(58, 134, 200, 0.4);
+  }
+  .btn-download:hover {
+    transform: translateY(-4px);
+    background: linear-gradient(180deg, #78bcf0 0%, #4a96d8 100%);
+    box-shadow:
+      0 10px 0 #2a6aa0,
+      0 18px 38px rgba(58, 134, 200, 0.5);
+  }
+  .btn-download:active {
+    transform: translateY(4px);
+    box-shadow:
+      0 2px 0 #2a6aa0,
+      0 6px 14px rgba(58, 134, 200, 0.3);
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #8ec8f0;
+    text-decoration: none;
+    padding: 12px 28px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(100, 180, 255, 0.25);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .back-link:hover {
+    color: #1a2a3a;
+    background: #8ec8f0;
+    border-color: #8ec8f0;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(142, 200, 240, 0.4);
+  }
+  .back-link svg {
+    width: 18px; height: 18px;
+    fill: currentColor;
+    transition: fill 0.3s;
+  }
+
+  .footer-text {
+    color: #6a8aa8;
+    font-size: 13px;
+    margin-top: 38px;
+  }
+
+  @media (max-width: 860px) {
+    .title { font-size: 2.2rem; }
+    .subtitle { font-size: 0.9rem; }
+    .intro-card { padding: 20px 20px; }
+    .intro-card p { font-size: 0.92rem; }
+    .btn-download { padding: 20px 24px; font-size: 1.15rem; }
+    .train-icon { font-size: 3.5rem; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="train-icon">🚆</div>
+
+    <div class="title-wrap">
+      <h1 class="title">LibreTrainSim</h1>
+      <div class="subtitle">— 开源火车模拟器 —</div>
+      <div class="underline"></div>
+    </div>
+
+    <div class="intro-card">
+      <p>
+        <span class="highlight">LibreTrainSim</span> 是一款开源、免费的火车模拟驾驶游戏。驾驶不同型号的列车，行驶在精心设计的线路上，体验真实的铁路驾驶乐趣。
+      </p>
+      <p>
+        游戏支持自定义线路与列车，社区活跃，适合铁路爱好者与模拟驾驶玩家。下载安装包后即可开始你的铁路之旅。
+      </p>
+    </div>
+
+    <div class="btn-group">
+      <a href="https://gh-proxy.com/https://github.com/sweetwatermelons/Games/releases/download/Train/LibreTrainSim.exe" class="btn-download">
+        ⬇️ 下载安装包
+      </a>
+    </div>
+
+    <a href="https://sweetwatermelons.github.io/games.html" class="back-link">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      返回游戏专区
+    </a>
+
+    <div class="footer-text">sweet🍉的小站 · LibreTrainSim</div>
+  </div>
+
+</body>
+</html>
