@@ -930,6 +930,12 @@
   .ac-msgs::-webkit-scrollbar, .ac-list::-webkit-scrollbar { width: 6px; }
   .ac-msgs::-webkit-scrollbar-thumb, .ac-list::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 3px; }
   .ac-msgs::-webkit-scrollbar-track, .ac-list::-webkit-scrollbar-track { background: transparent; }
+  .ac-mic { flex: 0 0 auto; width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text); font-size: 16px; line-height: 1; cursor: pointer; transition: all .2s; }
+  .ac-mic:hover { border-color: var(--accent); }
+  .ac-mic.rec { background: #e5484d; border-color: #e5484d; color: #fff; animation: acMicPulse 1s ease-in-out infinite; }
+  .ac-mic.off { opacity: .45; }
+  @keyframes acMicPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.92); opacity: .6; } }
+
 </style>
 </head>
 <body>
@@ -1490,7 +1496,11 @@
           <div class="ac-msgs" id="acMsgs"></div>
           <div class="ac-inputbar">
             <textarea class="ac-input" id="acInput" rows="1" placeholder="输入消息，Enter 发送，Shift+Enter 换行"></textarea>
-            <button class="ac-send" id="acSend" type="button">发送</button>
+            <button class="ac-mic" id="acMic" type="button" title="语音输入">🎤</button>
+            <button class="ac-send" id="acSend" type="button" title="发送（Enter）">
+              <svg class="ac-ico-send" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.4 20.4l17.45-7.48a1 1 0 0 0 0-1.84L3.4 3.6a1 1 0 0 0-1.4 1.06l1.1 4.9L14 12l-10.9 2.44-1.1 4.9a1 1 0 0 0 1.4 1.06z"/></svg>
+              <svg class="ac-ico-stop" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2.2"/></svg>
+            </button>
           </div>
         </div>
       </div>
@@ -4120,8 +4130,8 @@
   notepadEditor.addEventListener('click', (e) => {
     const aEl = e.target && e.target.closest ? e.target.closest('a') : null;
     if (!aEl || !notepadEditor.contains(aEl)) return;
-    const href = (aEl.getAttribute('href') || '').trim();
-    if (!/^(https?:\/\/|mailto:)/i.test(href)) return;
+    const href = npNormHref(aEl.getAttribute('href'));
+    if (!href) return;
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
       e.stopPropagation();
@@ -4131,7 +4141,7 @@
     }
   });
   // 失焦 / 粘贴后：把纯文本网址自动变成可点击链接
-  const NP_URL_RE = /(https?:\/\/[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]+|www\.[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]+)/gi;
+  const NP_URL_RE = /(https?:\/\/[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]+|www\.[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]+|(?:[a-z0-9][a-z0-9-]*\.)+(?:com|cn|net|org|io|co|dev|me|xyz|top|info|gov|edu|app|cc|tv|ai|site|vip|link|shop|club|fun|pro|work)(?::\d+)?(?:\/[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]*)?)/gi;
   const NP_CUT = /[.,;:!?)\]}>\x22\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff09\u3011\u300b\u300d\u300f]+$/;
   const npAutoLink = () => {
     if (!notepadEditor) return false;
@@ -4139,7 +4149,7 @@
     const targetsX = [];
     let node;
     while ((node = walker.nextNode())) {
-      if (!node.nodeValue || !/(https?:\/\/|www\.)/i.test(node.nodeValue)) continue;
+      if (!node.nodeValue || !/(https?:\/\/|www\.|[a-z0-9][a-z0-9-]*\.[a-z]{2,})/i.test(node.nodeValue)) continue;
       let p = node.parentNode, skip = false;
       while (p && p !== notepadEditor) {
         const tn = p.tagName ? p.tagName.toLowerCase() : '';
@@ -4267,7 +4277,8 @@
     const close = () => mask.remove();
 
     const doInsert = () => {
-      const url = urlInput.value.trim();
+      const rawUrl = urlInput.value.trim();
+      const url = (rawUrl && rawUrl !== 'https://') ? (npNormHref(rawUrl) || rawUrl) : rawUrl;
       if (!url || url === 'https://') { urlInput.style.borderColor = 'var(--danger)'; urlInput.focus(); return; }
       const text = textInput.value.trim() || url;
       notepadEditor.focus();
@@ -5703,7 +5714,7 @@ replaceInput.addEventListener('keydown', (e) => {
 
     }
 
-    var URL_RE = /(https?:\/\/[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]+|www\.[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]+|mailto:[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]+)/gi;
+    var URL_RE = /(https?:\/\/[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]+|www\.[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]+|(?:[a-z0-9][a-z0-9-]*\.)+(?:com|cn|net|org|io|co|dev|me|xyz|top|info|gov|edu|app|cc|tv|ai|site|vip|link|shop|club|fun|pro|work)(?::\d+)?(?:\/[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]*)?|mailto:[^\s<>\x22'\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff08\uff09\u3010\u3011\u300c\u300d\u300a\u300b\uff0c]+)/gi;
 
     function urlTrim(u) { return u.replace(/[.,;:!?)\]}>'\x22\u3001\u3002\uff1b\uff1a\uff01\uff1f\uff09\u3011\u300b\u300d\u300f]+$/, ''); }
 
@@ -5723,7 +5734,7 @@ replaceInput.addEventListener('keydown', (e) => {
       st = st || {};
       if (text === null || text === undefined) return '';
       var str = String(text);
-      if (linkDepth > 0 || !/(https?:\/\/|www\.|mailto:)/i.test(str)) return textRun(str, st);
+      if (linkDepth > 0 || !/(https?:\/\/|www\.|mailto:|[a-z0-9][a-z0-9-]*\.[a-z]{2,})/i.test(str)) return textRun(str, st);
       var out = '', last = 0, m, hit = false;
       URL_RE.lastIndex = 0;
       while ((m = URL_RE.exec(str)) !== null) {
@@ -5809,13 +5820,15 @@ replaceInput.addEventListener('keydown', (e) => {
         if (tag === 'a') {
           var href = n.getAttribute('href') || '';
           var ast = styleFrom(n, st);
-          if (/^(https?:\/\/|mailto:)/i.test(href)) {
+          var okHref = npNormHref(href);
+          if (okHref) {
             ast.color = '0563C1'; ast.underline = true;
             linkDepth++;
             var inner = inlineXml(n, ast);
+            if (!inner) inner = '<w:r>' + rPrXml(ast) + '<w:t xml:space="preserve">' + esc(n.textContent || '') + '</w:t></w:r>';
             linkDepth--;
             var rid = 'rId' + (ridSeq++);
-            RELS.push({ id: rid, target: href, type: 'hyperlink', external: true });
+            RELS.push({ id: rid, target: okHref, type: 'hyperlink', external: true });
             out += '<w:hyperlink r:id="' + rid + '" w:history="1">' + inner + '</w:hyperlink>';
           } else {
             out += inlineXml(n, ast);
@@ -6225,6 +6238,35 @@ replaceInput.addEventListener('keydown', (e) => {
   })();
 
   // ---------- 记事本导出 / 导入 公共工具 ----------
+  // 把各种形态的 href 统一成可用的绝对链接；不像网址就返回空串
+  function npNormHref(h) {
+    var v = String(h || '').trim();
+    if (!v) return '';
+    if (/^(javascript:|#|about:|data:|blob:)/i.test(v)) return '';
+    if (/^(https?:\/\/|mailto:)/i.test(v)) return v;
+    if (/^\/\//.test(v)) return 'https:' + v;
+    if (/^(www\.|[a-z0-9][a-z0-9-]*(\.[a-z0-9-]+)+)([:\/?#]|$)/i.test(v)) return 'http://' + v;
+    return '';
+  }
+  // 给一份 HTML 里的所有 <a> 补全 href / target，缺失或无效的链接降级为文字
+  function npFixAnchors(root) {
+    if (!root || !root.querySelectorAll) return root;
+    root.querySelectorAll('a').forEach(function (a) {
+      var fixed = npNormHref(a.getAttribute('href'));
+      var txt = String(a.textContent || '').trim();
+      if (!fixed && txt) fixed = npNormHref(txt);
+      if (fixed) {
+        a.setAttribute('href', fixed);
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
+      } else {
+        a.removeAttribute('href');
+        a.removeAttribute('target');
+      }
+    });
+    return root;
+  }
+
   function npDownload(blob, filename) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -6355,6 +6397,7 @@ replaceInput.addEventListener('keydown', (e) => {
       try {
         await npNormalizeImages(clone);
         await npWaitImages(clone);
+        npFixAnchors(clone);
         npDownload(NPDocx.build(clone), `记事本导出_${npDateStamp()}.docx`);
       } finally {
         holder.remove();
@@ -6422,7 +6465,10 @@ replaceInput.addEventListener('keydown', (e) => {
         try {
           const arrayBuffer = await file.arrayBuffer();
           const result = await mammoth.convertToHtml({ arrayBuffer });
-          await writeContent(result.value || '');
+          const tpl = document.createElement('template');
+          tpl.innerHTML = result.value || '';
+          npFixAnchors(tpl.content);
+          await writeContent(tpl.innerHTML);
         } catch (err) {
           console.error('[docx] import failed', err);
           toast('❌ Word 解析失败，请确认文件是有效的 .docx');
@@ -6600,12 +6646,13 @@ replaceInput.addEventListener('keydown', (e) => {
     const AC_MAX_CONV = 100;
     const AC_MAX_MSG = 50;
     const AC_CTX_MSG = 20;
-    const AC_SYS = '直接用简洁自然的中文回答用户问题，像朋友聊天一样，先给结论、再展开要点。涉及代码时用 Markdown 代码块。';
+    const AC_SYS = '直接用简洁自然的中文回答用户问题，像朋友聊天一样，先给结论、再展开要点。严禁自我介绍、严禁复述自己的能力、严禁说「我可以帮你」「请告诉我你需要什么」「我会尽力为你服务」这类客服套话，也不要加「作为AI」「我是助手」之类的前缀；用户没问就绝不解释自己是谁、能干什么。语气轻松但不啰嗦，长度按问题需要来，不硬凑客套结尾。涉及代码时用 Markdown 代码块。';
     const pick = (s) => card.querySelector(s);
     const el = {
       side: pick('#acSide'), list: pick('#acList'), search: pick('#acSearch'), newBtn: pick('#acNew'),
       title: pick('#acTitle'), status: pick('#acStatus'), msgs: pick('#acMsgs'),
-      input: pick('#acInput'), send: pick('#acSend'), toggle: pick('#acToggleSide')
+      input: pick('#acInput'), send: pick('#acSend'), toggle: pick('#acToggleSide'),
+      mic: pick('#acMic')
     };
     if (!el.msgs || !el.input || !el.send) return null;
     let state = store.get(AC_KEY, null);
@@ -6682,13 +6729,41 @@ replaceInput.addEventListener('keydown', (e) => {
       html = html.replace(/\u0000I(\d+)\u0000/g, (m, i) => inls[+i] || '');
       return html || '<p></p>';
     }
+    function startRename(c, it, tt) {
+      const inp = document.createElement('input');
+      inp.className = 'ac-rename';
+      inp.value = c.title || '新对话';
+      inp.maxLength = 40;
+      tt.style.display = 'none';
+      it.appendChild(inp);
+      inp.focus(); inp.select();
+      let done = false;
+      const finish = function (save) {
+        if (done) return; done = true;
+        const v = String(inp.value || '').trim();
+        if (save && v) { c.title = v.slice(0, 40); persist(); }
+        renderList(); renderMsgs();
+      };
+      inp.addEventListener('click', function (e) { e.stopPropagation(); });
+      inp.addEventListener('dblclick', function (e) { e.stopPropagation(); });
+      inp.addEventListener('keydown', function (e) {
+        e.stopPropagation();
+        if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); finish(true); }
+        else if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+      });
+      inp.addEventListener('blur', function () { finish(true); });
+    }
     function renderList() {
       if (!el.list) return;
       const k = String(kw || '').trim().toLowerCase();
-      const items = state.convs.filter(c => {
+      const items = state.convs.filter(function (c) {
         if (!k) return true;
         if (String(c.title || '').toLowerCase().indexOf(k) >= 0) return true;
-        return (c.msgs || []).some(m => String(m.content || '').toLowerCase().indexOf(k) >= 0);
+        return (c.msgs || []).some(function (m) { return String(m.content || '').toLowerCase().indexOf(k) >= 0; });
+      }).sort(function (a, b) {
+        const pa = a && a.pinned ? 1 : 0, pb = b && b.pinned ? 1 : 0;
+        if (pa !== pb) return pb - pa;
+        return (b.updatedAt || 0) - (a.updatedAt || 0);
       });
       el.list.innerHTML = '';
       if (!items.length) {
@@ -6698,27 +6773,42 @@ replaceInput.addEventListener('keydown', (e) => {
         el.list.appendChild(d);
         return;
       }
-      items.forEach(c => {
+      items.forEach(function (c) {
         const it = document.createElement('div');
-        it.className = 'ac-item' + (c.id === state.curId ? ' active' : '');
+        it.className = 'ac-item' + (c.id === state.curId ? ' active' : '') + (c.pinned ? ' pin-on' : '');
+        const pin = document.createElement('button');
+        pin.type = 'button';
+        pin.className = 'ac-pin' + (c.pinned ? ' on' : '');
+        pin.textContent = '📌';
+        pin.title = c.pinned ? '取消置顶' : '置顶这个对话';
+        pin.addEventListener('click', function (e) {
+          e.stopPropagation();
+          c.pinned = !c.pinned;
+          persist(); renderList();
+          toast(c.pinned ? '📌 已置顶' : '已取消置顶');
+        });
         const tt = document.createElement('div');
         tt.className = 'ac-item-t';
         tt.textContent = c.title || '新对话';
-        tt.title = c.title || '新对话';
+        tt.title = (c.title || '新对话') + '（双击改名）';
+        tt.addEventListener('dblclick', function (e) {
+          e.stopPropagation();
+          startRename(c, it, tt);
+        });
         const del = document.createElement('button');
         del.className = 'ac-del'; del.type = 'button'; del.textContent = '×'; del.title = '删除这个对话';
-        del.addEventListener('click', (e) => {
+        del.addEventListener('click', function (e) {
           e.stopPropagation();
           if (!confirm('删除对话「' + (c.title || '新对话') + '」？此操作不可撤销。')) return;
-          state.convs = state.convs.filter(x => x.id !== c.id);
+          state.convs = state.convs.filter(function (x) { return x.id !== c.id; });
           if (state.curId === c.id) state.curId = state.convs.length ? state.convs[0].id : null;
           persist(); renderList(); renderMsgs(); toast('🗑️ 已删除对话');
         });
-        it.appendChild(tt); it.appendChild(del);
-        it.addEventListener('click', () => {
+        it.appendChild(pin); it.appendChild(tt); it.appendChild(del);
+        it.addEventListener('click', function () {
           if (busy) { toast('⏳ 正在生成，先点「停止」再切换'); return; }
           state.curId = c.id; persist(); renderList(); renderMsgs();
-          setTimeout(() => { if (el.input) el.input.focus(); }, 30);
+          setTimeout(function () { if (el.input) el.input.focus(); }, 30);
         });
         el.list.appendChild(it);
       });
@@ -6759,49 +6849,111 @@ replaceInput.addEventListener('keydown', (e) => {
       el.input.style.height = 'auto';
       el.input.style.height = Math.min(el.input.scrollHeight || 36, 96) + 'px';
     }
-    function request(payload, onDelta, signal) {
-      return fetch(AC_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AC_TOKEN },
-        body: JSON.stringify({ model: AC_MODEL, messages: payload, temperature: 0.7, stream: true }),
-        signal: signal
-      }).then(res => {
+    // ===== 免注册接口池：一个忙就换下一个，全试完才报频繁 =====
+    const AC_SF_KEY = 'sk-yfakirwbvpcpxofnznchtmlnvdtnoiukqmtdfkpgvaipvbib';
+    const AC_ENDPOINTS = [
+      { name: 'LLM7 default', url: 'https://api.llm7.io/v1/chat/completions', key: AC_TOKEN, model: 'default', stream: true },
+      { name: 'LLM7 fast', url: 'https://api.llm7.io/v1/chat/completions', key: AC_TOKEN, model: 'fast', stream: true },
+      { name: 'Pollinations openai', url: 'https://text.pollinations.ai/openai', key: '', model: 'openai', stream: true }
+    ];
+    // ===== 自定义 API（设置面板里由用户自行添加，存本机 localStorage） =====
+    const AC_CUSTOM_KEY = 'ai_chat_custom_api_v1';
+    const AC_BUILTIN = AC_ENDPOINTS.slice();
+    function getCustomApis() {
+      try {
+        const v = JSON.parse(localStorage.getItem(AC_CUSTOM_KEY) || '[]');
+        return Array.isArray(v) ? v.filter(function (x) { return x && x.url; }) : [];
+      } catch (e) { return []; }
+    }
+    function setCustomApis(list) {
+      try { localStorage.setItem(AC_CUSTOM_KEY, JSON.stringify(list || [])); } catch (e) {}
+    }
+    function rebuildEndpoints() {
+      const list = AC_BUILTIN.concat(getCustomApis().map(function (x) {
+        return { name: x.name || '自定义接口', url: x.url, key: x.key || '', model: x.model || 'default', stream: true, custom: true };
+      }));
+      AC_ENDPOINTS.length = 0;
+      for (let i = 0; i < list.length; i++) AC_ENDPOINTS.push(list[i]);
+    }
+    rebuildEndpoints();
+    function acFetchOne(ep, payload, onDelta, signal) {
+      const headers = { 'Content-Type': 'application/json' };
+      if (ep.key) headers['Authorization'] = 'Bearer ' + ep.key;
+      const body = JSON.stringify({ model: ep.model, messages: payload, temperature: 0.7, stream: !!ep.stream });
+      return fetch(ep.url, { method: 'POST', headers: headers, body: body, signal: signal }).then(res => {
         if (!res.ok) {
-          const hint = res.status === 401 ? '（接口密钥失效）' : (res.status === 429 ? '（请求太频繁，稍后再试）' : (res.status >= 500 ? '（服务端开小差）' : ''));
-          throw new Error('HTTP ' + res.status + hint);
+          const e = new Error('HTTP ' + res.status);
+          e.status = res.status;
+          throw e;
         }
-        if (!res.body || typeof res.body.getReader !== 'function') {
-          return res.json().then(j => {
-            const ch = j && j.choices && j.choices[0];
-            const txt = ch ? ((ch.message && ch.message.content) || '') : '';
-            if (txt) onDelta(txt, txt);
-            return txt;
+        const ct = String(res.headers.get('content-type') || '').toLowerCase();
+        const canStream = ep.stream && res.body && typeof res.body.getReader === 'function' && ct.indexOf('application/json') < 0 && ct.indexOf('text/plain') < 0;
+        if (!canStream) {
+          return res.text().then(t => {
+            let out = '';
+            try {
+              const j = JSON.parse(t);
+              const ch = j && j.choices && j.choices[0];
+              out = ch ? ((ch.message && ch.message.content) || (ch.delta && ch.delta.content) || '') : (j && j.content) || '';
+            } catch (e2) { out = t; }
+            out = String(out || '');
+            if (!out.trim()) throw new Error('EMPTY');
+            if (onDelta) onDelta(out, out);
+            return out;
           });
         }
-        const reader = res.body.getReader(), dec = new TextDecoder('utf-8');
+        const reader = res.body.getReader();
+        const dec = new TextDecoder('utf-8');
         let buf = '', full = '';
-        const pump = () => reader.read().then(rv => {
-          if (rv.done) return full;
-          buf += dec.decode(rv.value, { stream: true });
-          let idx;
-          while ((idx = buf.indexOf('\n')) >= 0) {
-            const line = buf.slice(0, idx).trim();
-            buf = buf.slice(idx + 1);
-            if (!line || line.charAt(0) === ':') continue;
-            if (line.indexOf('data:') !== 0) continue;
-            const pay = line.slice(5).trim();
-            if (!pay || pay === '[DONE]') continue;
-            try {
-              const j = JSON.parse(pay);
-              const ch = j && j.choices && j.choices[0];
-              const piece = (ch && ch.delta && ch.delta.content) ? ch.delta.content : ((ch && ch.message && ch.message.content) || '');
-              if (piece) { full += piece; onDelta(piece, full); }
-            } catch (e) {}
+        const pump = () => reader.read().then(({ done, value }) => {
+          if (done) {
+            if (!full.trim()) throw new Error('EMPTY');
+            return full;
           }
+          buf += dec.decode(value, { stream: true });
+          const parts = buf.split('\n');
+          buf = parts.pop() || '';
+          parts.forEach(line => {
+            const s2 = line.trim();
+            if (!s2 || s2.indexOf('data:') !== 0) return;
+            const d = s2.slice(5).trim();
+            if (!d || d === '[DONE]') return;
+            try {
+              const j = JSON.parse(d);
+              const ch = j && j.choices && j.choices[0];
+              const piece = ch ? ((ch.delta && ch.delta.content) || (ch.message && ch.message.content) || '') : '';
+              if (piece) {
+                full += piece;
+                if (onDelta) onDelta(piece, full);
+              }
+            } catch (e3) {}
+          });
           return pump();
         });
         return pump();
       });
+    }
+    const acDead = {};   // 本次会话内 401/402/403 的端点直接跳过，避免反复撞墙
+    function request(payload, onDelta, signal, onTry) {
+      const alive = AC_ENDPOINTS.filter(e => !acDead[e.name]);
+      const eps = alive.length ? alive : AC_ENDPOINTS.slice();
+      let idx = 0;
+      const step = () => {
+        if (idx >= eps.length) {
+          const e = new Error('ALL_BUSY');
+          e.allBusy = true;
+          return Promise.reject(e);
+        }
+        const ep = eps[idx++];
+        if (typeof onTry === 'function') { try { onTry(ep.name, idx, eps.length); } catch (e4) {} }
+        return acFetchOne(ep, payload, onDelta, signal).then(txt => txt).catch(err => {
+          if (err && (err.name === 'AbortError' || err.name === 'abort')) throw err;
+          const st = err && err.status;
+          if (st === 401 || st === 402 || st === 403) acDead[ep.name] = 1;
+          return step();
+        });
+      };
+      return step();
     }
     function stop() {
       if (!busy) return;
@@ -6850,13 +7002,13 @@ replaceInput.addEventListener('keydown', (e) => {
       stopFlag = false;
       const myGen = ++genSeq;
       ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-      el.send.textContent = '停止'; el.send.classList.add('stop');
+      el.send.classList.add('stop'); el.send.title = '停止生成';
       setStatus('思考中…');
       let full = '';
       const resetUI = () => {
         busy = false; ctrl = null; stopFlag = false; onStop = null;
         if (watchdog) { clearTimeout(watchdog); watchdog = null; }
-        el.send.textContent = '发送'; el.send.classList.remove('stop');
+        el.send.classList.remove('stop'); el.send.title = '发送（Enter）';
       };
       const finish = (txt, ok, note, saveText) => {
         resetUI();
@@ -6889,7 +7041,14 @@ replaceInput.addEventListener('keydown', (e) => {
         full = all;
         if (bub) bub.innerHTML = mdToHtml(all) + '<span class="ac-cursor">▋</span>';
         el.msgs.scrollTop = el.msgs.scrollHeight;
-      }, ctrl ? ctrl.signal : undefined).then(txt => {
+      }, ctrl ? ctrl.signal : undefined, (name, idx, total) => {
+        if (myGen !== genSeq) return;
+        if (idx > 1) {
+          full = '';
+          if (bub) bub.innerHTML = '<span class="ac-cursor">▋</span>';
+        }
+        setStatus('接口 ' + idx + '/' + total + '：' + name);
+      }).then(txt => {
         if (myGen !== genSeq) return;
         const raw = String(txt || '');
         const body = raw.trim() ? raw : full;
@@ -6905,11 +7064,28 @@ replaceInput.addEventListener('keydown', (e) => {
           endGen(full || '（已停止生成）', true, '已停止', full || '');
           return;
         }
+        if (err && err.allBusy) {
+          endGen((full ? full + '\n\n' : '') + '⚠️ 现在免费接口都在频繁（429），已把 ' + AC_ENDPOINTS.length + ' 个免注册接口逐个试完，稍等 1 分钟再试～', false, '全部接口繁忙');
+          return;
+        }
         endGen((full ? full + '\n\n' : '') + '⚠️ 请求失败：' + (msg || '未知错误') + '\n\n（可检查网络，或稍后重试）', false, '出错了');
       });
     }
     function newConv() {
       if (busy) { toast('⏳ 正在生成，先点「停止」'); return; }
+      const cur = currentConv();
+      const isEmpty = function (c) { return c && (!c.msgs || !c.msgs.length); };
+      // 已有空对话就复用，不再堆一堆「新对话」
+      let reuse = isEmpty(cur) ? cur : (state.convs.filter(isEmpty)[0] || null);
+      if (reuse) {
+        state.curId = reuse.id;
+        persist();
+        el.input.value = ''; autoGrow();
+        renderList(); renderMsgs(); setStatus('就绪');
+        el.input.focus();
+        toast('已在新对话里，直接说吧');
+        return;
+      }
       const c = { id: uid(), title: '新对话', msgs: [], updatedAt: Date.now() };
       state.convs.unshift(c); state.curId = c.id;
       if (state.convs.length > AC_MAX_CONV) state.convs.length = AC_MAX_CONV;
@@ -6918,6 +7094,121 @@ replaceInput.addEventListener('keydown', (e) => {
       renderList(); renderMsgs(); setStatus('就绪');
       el.input.focus();
     }
+    // ===== 接口设置面板 =====
+    (function initApiPanel() {
+      const topbar = card.querySelector('.ac-topbar');
+      if (!topbar) return;
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'ac-set-btn'; btn.title = '接口设置'; btn.textContent = '⚙';
+      topbar.appendChild(btn);
+      const mask = document.createElement('div');
+      mask.className = 'ac-mask';
+      mask.style.display = 'none';
+      mask.innerHTML = '<div class="ac-set"><div class="ac-set-hd"><b>接口设置</b><button type="button" class="ac-set-x">×</button></div>'
+        + '<div class="ac-set-body"><div class="ac-set-sec">当前接口池<span class="ac-set-note">生成时按顺序自动接力</span></div>'
+        + '<div class="ac-set-list"></div>'
+        + '<div class="ac-set-sec">添加自定义 API<span class="ac-set-note">OpenAI 兼容格式</span></div>'
+        + '<label class="ac-lb">名称<input class="ac-in" data-f="name" placeholder="如 我的 DeepSeek" autocomplete="off"></label>'
+        + '<label class="ac-lb">接口地址<input class="ac-in" data-f="url" placeholder="https://api.xxx.com/v1/chat/completions" autocomplete="off"></label>'
+        + '<label class="ac-lb">模型名<input class="ac-in" data-f="model" placeholder="如 deepseek-chat" autocomplete="off"></label>'
+        + '<label class="ac-lb">API Key<input class="ac-in" data-f="key" type="password" placeholder="可留空" autocomplete="off"></label>'
+        + '<div class="ac-set-tip">Key 仅保存在本机浏览器，不上传任何服务器。添加后排在免费接口之后接力使用。</div>'
+        + '<div class="ac-set-ft"><button type="button" class="ac-btn-main">＋ 添加到接口池</button></div>'
+        + '</div></div>';
+      card.appendChild(mask);
+      const listEl = mask.querySelector('.ac-set-list');
+      const ins = mask.querySelectorAll('.ac-in');
+      function draw() {
+        listEl.innerHTML = '';
+        AC_ENDPOINTS.forEach(function (ep, i) {
+          const row = document.createElement('div');
+          row.className = 'ac-set-item';
+          const nm = document.createElement('div');
+          nm.className = 'ac-set-item-n';
+          nm.textContent = (i + 1) + '. ' + (ep.name || '接口');
+          const tag = document.createElement('span');
+          tag.className = 'ac-tag' + (ep.custom ? ' custom' : '');
+          tag.textContent = ep.custom ? '自定义' : '内建';
+          nm.appendChild(tag);
+          row.appendChild(nm);
+          const sub = document.createElement('div');
+          sub.className = 'ac-set-item-u';
+          sub.textContent = (ep.model || '-') + ' · ' + (ep.url || '');
+          row.appendChild(sub);
+          if (ep.custom) {
+            const del = document.createElement('button');
+            del.type = 'button'; del.className = 'ac-set-del'; del.textContent = '删除';
+            del.addEventListener('click', function (e) {
+              e.stopPropagation();
+              const list = getCustomApis().filter(function (x) { return !(x.url === ep.url && (x.model || 'default') === (ep.model || 'default')); });
+              setCustomApis(list); rebuildEndpoints(); draw(); toast('已从接口池移除');
+            });
+            row.appendChild(del);
+          }
+          listEl.appendChild(row);
+        });
+      }
+      function open() { draw(); mask.style.display = 'flex'; }
+      function close() { mask.style.display = 'none'; }
+      btn.addEventListener('click', function (e) { e.stopPropagation(); open(); });
+      mask.querySelector('.ac-set-x').addEventListener('click', function (e) { e.stopPropagation(); close(); });
+      mask.addEventListener('click', function (e) { if (e.target === mask) close(); });
+      mask.querySelector('.ac-btn-main').addEventListener('click', function (e) {
+        e.stopPropagation();
+        const v = {};
+        ins.forEach(function (x) { v[x.getAttribute('data-f')] = String(x.value || '').trim(); });
+        if (!v.url) { toast('先填接口地址'); return; }
+        if (!/^https?:\/\//i.test(v.url)) { toast('地址要以 http:// 或 https:// 开头'); return; }
+        const list = getCustomApis();
+        list.push({ name: v.name || '自定义接口', url: v.url, model: v.model || 'default', key: v.key || '' });
+        setCustomApis(list); rebuildEndpoints(); draw();
+        ins.forEach(function (x) { x.value = ''; });
+        toast('已添加，会排在免费接口之后接力');
+      });
+    })();
+    // ===== 语音输入 =====
+    const AC_SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let acRecog = null, acRecOn = false;
+    function initMic() {
+      if (!el.mic) return;
+      if (!AC_SR) {
+        el.mic.classList.add('off');
+        el.mic.title = '此浏览器不支持语音输入（请用 Chrome / Edge）';
+        return;
+      }
+      if (location.protocol === 'file:') el.mic.title = '本地 file:// 打开可能拿不到麦克风，建议用 https 或 localhost 访问';
+      el.mic.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (acRecOn) { try { acRecog && acRecog.stop(); } catch (e2) {} return; }
+        try {
+          acRecog = new AC_SR();
+          acRecog.lang = 'zh-CN';
+          acRecog.continuous = false;
+          acRecog.interimResults = true;
+          acRecog.maxAlternatives = 1;
+          acRecog.onstart = () => { acRecOn = true; el.mic.classList.add('rec'); setStatus('正在听…'); };
+          acRecog.onresult = (ev) => {
+            let txt = '';
+            for (let i = 0; i < ev.results.length; i++) txt += ev.results[i][0].transcript;
+            el.input.value = txt;
+            autoGrow();
+          };
+          acRecog.onerror = (ev2) => {
+            acRecOn = false; el.mic.classList.remove('rec');
+            const m = { 'not-allowed': '麦克风被拒绝，请点地址栏锁图标允许', 'service-not-allowed': '麦克风被拒绝', 'no-speech': '没听到声音，再说一次', 'audio-capture': '没找到麦克风设备', 'network': '语音识别要联网' };
+            setStatus(m[ev2.error] || ('语音出错：' + ev2.error));
+            if (ev2.error === 'not-allowed' || ev2.error === 'service-not-allowed') toast('请允许麦克风权限后重试');
+          };
+          acRecog.onend = () => {
+            acRecOn = false; el.mic.classList.remove('rec');
+            if (el.status && el.status.textContent === '正在听…') setStatus(el.input.value.trim() ? '按住 Enter 发送' : '就绪');
+            el.input.focus();
+          };
+          acRecog.start();
+        } catch (e3) { setStatus('语音启动失败'); }
+      });
+    }
+    initMic();
     el.send.addEventListener('click', (e) => { e.stopPropagation(); send(); });
     if (el.newBtn) el.newBtn.addEventListener('click', (e) => { e.stopPropagation(); newConv(); });
     if (el.search) el.search.addEventListener('input', () => { kw = el.search.value || ''; renderList(); });
@@ -9593,6 +9884,61 @@ document.getElementById('mp-shareBtn').addEventListener('click', shareCurrent);
   /* 时间显示可点击（切换已播放 / 剩余倒计时） */
   #mp-currentTime { cursor: pointer; transition: color .15s; }
   #mp-currentTime:hover { color: var(--accent); }
+
+/* ===== AI 卡片 DeepSeek 风格 + 设置面板 ===== */
+.widget[data-id="aichat"] .ac-msgs{padding:18px 26px 8px;}
+.widget[data-id="aichat"] .ac-row{max-width:760px;margin:0 auto 20px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;}
+.widget[data-id="aichat"] .ac-row.me{align-items:flex-end;}
+.widget[data-id="aichat"] .ac-who{font-size:11px;color:var(--muted,#8a8f98);font-weight:600;letter-spacing:.02em;}
+.widget[data-id="aichat"] .ac-bubble{background:transparent;border:none;padding:0;line-height:1.75;font-size:13.5px;color:inherit;max-width:100%;word-break:break-word;}
+.widget[data-id="aichat"] .ac-row.me .ac-bubble{background:linear-gradient(135deg,#4d8bff,#3a6ee0);color:#fff;padding:9px 14px;border-radius:16px 16px 4px 16px;max-width:78%;box-shadow:0 2px 8px rgba(58,110,224,.25);}
+.widget[data-id="aichat"] .ac-empty{border:none;background:none;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:17px;font-weight:600;color:var(--muted,#8a8f98);line-height:2;}
+.widget[data-id="aichat"] .ac-inputbar{max-width:760px;margin:0 auto 4px;border-radius:22px;padding:6px 8px 6px 16px;box-shadow:0 4px 18px rgba(0,0,0,.10);}
+.widget[data-id="aichat"] .ac-input{font-size:13.5px;line-height:1.7;}
+.widget[data-id="aichat"] .ac-send{border-radius:50%;width:32px;height:32px;}
+.widget[data-id="aichat"] .ac-topbar{padding-right:10px;}
+.ac-set-btn{border:none;background:transparent;cursor:pointer;font-size:15px;line-height:1;color:var(--muted,#8a8f98);padding:4px 6px;border-radius:8px;}
+.ac-set-btn:hover{background:rgba(127,127,127,.14);color:inherit;}
+.ac-mask{position:absolute;inset:0;background:rgba(12,14,18,.45);backdrop-filter:blur(3px);z-index:60;display:flex;align-items:center;justify-content:center;border-radius:inherit;}
+.ac-set{width:min(430px,92%);max-height:86%;display:flex;flex-direction:column;background:var(--card,#fff);color:inherit;border-radius:16px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.28);}
+.ac-set-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(127,127,127,.18);font-size:13.5px;}
+.ac-set-x{border:none;background:transparent;cursor:pointer;font-size:18px;line-height:1;color:var(--muted,#8a8f98);}
+.ac-set-body{padding:12px 14px 14px;overflow:auto;}
+.ac-set-sec{font-size:12px;font-weight:700;margin:6px 0 8px;display:flex;align-items:center;gap:8px;}
+.ac-set-note{font-weight:400;font-size:10.5px;color:var(--muted,#8a8f98);}
+.ac-set-list{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;}
+.ac-set-item{position:relative;border:1px solid rgba(127,127,127,.22);border-radius:10px;padding:8px 10px;font-size:12px;}
+.ac-set-item-n{font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.ac-set-item-u{font-size:10.5px;color:var(--muted,#8a8f98);word-break:break-all;padding-right:42px;}
+.ac-tag{font-size:9.5px;font-weight:500;padding:1px 6px;border-radius:6px;background:rgba(77,139,255,.16);color:#3a6ee0;}
+.ac-tag.custom{background:rgba(255,160,0,.18);color:#c47f00;}
+.ac-set-del{position:absolute;right:8px;bottom:8px;border:none;background:rgba(240,71,71,.12);color:#e04545;font-size:10.5px;padding:3px 8px;border-radius:7px;cursor:pointer;}
+.ac-lb{display:block;font-size:11px;color:var(--muted,#8a8f98);margin-bottom:8px;}
+.ac-lb .ac-in{display:block;width:100%;margin-top:4px;box-sizing:border-box;padding:7px 10px;font-size:12px;border-radius:9px;border:1px solid rgba(127,127,127,.28);background:rgba(127,127,127,.07);color:inherit;outline:none;}
+.ac-lb .ac-in:focus{border-color:#4d8bff;}
+.ac-set-tip{font-size:10.5px;color:var(--muted,#8a8f98);line-height:1.6;margin:2px 0 12px;}
+.ac-set-ft{display:flex;justify-content:flex-end;}
+.ac-btn-main{border:none;cursor:pointer;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:600;color:#fff;background:linear-gradient(135deg,#4d8bff,#3a6ee0);box-shadow:0 3px 12px rgba(58,110,224,.32);}
+
+/* ===== 对话置顶 / 重命名 ===== */
+.widget[data-id="aichat"] .ac-item{padding-right:44px;}
+.widget[data-id="aichat"] .ac-item.pin-on{background:rgba(255,190,60,.10);}
+.widget[data-id="aichat"] .ac-pin{position:absolute;right:22px;top:50%;transform:translateY(-50%);width:16px;height:16px;line-height:1;display:flex;align-items:center;justify-content:center;border:none;background:transparent;cursor:pointer;font-size:10px;opacity:0;filter:grayscale(1);padding:0;transition:.12s;}
+.widget[data-id="aichat"] .ac-item:hover .ac-pin{opacity:.55;}
+.widget[data-id="aichat"] .ac-pin:hover{opacity:1 !important;filter:none;transform:translateY(-50%) scale(1.15);}
+.widget[data-id="aichat"] .ac-pin.on{opacity:1;filter:none;}
+.widget[data-id="aichat"] .ac-rename{flex:1;min-width:0;font-size:12.5px;padding:2px 6px;border-radius:6px;border:1px solid #4d8bff;background:var(--card,#fff);color:inherit;outline:none;font-family:inherit;}
+
+/* ===== 发送按钮：纸飞机 ===== */
+.widget[data-id="aichat"] .ac-send{width:34px;height:34px;min-width:34px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(58,110,224,.30);transition:transform .14s,background .14s,box-shadow .14s;}
+.widget[data-id="aichat"] .ac-send:hover{opacity:1;transform:translateY(-1px) scale(1.05);box-shadow:0 5px 16px rgba(58,110,224,.38);}
+.widget[data-id="aichat"] .ac-send:active{transform:scale(.94);}
+.widget[data-id="aichat"] .ac-send svg{width:18px;height:18px;fill:currentColor;stroke:none;display:block;}
+.widget[data-id="aichat"] .ac-ico-send{transform:translateX(1px) rotate(0deg);}
+.widget[data-id="aichat"] .ac-send .ac-ico-stop{display:none;}
+.widget[data-id="aichat"] .ac-send.stop{background:#e5484d;box-shadow:0 3px 12px rgba(229,72,77,.35);}
+.widget[data-id="aichat"] .ac-send.stop .ac-ico-send{display:none;}
+.widget[data-id="aichat"] .ac-send.stop .ac-ico-stop{display:block;}
 </style>
 </body>
 </html>
