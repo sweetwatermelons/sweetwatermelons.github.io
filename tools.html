@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>其它小工具 · sweet🍉的小站</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+  body {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.8) 2px, transparent 2px), linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    background-size: 40px 40px, 100% 100%;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+    padding: 20px; overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 1000px; width: 100%;
+    display: flex; flex-direction: column; align-items: center; margin-top: -2vh;
+  }
+
+  /* 标题区 */
+  .title-wrap { display: flex; flex-direction: column; align-items: center; width: 100%; }
+  .title { font-size: 4.5rem; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; text-shadow: 0 4px 15px rgba(255, 255, 255, 0.8); }
+  .title .en { font-family: 'Georgia', serif; font-style: italic; transform: rotate(-3deg); }
+  .title .emoji { font-size: 4rem; display: inline-block; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-8px) rotate(10deg); } }
+  .title .zh { font-size: 2.8rem; font-weight: 700; color: #0284c7; }
+  .underline { width: 60%; height: 4px; background: linear-gradient(90deg, transparent 0%, #ffb6c1 50%, transparent 100%); border-radius: 2px; margin-bottom: 30px; box-shadow: 0 0 12px rgba(255, 182, 193, 0.5); }
+
+  /* 搜索框 */
+  .search-area {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 14px 20px 14px 48px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #0f172a;
+    background: #ffffff;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(3, 105, 161, 0.1);
+    outline: none;
+    transition: all 0.3s;
+  }
+
+  .search-input::placeholder { color: #94a3b8; }
+
+  .search-input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 4px 20px rgba(56, 189, 248, 0.3);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 18px;
+    width: 20px;
+    height: 20px;
+    fill: #94a3b8;
+    pointer-events: none;
+    transition: fill 0.3s;
+  }
+
+  .search-input:focus ~ .search-icon { fill: #38bdf8; }
+
+  /* 工具列表 */
+  .tool-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    width: 100%;
+    max-width: 560px;
+    margin-bottom: 50px;
+  }
+
+  .tool-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+    width: 100%;
+    padding: 22px 28px;
+    background: #ffffff;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 22px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0369a1;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 6px 20px rgba(3, 105, 161, 0.12);
+    text-align: left;
+  }
+
+  .tool-btn:hover {
+    transform: translateY(-4px);
+    border-color: #38bdf8;
+    color: #0284c7;
+    box-shadow: 0 14px 32px rgba(56, 189, 248, 0.35);
+  }
+
+  .tool-btn .emoji {
+    font-size: 2rem;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+
+  .tool-btn:hover .emoji {
+    transform: scale(1.15) rotate(6deg);
+  }
+
+  .tool-btn .text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    line-height: 1.5;
+  }
+
+  .tool-btn .main-text {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: inherit;
+  }
+
+  .tool-btn .sub-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #64748b;
+    white-space: normal;
+  }
+
+  .tool-btn:hover .sub-text {
+    color: #0284c7;
+  }
+
+  /* 无搜索结果提示 */
+  .no-result {
+    display: none;
+    width: 100%;
+    max-width: 560px;
+    text-align: center;
+    padding: 40px 20px;
+    color: #64748b;
+    font-size: 1.05rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 18px;
+    border: 1px dashed rgba(3, 105, 161, 0.3);
+  }
+
+  /* 返回按钮 */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0284c7;
+    text-decoration: none;
+    padding: 12px 28px;
+    border-radius: 30px;
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(3, 105, 161, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    margin-top: 10px;
+  }
+
+  .back-link:hover {
+    color: #ffffff;
+    background: #38bdf8;
+    box-shadow: 0 8px 25px rgba(56, 189, 248, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .back-link svg {
+    width: 18px;
+    height: 18px;
+    fill: #38bdf8;
+    transition: fill 0.3s;
+  }
+
+  .back-link:hover svg {
+    fill: #ffffff;
+  }
+
+  .footer-text { color: #64748b; font-size: 13px; margin-top: 40px; }
+
+  /* 手机端适配 */
+  @media (max-width: 860px) {
+    .title { font-size: 2.8rem; flex-wrap: wrap; gap: 8px; }
+    .title .emoji { font-size: 2.8rem; }
+    .title .zh { font-size: 2rem; }
+    .tool-list { max-width: 100%; gap: 18px; }
+    .tool-btn { padding: 18px 22px; border-radius: 18px; }
+    .tool-btn .emoji { font-size: 1.7rem; }
+    .tool-btn .main-text { font-size: 1.05rem; }
+    .tool-btn .sub-text { font-size: 0.8rem; }
+    .search-input { padding: 12px 16px 12px 42px; font-size: 0.95rem; }
+    .search-icon { left: 14px; width: 18px; height: 18px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="title-wrap">
+      <h1 class="title">
+        <span class="en">Tools</span>
+        <span class="emoji">🔧</span>
+        <span class="zh">其它小工具</span>
+      </h1>
+      <div class="underline"></div>
+    </div>
+
+    <!-- 搜索框 -->
+    <div class="search-area">
+      <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <input type="text" class="search-input" id="searchInput" placeholder="搜索工具名称...">
+    </div>
+
+    <!-- 工具列表 -->
+    <div class="tool-list">
+      <!-- Windows ISO 镜像 -->
+      <a href="https://www.kdocs.cn/join/gtmfexq" target="_blank" class="tool-btn" data-name="Windows 各版本ISO镜像">
+        <span class="emoji">💿</span>
+        <span class="text">
+          <span class="main-text">Windows 各版本ISO镜像</span>
+          <span class="sub-text">需打开并登录WPS云盘下载</span>
+        </span>
+      </a>
+
+      <!-- Microsoft 激活脚本 |MAS -->
+      <a href="https://sweetwatermelons.github.io/Microsoft%20Activation%20Scripts.html" target="_blank" class="tool-btn" data-name="Microsoft 激活脚本 |MAS">
+        <span class="emoji">🔑</span>
+        <span class="text">
+          <span class="main-text">Microsoft 激活脚本 |MAS</span>
+          <span class="sub-text">开源 Windows / Office 激活工具</span>
+        </span>
+      </a>
+    </div>
+
+    <!-- 无搜索结果提示 -->
+    <div class="no-result" id="noResult">😢 没有找到匹配的工具，试试其他关键词吧~</div>
+
+    <!-- 返回首页 -->
+    <a href="https://sweetwatermelons.github.io/" class="back-link">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      返回首页
+    </a>
+
+    <div class="footer-text">sweet🍉的小站 · 其它小工具</div>
+  </div>
+
+  <script>
+    (function() {
+      const searchInput = document.getElementById('searchInput');
+      const toolButtons = document.querySelectorAll('.tool-btn');
+      const noResult = document.getElementById('noResult');
+
+      function filterTools() {
+        const keyword = searchInput.value.trim().toLowerCase();
+        let totalVisible = 0;
+
+        toolButtons.forEach(btn => {
+          const name = (btn.getAttribute('data-name') || btn.textContent).toLowerCase();
+          if (keyword === '' || name.includes(keyword)) {
+            btn.style.display = '';
+            totalVisible++;
+          } else {
+            btn.style.display = 'none';
+          }
+        });
+
+        noResult.style.display = totalVisible === 0 ? 'block' : 'none';
+      }
+
+      searchInput.addEventListener('input', filterTools);
+    })();
+  </script>
+
+</body>
+</html>
