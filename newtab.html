@@ -1073,22 +1073,28 @@
     <!-- 计时器 -->
     <div class="widget" data-id="timer">
       <div class="widget-header"><div class="widget-title"><span class="dot"></span> 计时</div></div>
-      <div class="timer-wrap">
-        <div class="timer-circle" id="timerCircle" style="--progress: 100%;">
-          <div class="timer-inner">
-            <input type="number" id="inputH" class="timer-input" min="0" max="99" placeholder="00" value="00">
-            <span class="timer-sep">:</span>
-            <input type="number" id="inputM" class="timer-input" min="0" max="59" placeholder="25" value="25">
-            <span class="timer-sep">:</span>
-            <input type="number" id="inputS" class="timer-input" min="0" max="59" placeholder="00" value="00">
+            <div class="timer-wrap">
+        <div class="mt-tabs" id="mtTabs"></div>
+        <div id="timerMain">
+          <div class="timer-circle" id="timerCircle" style="--progress: 100%;">
+            <div class="timer-inner">
+              <input type="number" id="inputH" class="timer-input" min="0" max="99" placeholder="00" value="00">
+              <span class="timer-sep">:</span>
+              <input type="number" id="inputM" class="timer-input" min="0" max="59" placeholder="25" value="25">
+              <span class="timer-sep">:</span>
+              <input type="number" id="inputS" class="timer-input" min="0" max="59" placeholder="00" value="00">
+            </div>
+          </div>
+          <div class="timer-actions">
+            <button class="timer-btn primary" id="btnStartTimer">开始</button>
+            <button class="timer-btn" id="btnResetTimer">重置</button>
           </div>
         </div>
-        <div class="timer-actions">
-          <button class="timer-btn primary" id="btnStartTimer">开始</button>
-          <button class="timer-btn" id="btnResetTimer">重置</button>
+        <div class="timer-done" id="timerDone" hidden>
+          <div class="timer-done-ico">⏰</div>
+          <div class="timer-done-txt">倒计时已结束</div>
+          <button class="timer-btn primary" id="btnDoneReset" type="button">重置</button>
         </div>
-        <div class="mt-head"><span class="mt-label">多个计时（可同时开）</span><button class="timer-btn primary" id="mtAddBtn" type="button">＋ 新建</button></div>
-        <div class="mt-list" id="mtList"></div>
       </div>
       <div class="resize-handle resize-n"></div>
       <div class="resize-handle resize-s"></div>
@@ -3024,7 +3030,12 @@
   $('#todoInput').addEventListener('keydown', e => { if (e.key === 'Enter') addTodo(); });
   renderTodos();
 
-  // ================= 计时器 =================
+  // ================= 计时器（选项卡式 · 最多同时 3 个） =================
+  const MT_KEY = 'nt_mt_timers';
+  const MT_MAX = 3;
+  let mtTimers = [];
+  let mtActiveId = '';
+
   let timerTotal = 25 * 60;
   let timerLeft = timerTotal;
   let timerInt = null;
@@ -3033,75 +3044,320 @@
 
   const timerCircle = $('#timerCircle');
   const btnStartTimer = $('#btnStartTimer');
+  const btnResetTimer = $('#btnResetTimer');
+  const btnDoneReset = $('#btnDoneReset');
   const inputH = $('#inputH'), inputM = $('#inputM'), inputS = $('#inputS');
+  const mtTabsEl = $('#mtTabs');
+  const timerMainEl = $('#timerMain');
+  const timerDoneEl = $('#timerDone');
 
+  const mtP2 = (n) => (n < 10 ? '0' + n : '' + n);
+  function mtFmt(sec) {
+    sec = Math.max(0, Math.round(sec));
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), sc = sec % 60;
+    return h > 0 ? h + ':' + mtP2(m) + ':' + mtP2(sc) : mtP2(m) + ':' + mtP2(sc);
+  }
+  function mtNewId() { return 'mt' + Date.now().toString(36) + Math.floor(Math.random() * 999); }
+  function mtMake(name, total) {
+    return { id: mtNewId(), name: name, total: total, left: total, running: false, endAt: 0, done: false, _beeped: -1 };
+  }
+  function mtCur() {
+    return mtTimers.find((t) => t.id === mtActiveId) || mtTimers[0] || null;
+  }
+  function mtRemain(it) {
+    if (!it) return 0;
+    if (it.running) return Math.max(0, Math.ceil((it.endAt - Date.now()) / 1000));
+    return Math.max(0, Math.round(it.left));
+  }
+  function mtSave() {
+    try {
+      localStorage.setItem(MT_KEY, JSON.stringify(mtTimers.map((it) => ({
+        id: it.id, name: it.name, total: it.total, left: it.left,
+        running: it.running, endAt: it.endAt, done: it.done
+      }))));
+      localStorage.setItem(MT_KEY + '_active', mtActiveId);
+    } catch (e) {}
+  }
+  function mtLoad() {
+    let arr = [];
+    try { arr = JSON.parse(localStorage.getItem(MT_KEY) || '[]'); } catch (e) { arr = []; }
+    if (!Array.isArray(arr)) arr = [];
+    arr = arr.filter((o) => o && typeof o === 'object').slice(0, MT_MAX).map((o) => {
+      const total = Math.round(+o.total || 0) > 0 ? Math.round(+o.total) : 25 * 60;
+      let left = (o.left !== undefined && o.left !== null && +o.left >= 0) ? Math.round(+o.left) : total;
+      left = Math.min(left, total);
+      return {
+        id: o.id || mtNewId(),
+        name: String(o.name || '计时器').slice(0, 5),
+        total: total, left: left,
+        running: !!o.running, endAt: +o.endAt || 0, done: !!o.done,
+        _beeped: -1
+      };
+    });
+    if (!arr.length) arr = [mtMake('计时器1', 25 * 60)];
+    return arr;
+  }
+
+  /* ---------- 页面边框闪烁 / 提示音 ---------- */
+  let mtFlashEl = null;
+  function mtSetFlash(on) {
+    if (!mtFlashEl || !document.body.contains(mtFlashEl)) {
+      mtFlashEl = document.createElement('div');
+      mtFlashEl.id = 'timerFlash';
+      document.body.appendChild(mtFlashEl);
+    }
+    mtFlashEl.classList.toggle('on', !!on);
+  }
+  let _mtAC = null;
+  function mtAudio() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      if (!_mtAC) _mtAC = new AC();
+      if (_mtAC.state === 'suspended') _mtAC.resume();
+      return _mtAC;
+    } catch (e) { return null; }
+  }
+  function mtTone(freq, dur, vol, type, delay) {
+    const ctx = mtAudio();
+    if (!ctx) return;
+    try {
+      const t0 = ctx.currentTime + (delay || 0);
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, t0);
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(vol || 0.2, t0 + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(t0); osc.stop(t0 + dur + 0.06);
+    } catch (e) {}
+  }
+  function mtBeep() { mtTone(1180, 0.16, 0.26, 'square', 0); }
+  function mtDingDong() {
+    mtTone(1318.5, 0.26, 0.27, 'sine', 0);
+    mtTone(1567.98, 0.22, 0.23, 'sine', 0.16);
+    mtTone(783.99, 0.62, 0.28, 'sine', 0.42);
+  }
+
+  /* ---------- 渲染 ---------- */
+  function mtRenderTabs() {
+    if (!mtTabsEl) return;
+    mtTabsEl.innerHTML = '';
+    mtTimers.forEach((it) => {
+      const tab = document.createElement('div');
+      tab.className = 'mt-tab' + (it.id === mtActiveId ? ' active' : '') + (it.running ? ' running' : '') + (it.done && !it.running ? ' done' : '');
+      tab.title = it.name + '（双击名字可改名）';
+      const dot = document.createElement('i'); dot.className = 'mt-tab-dot';
+      const nm = document.createElement('span'); nm.className = 'mt-tab-name'; nm.textContent = it.name;
+      const rem = document.createElement('span'); rem.className = 'mt-tab-rem';
+      rem.textContent = it.running ? mtFmt(mtRemain(it)) : '';
+      nm.addEventListener('dblclick', (e) => { e.stopPropagation(); mtRename(it); });
+      tab.appendChild(dot); tab.appendChild(nm); tab.appendChild(rem);
+      if (mtTimers.length > 1) {
+        const x = document.createElement('button');
+        x.type = 'button'; x.className = 'mt-tab-x'; x.textContent = '\u2715';
+        x.title = '删除这个计时器';
+        x.addEventListener('click', (e) => { e.stopPropagation(); mtRemove(it); });
+        tab.appendChild(x);
+      }
+      tab.addEventListener('click', () => {
+        if (it.id === mtActiveId) return;
+        mtActiveId = it.id;
+        mtSave(); mtRenderTabs(); mtSyncGlobals(); mtPaintTimer(); mtSetInputs();
+        if (!it.running && !it.done) mtSetFlash(false);
+      });
+      it._tab = tab; it._rem = rem;
+      mtTabsEl.appendChild(tab);
+    });
+    if (mtTimers.length < MT_MAX) {
+      const add = document.createElement('button');
+      add.type = 'button'; add.className = 'mt-tab-add'; add.textContent = '\uff0b';
+      add.title = '新建计时器（最多同时 3 个）';
+      add.addEventListener('click', mtAdd);
+      mtTabsEl.appendChild(add);
+    }
+  }
+  function mtSyncGlobals() {
+    const it = mtCur();
+    if (!it) return;
+    timerTotal = it.total;
+    timerLeft = mtRemain(it);
+    timerOriginal = it.total;
+    isRunning = !!it.running;
+  }
   function updateTimerCircle() {
-    if (timerTotal === 0) { timerCircle.style.setProperty('--progress', '0%'); return; }
-    const percent = (timerLeft / timerTotal) * 100;
-    timerCircle.style.setProperty('--progress', `${percent}%`);
+    const it = mtCur();
+    const total = it ? it.total : timerTotal;
+    const left = it ? mtRemain(it) : timerLeft;
+    const pct = total > 0 ? Math.max(0, Math.min(100, (left / total) * 100)) : 0;
+    if (timerCircle) timerCircle.style.setProperty('--progress', pct + '%');
   }
   function updateInputsFromLeft() {
-    const h = Math.floor(timerLeft / 3600);
-    const m = Math.floor((timerLeft % 3600) / 60);
-    const s = timerLeft % 60;
-    inputH.value = String(h).padStart(2, '0');
-    inputM.value = String(m).padStart(2, '0');
-    inputS.value = String(s).padStart(2, '0');
+    const it = mtCur();
+    if (!it) return;
+    const left = mtRemain(it);
+    inputH.value = String(Math.floor(left / 3600)).padStart(2, '0');
+    inputM.value = String(Math.floor((left % 3600) / 60)).padStart(2, '0');
+    inputS.value = String(left % 60).padStart(2, '0');
+  }
+  function mtSetInputs() {
+    const it = mtCur();
+    if (!it) return;
+    const v = (it.done && !it.running) ? it.total : (it.running ? mtRemain(it) : it.left);
+    inputH.value = String(Math.floor(v / 3600)).padStart(2, '0');
+    inputM.value = String(Math.floor((v % 3600) / 60)).padStart(2, '0');
+    inputS.value = String(v % 60).padStart(2, '0');
   }
   function getInputSeconds() {
     return (parseInt(inputH.value, 10) || 0) * 3600 + (parseInt(inputM.value, 10) || 0) * 60 + (parseInt(inputS.value, 10) || 0);
   }
-  function stopTimer() {
-    clearInterval(timerInt); isRunning = false;
-    btnStartTimer.textContent = '开始'; btnStartTimer.classList.add('primary');
+  function mtPaintTimer() {
+    const it = mtCur();
+    if (!it) return;
+    const done = !!it.done && !it.running;
+    if (timerDoneEl) timerDoneEl.hidden = !done;
+    if (timerMainEl) timerMainEl.hidden = done;
+    updateTimerCircle();
+    if (btnStartTimer) {
+      btnStartTimer.textContent = it.running ? '暂停' : '开始';
+      btnStartTimer.classList.toggle('primary', !it.running);
+    }
+    if (it._tab) {
+      it._tab.classList.toggle('active', it.id === mtActiveId);
+      it._tab.classList.toggle('running', !!it.running);
+      it._tab.classList.toggle('done', done);
+    }
   }
-  [inputH, inputM, inputS].forEach(input => {
+
+  /* ---------- 操作 ---------- */
+  function mtStart(it) {
+    if (!it) return;
+    const rem = mtRemain(it);
+    const use = (it.total > 0 && (it.left > 0 || rem > 0)) ? (rem > 0 ? rem : it.left) : it.total;
+    if (use <= 0) { toast('请先设置计时时长，再点开始'); return; }
+    if (!it.total || it.total < use) it.total = use;
+    it.left = use;
+    it.running = true; it.done = false; it.endAt = Date.now() + use * 1000; it._beeped = -1;
+    mtAudio();
+    mtSave(); mtRenderTabs(); mtSyncGlobals(); mtPaintTimer(); updateInputsFromLeft();
+  }
+  function mtPause(it) {
+    if (!it) return;
+    it.left = mtRemain(it); it.running = false; it.endAt = 0;
+    mtSave(); mtRenderTabs(); mtSyncGlobals(); mtPaintTimer(); updateInputsFromLeft();
+  }
+  function mtResetCur() {
+    const it = mtCur();
+    if (!it) return;
+    it.running = false; it.endAt = 0; it.done = false; it._beeped = -1;
+    it.left = it.total > 0 ? it.total : 25 * 60;
+    if (!it.total) it.total = it.left;
+    mtSetFlash(false);
+    mtSave(); mtRenderTabs(); mtSyncGlobals(); mtPaintTimer(); mtSetInputs();
+  }
+  function mtAdd() {
+    if (mtTimers.length >= MT_MAX) { toast('最多同时开 3 个计时器'); return; }
+    let n = mtTimers.length + 1;
+    while (mtTimers.some((t) => t.name === '计时器' + n) && n < 99) n++;
+    const it = mtMake('计时器' + n, 25 * 60);
+    mtTimers.push(it); mtActiveId = it.id;
+    mtSave(); mtRenderTabs(); mtSyncGlobals(); mtPaintTimer(); mtSetInputs();
+  }
+  function mtRemove(it) {
+    if (mtTimers.length <= 1) { toast('至少保留 1 个计时器'); return; }
+    it.running = false;
+    mtTimers = mtTimers.filter((x) => x.id !== it.id);
+    if (mtActiveId === it.id) mtActiveId = mtTimers[0].id;
+    mtSetFlash(false);
+    mtSave(); mtRenderTabs(); mtSyncGlobals(); mtPaintTimer(); mtSetInputs();
+  }
+  function mtRename(it) {
+    const v = window.prompt('给这个计时器起个名字（最多 5 个字）', it.name);
+    if (v === null) return;
+    const nm = String(v || '').trim().slice(0, 5);
+    if (!nm) return;
+    it.name = nm;
+    mtSave(); mtRenderTabs();
+  }
+  function mtImportState(st) {
+    const it = mtCur();
+    if (!it || !st) return;
+    const total = Math.round(+st.total || 0) > 0 ? Math.round(+st.total) : 25 * 60;
+    it.total = total;
+    it.left = Math.min(Math.max(0, Math.round(+st.left || 0)), total);
+    it.running = false; it.endAt = 0; it.done = it.left <= 0;
+    mtSyncGlobals(); mtRenderTabs(); mtPaintTimer(); mtSetInputs();
+    if (st.isRunning && it.left > 0) mtStart(it);
+  }
+
+  /* ---------- 心跳 ---------- */
+  function mtTick() {
+    let flashOn = false;
+    mtTimers.forEach((it) => {
+      if (!it.running) return;
+      const rem = mtRemain(it);
+      if (rem <= 0) {
+        it.running = false; it.endAt = 0; it.left = 0; it.done = true;
+        mtSave();
+        if (it._tab) { it._tab.classList.remove('running'); it._tab.classList.add('done'); }
+        if (it._rem) it._rem.textContent = '';
+        mtDingDong();
+        toast('⏰ ' + it.name + ' 倒计时已结束');
+        if (it.id === mtActiveId) { mtSyncGlobals(); mtPaintTimer(); }
+        return;
+      }
+      if (rem <= 3 && it._beeped !== rem) { it._beeped = rem; mtBeep(); }
+      if (it.id === mtActiveId && rem <= 10) flashOn = true;
+      if (it.id === mtActiveId) { updateInputsFromLeft(); updateTimerCircle(); }
+      if (it._rem) it._rem.textContent = mtFmt(rem);
+    });
+    mtSetFlash(flashOn);
+    const cur = mtCur();
+    if (cur) { timerTotal = cur.total; timerLeft = mtRemain(cur); timerOriginal = cur.total; isRunning = !!cur.running; }
+  }
+
+  /* ---------- 绑定 ---------- */
+  btnStartTimer.addEventListener('click', () => {
+    const it = mtCur();
+    if (!it) return;
+    if (it.running) { mtPause(it); return; }
+    const sec = getInputSeconds();
+    if (sec <= 0) { toast('请先设置计时时长，再点开始'); return; }
+    it.total = sec; it.left = sec; it.done = false;
+    mtStart(it);
+  });
+  btnResetTimer.addEventListener('click', mtResetCur);
+  if (btnDoneReset) btnDoneReset.addEventListener('click', mtResetCur);
+  [inputH, inputM, inputS].forEach((input) => {
     input.addEventListener('input', () => {
-      if (isRunning) stopTimer();
+      const it = mtCur();
+      if (!it) return;
       let v = parseInt(input.value, 10);
       if (isNaN(v) || v < 0) v = 0;
       if (input === inputM || input === inputS) v = Math.min(v, 59);
+      if (input === inputH) v = Math.min(v, 99);
       input.value = String(v).padStart(2, '0');
-      timerTotal = getInputSeconds(); timerLeft = timerTotal; updateTimerCircle();
+      const sec = getInputSeconds();
+      it.total = sec; it.left = sec; it.running = false; it.endAt = 0; it.done = false; it._beeped = -1;
+      mtSave(); mtSyncGlobals(); mtPaintTimer();
     });
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') { e.preventDefault(); btnStartTimer.click(); }
     });
   });
-  btnStartTimer.addEventListener('click', () => {
-    if (isRunning) { stopTimer(); }
-    else {
-      const inputSec = getInputSeconds();
-      // 输入框被用户手动改成与剩余时间不同 → 视为新设定，重置；否则从剩余时间继续
-      if (timerLeft <= 0 || inputSec <= 0) {
-        timerTotal = inputSec; timerLeft = inputSec;
-      } else if (Math.abs(inputSec - timerLeft) > 1) {
-        timerTotal = inputSec; timerLeft = inputSec;
-      }
-      if (timerTotal <= 0) { toast('请先设置计时时长，再点开始'); return; }
-      timerOriginal = timerTotal;
-      isRunning = true; btnStartTimer.textContent = '暂停'; btnStartTimer.classList.remove('primary');
-      timerInt = setInterval(() => {
-        timerLeft--;
-        if (timerLeft >= 0) { updateInputsFromLeft(); updateTimerCircle(); }
-        if (timerLeft <= 0) {
-          stopTimer(); timerLeft = 0; updateInputsFromLeft(); updateTimerCircle();
-          try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioCtx.createOscillator();
-            oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-            oscillator.connect(audioCtx.destination); oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.5);
-          } catch(e) {}
-          toast('时间到！休息一下吧 ☕');
-        }
-      }, 1000);
-    }
+
+  /* ---------- 初始化 ---------- */
+  mtTimers = mtLoad();
+  let mtSavedActive = '';
+  try { mtSavedActive = localStorage.getItem(MT_KEY + '_active') || ''; } catch (e) {}
+  mtActiveId = (mtTimers.find((t) => t.id === mtSavedActive) || mtTimers[0]).id;
+  mtTimers.forEach((it) => {
+    if (it.running && mtRemain(it) <= 0) { it.running = false; it.left = 0; it.done = true; }
   });
-  $('#btnResetTimer').addEventListener('click', () => {
-    stopTimer(); timerTotal = timerOriginal; timerLeft = timerOriginal;
-    updateInputsFromLeft(); updateTimerCircle();
-  });
-  updateInputsFromLeft(); updateTimerCircle();
+  mtRenderTabs(); mtSyncGlobals(); mtPaintTimer(); mtSetInputs();
+  clearInterval(timerInt);
+  timerInt = setInterval(mtTick, 200);
 
   // ================= 格言 =================
   const QUOTES = [
@@ -8182,17 +8438,7 @@ replaceInput.addEventListener('keydown', (e) => {
 
           // ====== 新增：恢复全量状态 ======
           // 1. 恢复计时器
-          if (data.timerState) {
-            timerTotal = data.timerState.total || 25 * 60;
-            timerLeft = data.timerState.left || timerTotal;
-            timerOriginal = data.timerState.original || timerTotal;
-            updateInputsFromLeft();
-            updateTimerCircle();
-            if (data.timerState.isRunning && timerLeft > 0) {
-              // 如果之前是运行状态，直接触发开始按钮
-              setTimeout(() => btnStartTimer.click(), 500);
-            }
-          }
+          if (data.timerState) { if (typeof mtImportState === 'function') mtImportState(data.timerState); }
           
           // 2. 恢复音乐播放状态
           if (data.musicState && data.musicState.currentTrack) {
@@ -9798,17 +10044,44 @@ document.getElementById('mp-shareBtn').addEventListener('click', shareCurrent);
       return idx;
     }
     // 逐字拆分渲染：每个字带独立延时，形成「一个字一个字渐显、飘出」的效果
-    function mplRenderChars(el, text) {
+    // 计算本句歌词的实际演唱时长（到下一句的时间差），用于逐字平均渐显
+    function mplLineSpanFor(text) {
+      const lines = mp.lyricLines || [];
+      if (!lines.length) return null;
+      let i = (curIdx >= 0 && curIdx < lines.length) ? curIdx : computeIdx();
+      if (i < 0 || !lines[i]) return null;
+      const start = +lines[i].time || 0;
+      let end = 0;
+      if (lines[i + 1] && +lines[i + 1].time > start) end = +lines[i + 1].time;
+      const durAll = (mp.audio && isFinite(mp.audio.duration)) ? mp.audio.duration : 0;
+      if (!end) end = durAll > start + 0.4 ? durAll : start + Math.max(1.6, (text || '').length * 0.2);
+      let dur = end - start;
+      if (!(dur > 0.35)) dur = Math.max(1.4, Math.min(9, (text || '').length * 0.2));
+      return { start: start, dur: dur };
+    }
+    // 逐字拆分渲染：每个字的延时按本句音乐时长平均分配（句尾 15% 留白），
+    // 唱到哪儿亮到哪儿，句子没唱完不会提前显示完
+    function mplRenderChars(el, text, span) {
       el.innerHTML = '';
       const chars = Array.from(text);
       const n = chars.length;
-      const step = n > 30 ? 0.026 : (n > 20 ? 0.036 : (n > 12 ? 0.046 : 0.058));
+      let step;
+      if (span && span.dur > 0.35 && n > 1) {
+        step = (span.dur * 0.85) / (n - 1);
+        step = Math.max(0.012, Math.min(1.2, step));
+      } else {
+        step = n > 30 ? 0.026 : (n > 20 ? 0.036 : (n > 12 ? 0.046 : 0.058));
+      }
+      const now = (mp.audio && +mp.audio.currentTime) || 0;
+      const base = (span && isFinite(span.start)) ? span.start : now;
       const frag = document.createDocumentFragment();
       for (let i = 0; i < n; i++) {
         const sp = document.createElement('span');
         sp.className = 'mpl-ch';
         sp.textContent = (chars[i] === ' ') ? '\u00a0' : chars[i];
-        sp.style.animationDelay = (Math.min(i, 48) * step).toFixed(3) + 's';
+        let d = base + i * step - now;
+        if (!isFinite(d) || d < 0) d = 0;
+        sp.style.animationDelay = d.toFixed(3) + 's';
         frag.appendChild(sp);
       }
       el.appendChild(frag);
@@ -9821,7 +10094,7 @@ document.getElementById('mp-shareBtn').addEventListener('click', shareCurrent);
       const prev = front;
       next.classList.remove('out');
       next.dataset.text = text;
-      mplRenderChars(next, text);
+      mplRenderChars(next, text, mplLineSpanFor(text));
       next.classList.remove('on');
       void next.offsetWidth;
       if (prev && prev !== next) {
@@ -10054,10 +10327,12 @@ document.getElementById('mp-shareBtn').addEventListener('click', shareCurrent);
       immTitle.textContent = t.title || '未在播放';
       immArtist.textContent = t.artist || '';
       if (t.cover) {
+        immBg.classList.remove('mpi-fb');
         immBg.style.backgroundImage = 'url("' + String(t.cover).replace(/"/g, '%22') + '")';
         immCover.innerHTML = '<img src="' + mpEsc(t.cover) + '" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility=\'hidden\';this.parentNode.classList.add(\'mp-ph-fail\')">';
       } else {
-        immBg.style.backgroundImage = '';
+        immBg.classList.add('mpi-fb');
+        immBg.style.backgroundImage = 'url("https://cdn.luogu.com.cn/upload/image_hosting/st18pvxc.webp")';
         immCover.innerHTML = mpPlaceholderHtml();
       }
     }
@@ -10070,21 +10345,49 @@ document.getElementById('mp-shareBtn').addEventListener('click', shareCurrent);
       } else {
         immInner.innerHTML = lines.map(function (l) { return '<div class="mpi-l">' + mpEsc(t2s(l.text)) + '</div>'; }).join('');
       }
-      immInner.style.transform = 'translate3d(0,0,0)';
+      immInner.style.paddingTop = '0px'; immInner.style.paddingBottom = '0px';
+      if (immInner.parentNode) immInner.parentNode.scrollTop = 0;
+      immUserScrollUntil = 0;
     }
 
+    let immUserScrollUntil = 0;
+    (function bindImmUserScroll() {
+      const box = immInner && immInner.parentNode;
+      if (!box || box.dataset.usb === '1') return;
+      box.dataset.usb = '1';
+      const mark = function () { immUserScrollUntil = Date.now() + 3500; };
+      box.addEventListener('wheel', mark, { passive: true });
+      box.addEventListener('touchstart', mark, { passive: true });
+      box.addEventListener('touchmove', mark, { passive: true });
+      box.addEventListener('mousedown', mark);
+      box.addEventListener('keydown', mark);
+      box.addEventListener('scroll', function () {
+        if (Date.now() >= immUserScrollUntil) return;
+        const kid = immInner.children[immIdx];
+        if (!kid) return;
+        const t2 = kid.offsetTop - (box.clientHeight - kid.offsetHeight) / 2;
+        if (Math.abs(box.scrollTop - t2) < 60) immUserScrollUntil = 0;
+      }, { passive: true });
+    })();
     function immHighlight(idx) {
       immIdx = idx;
       if (!immOpen) return;
+      const box = immInner.parentNode;
       const kids = immInner.children;
-      for (let i = 0; i < kids.length; i++) kids[i].classList.toggle('on', i === idx);
-      const el = (idx >= 0) ? kids[idx] : null;
-      if (!el) { immInner.style.transform = 'translate3d(0,0,0)'; return; }
-      const boxH = immLyricsBox.clientHeight || 0;
-      const target = boxH / 2 - (el.offsetTop + el.offsetHeight / 2);
-      immInner.style.transform = 'translate3d(0,' + Math.round(target) + 'px,0)';
+      for (let i = 0; i < kids.length; i++) {
+        if (i === idx) kids[i].classList.add('on'); else kids[i].classList.remove('on');
+      }
+      const pad = Math.max(0, Math.round(box.clientHeight / 2 - 26));
+      if (immInner.style.paddingTop !== pad + 'px') {
+        immInner.style.paddingTop = pad + 'px';
+        immInner.style.paddingBottom = pad + 'px';
+      }
+      if (idx < 0 || idx >= kids.length) return;
+      if (Date.now() < immUserScrollUntil) return;
+      const kid = kids[idx];
+      const target = Math.max(0, kid.offsetTop - (box.clientHeight - kid.offsetHeight) / 2);
+      box.scrollTo({ top: target, behavior: 'smooth' });
     }
-
     function updateImmProgress() {
       const d = mp.audio ? mp.audio.duration : NaN;
       const c = (mp.audio && mp.audio.currentTime) || 0;
@@ -10201,145 +10504,6 @@ document.getElementById('mp-shareBtn').addEventListener('click', shareCurrent);
       }
     };
     syncBarByState();
-  })();
-
-  // ================= 多个计时器（自定义名字 + 时长） =================
-  (function () {
-    const mtWrap = document.getElementById('mtList');
-    const mtAdd = document.getElementById('mtAddBtn');
-    if (!mtWrap || !mtAdd) return;
-    const MT_KEY = 'nt_mt_timers';
-    let mtList = [];
-    try { mtList = JSON.parse(localStorage.getItem(MT_KEY) || '[]') || []; } catch (e) { mtList = []; }
-    if (!Array.isArray(mtList)) mtList = [];
-    mtList = mtList.map(function (o) {
-      o = o || {};
-      return {
-        id: o.id || ('mt' + Date.now() + Math.floor(Math.random() * 9999)),
-        name: o.name || '计时',
-        total: +o.total > 0 ? Math.round(+o.total) : 300,
-        left: (+o.left >= 0) ? Math.round(+o.left) : 300,
-        running: !!o.running,
-        endAt: +o.endAt || 0
-      };
-    });
-    function mtSave() { try { localStorage.setItem(MT_KEY, JSON.stringify(mtList)); } catch (e) {} }
-    function mtFmt(s) {
-      s = Math.max(0, Math.round(s));
-      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-      const p2 = function (n) { return n < 10 ? '0' + n : '' + n; };
-      return h > 0 ? h + ':' + p2(m) + ':' + p2(sec) : p2(m) + ':' + p2(sec);
-    }
-    function mtRemain(it) {
-      if (it.running) return Math.max(0, Math.round((it.endAt - Date.now()) / 1000));
-      return Math.max(0, Math.round(it.left));
-    }
-    function mtBeep() {
-      try {
-        const AC = window.AudioContext || window.webkitAudioContext;
-        if (!AC) return;
-        const ctx = new AC();
-        const osc = ctx.createOscillator(), gain = ctx.createGain();
-        osc.type = 'sine'; osc.frequency.value = 880; gain.gain.value = 0.12;
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start();
-        setTimeout(function () { try { osc.stop(); ctx.close(); } catch (e) {} }, 800);
-      } catch (e) {}
-    }
-    function mtUpdateRow(it) {
-      if (!it._el) return;
-      const tEl = it._el.querySelector('.mt-time');
-      const rem = mtRemain(it);
-      if (tEl) tEl.textContent = mtFmt(rem);
-      it._el.classList.toggle('running', !!it.running);
-      it._el.classList.toggle('done', !it.running && rem <= 0);
-    }
-    function mtRender() {
-      mtWrap.innerHTML = '';
-      if (!mtList.length) {
-        mtWrap.innerHTML = '<div class="evt-empty" style="padding:10px 0;">还没有其他计时，点「＋ 新建」加一个</div>';
-        return;
-      }
-      mtList.forEach(function (it) {
-        const row = document.createElement('div');
-        row.className = 'mt-item';
-        const nameIn = document.createElement('input');
-        nameIn.className = 'mt-name'; nameIn.type = 'text'; nameIn.maxLength = 8;
-        nameIn.value = it.name; nameIn.title = '可直接改名字';
-        nameIn.addEventListener('input', function () { it.name = nameIn.value || '计时'; mtSave(); });
-        nameIn.addEventListener('keydown', function (e) { if (e.key === 'Enter') nameIn.blur(); });
-        const timeEl = document.createElement('span');
-        timeEl.className = 'mt-time'; timeEl.textContent = mtFmt(mtRemain(it));
-        timeEl.title = '点一下设置分钟数';
-        timeEl.addEventListener('click', function () {
-          const curSec = it.running ? mtRemain(it) : it.left;
-          const def = Math.round((curSec > 0 ? curSec : it.total) / 6) / 10 || 5;
-          const v = window.prompt('设置「' + it.name + '」的时长（分钟，可填 1.5）', String(def));
-          if (v === null) return;
-          const mins = parseFloat(v);
-          if (isNaN(mins) || mins <= 0) { toast('⚠️ 请输入大于 0 的分钟数'); return; }
-          it.total = Math.round(mins * 60);
-          it.left = it.total; it.running = false; it.endAt = 0;
-          if (it._toggle) it._toggle.textContent = '▶';
-          mtUpdateRow(it); mtSave();
-        });
-        const btnToggle = document.createElement('button');
-        btnToggle.className = 'mt-btn'; btnToggle.type = 'button';
-        btnToggle.textContent = it.running ? '⏸' : '▶';
-        btnToggle.title = it.running ? '暂停' : '开始';
-        btnToggle.addEventListener('click', function () {
-          if (it.running) {
-            it.left = mtRemain(it); it.running = false; it.endAt = 0;
-            btnToggle.textContent = '▶';
-          } else {
-            const rem = mtRemain(it);
-            it.left = rem > 0 ? rem : it.total;
-            it.endAt = Date.now() + it.left * 1000; it.running = true;
-            btnToggle.textContent = '⏸';
-          }
-          mtUpdateRow(it); mtSave();
-        });
-        const btnReset = document.createElement('button');
-        btnReset.className = 'mt-btn'; btnReset.type = 'button'; btnReset.textContent = '↺'; btnReset.title = '重置';
-        btnReset.addEventListener('click', function () {
-          it.running = false; it.endAt = 0; it.left = it.total;
-          btnToggle.textContent = '▶'; mtUpdateRow(it); mtSave();
-        });
-        const btnDel = document.createElement('button');
-        btnDel.className = 'mt-btn del'; btnDel.type = 'button'; btnDel.textContent = '✕'; btnDel.title = '删除';
-        btnDel.addEventListener('click', function () {
-          mtList = mtList.filter(function (x) { return x.id !== it.id; });
-          mtSave(); mtRender();
-        });
-        row.appendChild(nameIn); row.appendChild(timeEl);
-        row.appendChild(btnToggle); row.appendChild(btnReset); row.appendChild(btnDel);
-        it._el = row; it._toggle = btnToggle;
-        mtUpdateRow(it);
-        mtWrap.appendChild(row);
-      });
-    }
-    mtAdd.addEventListener('click', function () {
-      mtList.push({ id: 'mt' + Date.now() + Math.floor(Math.random() * 9999), name: '计时' + (mtList.length + 1), total: 300, left: 300, running: false, endAt: 0 });
-      mtSave(); mtRender();
-    });
-    mtRender();
-    setInterval(function () {
-      mtList.forEach(function (it) {
-        if (it.running && mtRemain(it) <= 0) {
-          it.running = false; it.left = 0; it.endAt = 0;
-          it._el && it._el.classList.remove('running');
-          mtUpdateRow(it);
-          if (it._toggle) it._toggle.textContent = '▶';
-          mtBeep();
-          toast('⏰ ' + it.name + ' 到点啦！');
-          mtSave();
-        } else if (it.running) {
-          mtUpdateRow(it);
-        } else {
-          mtUpdateRow(it);
-        }
-      });
-    }, 500);
   })();
 
   // ================= 重要事件（自定义名称 / 周期 / 时间） =================
@@ -11479,6 +11643,39 @@ document.getElementById('mp-shareBtn').addEventListener('click', shareCurrent);
 .evt-act button.del:hover{ background:rgba(217,48,37,.12); color:var(--danger); }
 .evt-empty{ text-align:center; color:var(--text-mute); font-size:12.5px; padding:16px 0; line-height:1.8; }
 
+/* ============ 计时：选项卡 + 结束态 + 边框警示 ============ */
+.mt-tabs{display:flex;align-items:center;gap:6px;margin-bottom:11px;overflow-x:auto;padding:1px 1px 3px;}
+.mt-tabs::-webkit-scrollbar{height:4px;}
+.mt-tab{display:flex;align-items:center;gap:5px;padding:5px 9px;border-radius:9px;background:var(--input-bg);border:1px solid var(--divider);font-size:12.5px;font-weight:700;color:var(--text-soft);cursor:pointer;white-space:nowrap;user-select:none;transition:background .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease;}
+.mt-tab:hover{background:var(--hover);transform:translateY(-1px);}
+.mt-tab.active{background:linear-gradient(135deg,var(--accent),#3b9cf0);border-color:transparent;color:#fff;box-shadow:0 3px 10px rgba(0,103,192,.28);}
+.mt-tab-dot{width:6px;height:6px;border-radius:50%;background:var(--text-mute);opacity:.45;flex:0 0 auto;}
+.mt-tab.running .mt-tab-dot{background:#22c55e;opacity:1;animation:mtDot 1.05s ease-in-out infinite;}
+.mt-tab.active.running .mt-tab-dot{background:#eafff1;}
+.mt-tab.done .mt-tab-dot{background:var(--danger);opacity:1;}
+.mt-tab-rem{font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;opacity:.9;}
+.mt-tab-rem:empty{display:none;}
+.mt-tab-x{width:15px;height:15px;line-height:1;display:flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:transparent;color:inherit;opacity:.5;font-size:9px;cursor:pointer;padding:0;transition:all .16s;}
+.mt-tab-x:hover{opacity:1;background:rgba(0,0,0,.16);color:var(--danger);}
+.mt-tab.active .mt-tab-x:hover{background:rgba(255,255,255,.28);color:#fff;}
+.mt-tab-add{flex:0 0 auto;width:26px;height:26px;border-radius:8px;border:1px dashed var(--divider);background:transparent;color:var(--text-soft);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+.mt-tab-add:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);}
+@keyframes mtDot{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.5);opacity:1}}
+#timerMain[hidden]{display:none;}
+.timer-done{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:28px 10px 24px;animation:mtDoneIn .42s cubic-bezier(.16,1,.3,1);}
+.timer-done[hidden]{display:none;}
+.timer-done-ico{font-size:32px;line-height:1;animation:mtDoneIco 1.5s ease-in-out infinite;}
+.timer-done-txt{font-size:14.5px;font-weight:800;letter-spacing:.05em;color:var(--danger);}
+@keyframes mtDoneIn{from{opacity:0;transform:translateY(10px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes mtDoneIco{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-6px) rotate(5deg)}}
+#timerFlash{position:fixed;inset:0;pointer-events:none;z-index:2147483000;opacity:0;}
+#timerFlash.on{animation:mtFlash 1s ease-in-out infinite;}
+@keyframes mtFlash{
+  0%{opacity:0;box-shadow:inset 0 0 0 0 rgba(255,42,42,0),inset 0 0 0 0 rgba(255,42,42,0);}
+  16%{opacity:1;box-shadow:inset 0 0 26px 3px rgba(255,42,42,.92),inset 0 0 110px 22px rgba(255,42,42,.4);}
+  100%{opacity:0;box-shadow:inset 0 0 120px 30px rgba(255,42,42,.95),inset 0 0 320px 150px rgba(255,42,42,.45);}
+}
+
 /* ============ 计时：多计时器 ============ */
 .mt-head{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
 .mt-head .mt-label{ font-size:12px; color:var(--text-mute); font-weight:600; }
@@ -11590,6 +11787,38 @@ document.getElementById('mp-shareBtn').addEventListener('click', shareCurrent);
   /* 繁体→简体 开关 */
   #mp-t2sBtn.on { color: var(--accent); border-color: var(--accent); background: rgba(58,110,224,.11); }
 
+
+/* ================= 沉浸式：歌词可手动滚动 + 无封面模糊背景 ================= */
+.mpi-lyrics{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;scrollbar-width:none;-ms-overflow-style:none;}
+.mpi-lyrics::-webkit-scrollbar{width:0;height:0;display:none;}
+.mpi-lyrics-inner{position:relative;transform:none;transition:none;will-change:auto;}
+.mpi-bg.mpi-fb{filter:blur(30px) saturate(1.35) brightness(.62);}
+
+/* ================= 桌面歌词：字体与配色（最终版） ================= */
+.mpl-bar .mpl-line{
+  font-family:"MiSans","HarmonyOS Sans SC","PingFang SC","Source Han Sans SC","Noto Sans SC","Microsoft YaHei UI",system-ui,-apple-system,sans-serif;
+  font-weight:600;
+  letter-spacing:.035em;
+  line-height:1.36;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+.mpl-bar .mpl-line > .mpl-ch{
+  display:inline-block;
+  background-image:linear-gradient(179deg,#ffffff 0%,#ffffff 54%,#f2f8ff 84%,#e4f0ff 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+  text-shadow:0 2px 14px rgba(0,0,0,.36);
+  animation-name:mplChIn3;
+  animation-duration:.72s;
+  animation-timing-function:cubic-bezier(.2,.9,.25,1);
+  animation-fill-mode:both;
+}
+@keyframes mplChIn3{
+  0%{opacity:0;filter:blur(9px) brightness(1.45);transform:translateY(15px) scale(.94);}
+  62%{opacity:1;filter:blur(0) brightness(1.08);transform:translateY(-2px) scale(1.012);}
+  100%{opacity:1;filter:blur(0) brightness(1);transform:translateY(0) scale(1);}
+}
 </style>
 </body>
 </html>
